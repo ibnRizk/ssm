@@ -14,6 +14,7 @@ class AccountSettingsTile extends StatelessWidget {
   final String subtitle;
   final VoidCallback onTap;
   final Widget? badge;
+  final Widget? trailing;
 
   const AccountSettingsTile({
     super.key,
@@ -22,6 +23,7 @@ class AccountSettingsTile extends StatelessWidget {
     required this.subtitle,
     required this.onTap,
     this.badge,
+    this.trailing,
   });
 
   @override
@@ -69,13 +71,14 @@ class AccountSettingsTile extends StatelessWidget {
               badge!,
               SizedBox(width: AppSpacing.xs.w),
             ],
-            Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? Icons.chevron_left
-                  : Icons.chevron_right,
-              size: 20.r,
-              color: c.textHint,
-            ),
+            trailing ??
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left
+                      : Icons.chevron_right,
+                  size: 20.r,
+                  color: c.textHint,
+                ),
           ],
         ),
       ),

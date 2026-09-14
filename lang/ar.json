@@ -173,6 +173,8 @@
   "account_help_subtitle": "نحن هنا لخدمتك",
   "account_logout_button": "تسجيل الخروج",
   "account_footer_tagline": "خدمات لوجستية · نقل طرود محلي",
+  "account_appearance_title": "الوضع الداكن",
+  "account_appearance_subtitle": "التبديل بين الوضع الفاتح والداكن",
   "theme": "المظهر",
   "field_required": "هذا الحقل مطلوب",
   "invalid_email": "أدخل بريداً إلكترونياً صحيحاً",

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/theme_cubit.dart';
 import '../../../../core/utils/enum_extensions.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/show_modal_bottom_sheet.dart';
@@ -80,6 +82,21 @@ class AccountSettingsSection extends StatelessWidget {
         subtitle: Strings.accountHelpSubtitle,
         // TODO: open help & support once it exists.
         onTap: () {},
+      ),
+      AccountSettingsTile(
+        icon: Icons.dark_mode_outlined,
+        title: Strings.accountAppearanceTitle,
+        subtitle: Strings.accountAppearanceSubtitle,
+        trailing: BlocBuilder<ThemeCubit, ThemeMode>(
+          builder: (context, themeMode) {
+            return Switch(
+              value: themeMode == ThemeMode.dark,
+              onChanged: (_) => context.read<ThemeCubit>().toggleTheme(),
+              activeTrackColor: c.secondary,
+            );
+          },
+        ),
+        onTap: () => context.read<ThemeCubit>().toggleTheme(),
       ),
       AccountSettingsTile(
         icon: Icons.language,

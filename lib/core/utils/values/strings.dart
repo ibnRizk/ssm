@@ -664,6 +664,12 @@ abstract class Strings {
   static const String _accountLogoutButton = 'account_logout_button';
   static String get accountLogoutButton => _accountLogoutButton.tr;
 
+  static const String _accountAppearanceTitle = 'account_appearance_title';
+  static String get accountAppearanceTitle => _accountAppearanceTitle.tr;
+
+  static const String _accountAppearanceSubtitle = 'account_appearance_subtitle';
+  static String get accountAppearanceSubtitle => _accountAppearanceSubtitle.tr;
+
   static const String _accountFooterTagline = 'account_footer_tagline';
   static String get accountFooterTagline => _accountFooterTagline.tr;
 

@@ -9,6 +9,7 @@ import 'config/locale/app_localizations_setup.dart';
 import 'config/locale/locale_cubit.dart';
 import 'config/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_cubit.dart';
 import 'injection_container.dart';
 
 /// Set this to your Figma frame size. Every `.w/.h/.sp/.r` is relative to it.
@@ -48,23 +49,28 @@ class _AppState extends State<App> {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, __) {
-        return BlocProvider<LocaleCubit>.value(
-          value: localeCubit,
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<LocaleCubit>.value(value: localeCubit),
+            BlocProvider<ThemeCubit>.value(value: themeCubit),
+          ],
           child: BlocBuilder<LocaleCubit, Locale?>(
             builder: (BuildContext context, Locale? locale) {
-              return MaterialApp.router(
-                // `'key'.tr` reads a global singleton, not `context` — plain
-                // const widgets deep in the tree won't re-run `build()` just
-                // because `locale` changed above them. Keying on the locale
-                // forces Flutter to remount the whole visual subtree so text
-                // actually refreshes; `AppRoutes.router` is a singleton, so
-                // navigation position survives the remount.
-                key: ValueKey<Locale?>(locale),
-                title: AppEnv.appName,
-                debugShowCheckedModeBanner: false,
-                // Light only — the SSM design has no dark variant.
-                theme: appTheme,
-                themeMode: ThemeMode.light,
+              return BlocBuilder<ThemeCubit, ThemeMode>(
+                builder: (BuildContext context, ThemeMode themeMode) {
+                  return MaterialApp.router(
+                    // `'key'.tr` reads a global singleton, not `context` — plain
+                    // const widgets deep in the tree won't re-run `build()` just
+                    // because `locale` changed above them. Keying on the locale
+                    // forces Flutter to remount the whole visual subtree so text
+                    // actually refreshes; `AppRoutes.router` is a singleton, so
+                    // navigation position survives the remount.
+                    key: ValueKey<Locale?>(locale),
+                    title: AppEnv.appName,
+                    debugShowCheckedModeBanner: false,
+                    theme: appTheme,
+                    darkTheme: appThemeDark,
+                    themeMode: themeMode,
                 // Null until the user explicitly picks a language in the
                 // Account tab — `localeResolutionCallback` below then keeps
                 // following the device locale, same as before that choice.
@@ -74,7 +80,9 @@ class _AppState extends State<App> {
                     AppLocalizationsSetup.localizationsDelegates,
                 localeResolutionCallback:
                     AppLocalizationsSetup.localeResolutionCallback,
-                routerConfig: AppRoutes.router,
+                    routerConfig: AppRoutes.router,
+                  );
+                },
               );
             },
           ),

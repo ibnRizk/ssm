@@ -26,12 +26,14 @@ class LanguageSelectorSheet extends StatelessWidget {
       title: Strings.language,
       child: Column(
         children: <Widget>[
-          for (final LanguageCode code in LanguageCode.values) ...<Widget>[
+          for (final LanguageCode code
+              in LanguageCode.values) ...<Widget>[
             _LanguageOption(
               code: code,
               selected: current.languageCode == code.name,
             ),
-            if (code != LanguageCode.values.last) SizedBox(height: 4.h),
+            if (code != LanguageCode.values.last)
+              SizedBox(height: 4.h),
           ],
           SizedBox(height: AppSpacing.sm.h),
         ],
@@ -44,7 +46,10 @@ class _LanguageOption extends StatelessWidget {
   final LanguageCode code;
   final bool selected;
 
-  const _LanguageOption({required this.code, required this.selected});
+  const _LanguageOption({
+    required this.code,
+    required this.selected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +66,12 @@ class _LanguageOption extends StatelessWidget {
           vertical: AppSpacing.sm.h,
         ),
         decoration: BoxDecoration(
-          color: selected ? c.primaryLight : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadius.md.r),
+          color: selected
+              ? c.primaryLight
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(
+            AppRadius.md.r,
+          ),
         ),
         child: Row(
           children: <Widget>[
@@ -70,12 +79,18 @@ class _LanguageOption extends StatelessWidget {
               child: Text(
                 code.displayName,
                 style: AppTextStyles.titleSmall(
-                  color: selected ? c.primary : c.textPrimary,
+                  color: selected
+                      ? c.primary
+                      : c.textPrimary,
                 ),
               ),
             ),
             if (selected)
-              Icon(Icons.check_circle, color: c.primary, size: 20.r),
+              Icon(
+                Icons.check_circle,
+                color: c.primary,
+                size: 20.r,
+              ),
           ],
         ),
       ),

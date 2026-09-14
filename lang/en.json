@@ -173,6 +173,8 @@
   "account_help_subtitle": "We're here to help",
   "account_logout_button": "Log out",
   "account_footer_tagline": "Logistics services · local parcel delivery",
+  "account_appearance_title": "Dark Mode",
+  "account_appearance_subtitle": "Switch between Light and Dark mode",
   "theme": "Theme",
   "field_required": "This field is required",
   "invalid_email": "Enter a valid email address",

@@ -90,8 +90,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.info,
   });
 
-  /// The only variant — the SSM design is light-only. A dark variant would be
-  /// a second constant here plus a `darkTheme` in `app_theme.dart`.
   static const AppColors light = AppColors(
     primary: Palette.primary,
     primaryDark: Palette.primaryDark,
@@ -112,6 +110,31 @@ class AppColors extends ThemeExtension<AppColors> {
     successLight: Palette.successLight,
     warning: Palette.warning,
     warningLight: Palette.warningLight,
+    info: Palette.info,
+  );
+
+  /// The dark variant, retaining the core brand colours (navy/orange) while
+  /// inverting the background and textual elements for night-time readability.
+  static const AppColors dark = AppColors(
+    primary: Palette.primary,
+    primaryDark: Palette.primaryDark,
+    primaryLight: Palette.primaryDark, // Muted for dark mode
+    secondary: Palette.secondary,
+    secondaryDark: Palette.secondaryDark,
+    secondaryLight: Color(0xFF452B0F), // Darkened orange tint
+    accent: Palette.accent,
+    background: Color(0xFF121212),
+    surface: Color(0xFF1E1E1E),
+    textPrimary: Color(0xFFF9FAFB),
+    textSecondary: Color(0xFF9CA3AF),
+    textHint: Color(0xFF6B7280),
+    border: Color(0xFF374151),
+    error: Palette.error,
+    errorLight: Color(0xFF450A0A),
+    success: Palette.success,
+    successLight: Color(0xFF064E3B),
+    warning: Palette.warning,
+    warningLight: Color(0xFF451A03),
     info: Palette.info,
   );
 

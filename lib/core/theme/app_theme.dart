@@ -8,13 +8,15 @@ import 'app_fonts.dart';
 import 'app_text_styles.dart';
 
 /// The SSM theme — light only, the design has no dark variant.
-///
 /// A getter, not a constant: it uses ScreenUtil (`.w/.h/.sp/.r`), so it must
 /// be evaluated *inside* the `ScreenUtilInit` builder — which is where
 /// `app.dart` reads it.
-ThemeData get appTheme => _buildTheme(AppColors.light);
+ThemeData get appTheme => _buildTheme(AppColors.light, Brightness.light);
 
-ThemeData _buildTheme(AppColors c) {
+/// The dark variant of the SSM theme.
+ThemeData get appThemeDark => _buildTheme(AppColors.dark, Brightness.dark);
+
+ThemeData _buildTheme(AppColors c, Brightness brightness) {
   final RoundedRectangleBorder buttonShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(AppRadius.lg.r),
   );
@@ -22,13 +24,13 @@ ThemeData _buildTheme(AppColors c) {
 
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.light,
+    brightness: brightness,
     fontFamily: AppFonts.primary,
     extensions: <ThemeExtension<dynamic>>[c],
     textTheme: _buildTextTheme(c),
 
     colorScheme: ColorScheme(
-      brightness: Brightness.light,
+      brightness: brightness,
       primary: c.primary,
       onPrimary: Colors.white,
       primaryContainer: c.primaryLight,

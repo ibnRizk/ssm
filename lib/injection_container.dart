@@ -11,6 +11,7 @@ import 'core/api/dio_consumer.dart';
 import 'core/services/local_storage/app_secure_storage.dart';
 import 'core/services/local_storage/app_shared_preferences.dart';
 import 'core/theme/app_colors.dart';
+import 'core/theme/theme_cubit.dart';
 import 'features/home/home_injection.dart';
 import 'features/restaurants/restaurants_injection.dart';
 
@@ -37,6 +38,7 @@ abstract class ServiceLocator {
     injectAppColors(AppColors.light);
     injectRoutesStackSingleton(<String>[]);
     _injectLocaleCubit();
+    _injectThemeCubit();
 
     // --- Features ---
     await initHomeFeatureInjection();
@@ -65,6 +67,10 @@ abstract class ServiceLocator {
 
   static void _injectLocaleCubit() => instance.registerLazySingleton<LocaleCubit>(
     () => LocaleCubit(sharedPreferences: instance()),
+  );
+
+  static void _injectThemeCubit() => instance.registerLazySingleton<ThemeCubit>(
+    () => ThemeCubit(sharedPreferences: instance()),
   );
 
   static void _injectDioConsumer() => instance
@@ -128,6 +134,8 @@ AppLocalizations get appLocalizations =>
     ServiceLocator.instance<AppLocalizations>();
 
 LocaleCubit get localeCubit => ServiceLocator.instance<LocaleCubit>();
+
+ThemeCubit get themeCubit => ServiceLocator.instance<ThemeCubit>();
 
 List<String> get routesStack =>
     ServiceLocator.instance<List<String>>(instanceName: 'routesStack');
