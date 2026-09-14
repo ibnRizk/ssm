@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
@@ -63,8 +65,7 @@ class HomeOffersSection extends StatelessWidget {
               SizedBox(width: AppSpacing.sm.w),
               AppButton(
                 btnText: Strings.homeOfferButton,
-                // TODO: wire to the pharmacy request flow once it exists.
-                onPressed: () {},
+                onPressed: () => context.push(AppRoutes.pharmacyOrder),
                 width: 118.w,
                 height: 40,
                 borderRadius: AppRadius.pill,

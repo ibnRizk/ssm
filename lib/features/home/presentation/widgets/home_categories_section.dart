@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
@@ -14,10 +16,15 @@ class _HomeCategory {
   /// Pharmacy gets the distinct light-green / "+" treatment in the design.
   final bool featured;
 
+  /// Full route path to push when tapped, or `null` for categories that
+  /// don't have a screen yet.
+  final String? routePath;
+
   const _HomeCategory({
     required this.label,
     required this.icon,
     this.featured = false,
+    this.routePath,
   });
 }
 
@@ -27,11 +34,20 @@ class _HomeCategory {
 /// RTL layout), so listing them in reading order reproduces the design's
 /// exact grid position without hardcoding a physical side anywhere.
 const List<_HomeCategory> _placeholderCategories = <_HomeCategory>[
-  _HomeCategory(label: 'مطاعم', icon: Icons.restaurant_outlined),
+  _HomeCategory(
+    label: 'مطاعم',
+    icon: Icons.restaurant_outlined,
+    routePath: AppRoutes.restaurants,
+  ),
   _HomeCategory(label: 'كافيهات', icon: Icons.coffee_outlined),
   _HomeCategory(label: 'سوبرماركت', icon: Icons.shopping_cart_outlined),
   _HomeCategory(label: 'معسلات', icon: Icons.smoking_rooms_outlined),
-  _HomeCategory(label: 'صيدليات', icon: Icons.add, featured: true),
+  _HomeCategory(
+    label: 'صيدليات',
+    icon: Icons.add,
+    featured: true,
+    routePath: AppRoutes.pharmacyOrder,
+  ),
 ];
 
 class HomeCategoriesSection extends StatelessWidget {
@@ -107,38 +123,43 @@ class _CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
     final bool featured = category.featured;
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: AppSpacing.md.h),
-      decoration: featured
-          ? BoxDecoration(
-              color: c.successLight,
-              borderRadius: BorderRadius.circular(AppRadius.lg.r),
-            )
-          : AppDecorations.card(),
-      child: Column(
-        children: <Widget>[
-          Container(
-            width: 40.r,
-            height: 40.r,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: featured ? c.success : c.primaryLight,
+    final String? routePath = category.routePath;
+    return GestureDetector(
+      // TODO: wire the remaining categories once their screens exist.
+      onTap: routePath == null ? null : () => context.push(routePath),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: AppSpacing.md.h),
+        decoration: featured
+            ? BoxDecoration(
+                color: c.successLight,
+                borderRadius: BorderRadius.circular(AppRadius.lg.r),
+              )
+            : AppDecorations.card(),
+        child: Column(
+          children: <Widget>[
+            Container(
+              width: 40.r,
+              height: 40.r,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: featured ? c.success : c.primaryLight,
+              ),
+              child: Icon(
+                category.icon,
+                color: featured ? Colors.white : c.primary,
+                size: 20.r,
+              ),
             ),
-            child: Icon(
-              category.icon,
-              color: featured ? Colors.white : c.primary,
-              size: 20.r,
+            SizedBox(height: AppSpacing.xs.h),
+            Text(
+              category.label,
+              style: AppTextStyles.caption(color: c.textPrimary),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          SizedBox(height: AppSpacing.xs.h),
-          Text(
-            category.label,
-            style: AppTextStyles.caption(color: c.textPrimary),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

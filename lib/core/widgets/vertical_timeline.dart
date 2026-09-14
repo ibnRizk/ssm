@@ -23,18 +23,49 @@ class TimelineStep {
 
 /// A vertical status stepper — dot-and-line on the start side, title and
 /// subtitle on the end side. Used by parcel and order tracking, which share
-/// the exact same "completed / active / pending" visual language.
+/// the exact same layout but not the exact same palette: Parcels marks
+/// "completed" navy and "active" orange, while Order Tracking does the
+/// reverse (orange for what already happened, navy for "you are here").
+/// The three colour overrides default to Parcels' original look, so its
+/// call site (no overrides passed) renders exactly as before.
 class VerticalTimeline extends StatelessWidget {
   final List<TimelineStep> steps;
+  final Color? completedColor;
+  final Color? activeColor;
+  final Color? pendingColor;
 
-  const VerticalTimeline({super.key, required this.steps});
+  /// The *active* step's title colour only — completed/pending titles are
+  /// always [AppColors.textPrimary]/[AppColors.textSecondary], since both
+  /// screens agree on those.
+  final Color? activeTitleColor;
+
+  const VerticalTimeline({
+    super.key,
+    required this.steps,
+    this.completedColor,
+    this.activeColor,
+    this.pendingColor,
+    this.activeTitleColor,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final AppColors c = context.colors;
+    final Color resolvedCompleted = completedColor ?? c.primary;
+    final Color resolvedActive = activeColor ?? c.secondary;
+    final Color resolvedPending = pendingColor ?? c.border;
+    final Color resolvedActiveTitle = activeTitleColor ?? c.secondary;
     return Column(
       children: <Widget>[
         for (int i = 0; i < steps.length; i++)
-          _TimelineRow(step: steps[i], isLast: i == steps.length - 1),
+          _TimelineRow(
+            step: steps[i],
+            isLast: i == steps.length - 1,
+            completedColor: resolvedCompleted,
+            activeColor: resolvedActive,
+            pendingColor: resolvedPending,
+            activeTitleColor: resolvedActiveTitle,
+          ),
       ],
     );
   }
@@ -43,25 +74,36 @@ class VerticalTimeline extends StatelessWidget {
 class _TimelineRow extends StatelessWidget {
   final TimelineStep step;
   final bool isLast;
+  final Color completedColor;
+  final Color activeColor;
+  final Color pendingColor;
+  final Color activeTitleColor;
 
-  const _TimelineRow({required this.step, required this.isLast});
+  const _TimelineRow({
+    required this.step,
+    required this.isLast,
+    required this.completedColor,
+    required this.activeColor,
+    required this.pendingColor,
+    required this.activeTitleColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
     final Color dotColor = switch (step.state) {
-      TimelineStepState.completed => c.primary,
-      TimelineStepState.active => c.secondary,
-      TimelineStepState.pending => c.border,
+      TimelineStepState.completed => completedColor,
+      TimelineStepState.active => activeColor,
+      TimelineStepState.pending => pendingColor,
     };
     final Color titleColor = switch (step.state) {
       TimelineStepState.completed => c.textPrimary,
-      TimelineStepState.active => c.secondary,
+      TimelineStepState.active => activeTitleColor,
       TimelineStepState.pending => c.textSecondary,
     };
     final Color lineColor = step.state == TimelineStepState.completed
-        ? c.primary
-        : c.border;
+        ? completedColor
+        : pendingColor;
 
     return IntrinsicHeight(
       child: Row(

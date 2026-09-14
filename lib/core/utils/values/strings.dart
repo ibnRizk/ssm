@@ -236,6 +236,372 @@ abstract class Strings {
   static const String _parcelsPendingSubtitle = 'parcels_pending_subtitle';
   static String get parcelsPendingSubtitle => _parcelsPendingSubtitle.tr;
 
+  // --- Restaurants ---
+  static const String _restaurantsTitle = 'restaurants_title';
+  static String get restaurantsTitle => _restaurantsTitle.tr;
+
+  static const String _restaurantsSubtitle = 'restaurants_subtitle';
+  static String get restaurantsSubtitle => _restaurantsSubtitle.tr;
+
+  static const String _restaurantsFilterNearest = 'restaurants_filter_nearest';
+  static String get restaurantsFilterNearest => _restaurantsFilterNearest.tr;
+
+  static const String _restaurantsFilterTopRated =
+      'restaurants_filter_top_rated';
+  static String get restaurantsFilterTopRated => _restaurantsFilterTopRated.tr;
+
+  static const String _restaurantsFilterFastest = 'restaurants_filter_fastest';
+  static String get restaurantsFilterFastest => _restaurantsFilterFastest.tr;
+
+  static const String _restaurantsSectionTitle = 'restaurants_section_title';
+  static String get restaurantsSectionTitle => _restaurantsSectionTitle.tr;
+
+  static const String _restaurantsBadgeTodayOffer =
+      'restaurants_badge_today_offer';
+  static String get restaurantsBadgeTodayOffer =>
+      _restaurantsBadgeTodayOffer.tr;
+
+  // --- Store details ---
+  static const String _storeDetailsOpenNowBadge =
+      'store_details_open_now_badge';
+  static String get storeDetailsOpenNowBadge => _storeDetailsOpenNowBadge.tr;
+
+  static const String _storeDetailsTabMostOrdered =
+      'store_details_tab_most_ordered';
+  static String get storeDetailsTabMostOrdered =>
+      _storeDetailsTabMostOrdered.tr;
+
+  static const String _storeDetailsTabMeals = 'store_details_tab_meals';
+  static String get storeDetailsTabMeals => _storeDetailsTabMeals.tr;
+
+  static const String _storeDetailsTabAddons = 'store_details_tab_addons';
+  static String get storeDetailsTabAddons => _storeDetailsTabAddons.tr;
+
+  static const String _storeDetailsSectionTitle =
+      'store_details_section_title';
+  static String get storeDetailsSectionTitle => _storeDetailsSectionTitle.tr;
+
+  static const String _storeDetailsAddonsTitle = 'store_details_addons_title';
+  static String get storeDetailsAddonsTitle => _storeDetailsAddonsTitle.tr;
+
+  static const String _storeDetailsCartViewButton =
+      'store_details_cart_view_button';
+  static String get storeDetailsCartViewButton =>
+      _storeDetailsCartViewButton.tr;
+
+  static const String _storeDetailsCartCount = 'store_details_cart_count';
+
+  /// `{count}` in the translation is replaced with the live cart total —
+  /// the only translation key in this file that needs a parameter.
+  static String storeDetailsCartCount(int count) =>
+      _storeDetailsCartCount.tr.replaceFirst('{count}', '$count');
+
+  // --- Cart ---
+  static const String _cartTitle = 'cart_title';
+  static String get cartTitle => _cartTitle.tr;
+
+  static const String _cartEmptyMessage = 'cart_empty_message';
+  static String get cartEmptyMessage => _cartEmptyMessage.tr;
+
+  static const String _cartProductsValueLabel = 'cart_products_value_label';
+  static String get cartProductsValueLabel => _cartProductsValueLabel.tr;
+
+  static const String _cartTotalLabel = 'cart_total_label';
+  static String get cartTotalLabel => _cartTotalLabel.tr;
+
+  static const String _cartContinueButton = 'cart_continue_button';
+  static String get cartContinueButton => _cartContinueButton.tr;
+
+  // --- Order confirmation ---
+  static const String _orderConfirmationTitle = 'order_confirmation_title';
+  static String get orderConfirmationTitle => _orderConfirmationTitle.tr;
+
+  static const String _orderConfirmationAddressSectionTitle =
+      'order_confirmation_address_section_title';
+  static String get orderConfirmationAddressSectionTitle =>
+      _orderConfirmationAddressSectionTitle.tr;
+
+  static const String _orderConfirmationChangeButton =
+      'order_confirmation_change_button';
+  static String get orderConfirmationChangeButton =>
+      _orderConfirmationChangeButton.tr;
+
+  static const String _orderConfirmationDeliveryFeeSectionTitle =
+      'order_confirmation_delivery_fee_section_title';
+  static String get orderConfirmationDeliveryFeeSectionTitle =>
+      _orderConfirmationDeliveryFeeSectionTitle.tr;
+
+  static const String _orderConfirmationAreaCardSubtitle =
+      'order_confirmation_area_card_subtitle';
+  static String get orderConfirmationAreaCardSubtitle =>
+      _orderConfirmationAreaCardSubtitle.tr;
+
+  static const String _orderConfirmationPaymentSectionTitle =
+      'order_confirmation_payment_section_title';
+  static String get orderConfirmationPaymentSectionTitle =>
+      _orderConfirmationPaymentSectionTitle.tr;
+
+  static const String _orderConfirmationPaymentTitle =
+      'order_confirmation_payment_title';
+  static String get orderConfirmationPaymentTitle =>
+      _orderConfirmationPaymentTitle.tr;
+
+  static const String _orderConfirmationPaymentDescription =
+      'order_confirmation_payment_description';
+  static String get orderConfirmationPaymentDescription =>
+      _orderConfirmationPaymentDescription.tr;
+
+  static const String _orderConfirmationSummarySectionTitle =
+      'order_confirmation_summary_section_title';
+  static String get orderConfirmationSummarySectionTitle =>
+      _orderConfirmationSummarySectionTitle.tr;
+
+  static const String _orderConfirmationDeliveryFeeLabel =
+      'order_confirmation_delivery_fee_label';
+  static String get orderConfirmationDeliveryFeeLabel =>
+      _orderConfirmationDeliveryFeeLabel.tr;
+
+  static const String _orderConfirmationConfirmButton =
+      'order_confirmation_confirm_button';
+  static String get orderConfirmationConfirmButton =>
+      _orderConfirmationConfirmButton.tr;
+
+  // --- Order tracking ---
+  static const String _orderTrackingTitle = 'order_tracking_title';
+  static String get orderTrackingTitle => _orderTrackingTitle.tr;
+
+  static const String _orderTrackingCurrentStatusLabel =
+      'order_tracking_current_status_label';
+  static String get orderTrackingCurrentStatusLabel =>
+      _orderTrackingCurrentStatusLabel.tr;
+
+  static const String _orderTrackingStatusDescription =
+      'order_tracking_status_description';
+  static String get orderTrackingStatusDescription =>
+      _orderTrackingStatusDescription.tr;
+
+  static const String _orderTrackingOrderNumberLabel =
+      'order_tracking_order_number_label';
+  static String get orderTrackingOrderNumberLabel =>
+      _orderTrackingOrderNumberLabel.tr;
+
+  static const String _orderTrackingCallButton = 'order_tracking_call_button';
+  static String get orderTrackingCallButton => _orderTrackingCallButton.tr;
+
+  static const String _orderTrackingStepSentTitle =
+      'order_tracking_step_sent_title';
+  static String get orderTrackingStepSentTitle =>
+      _orderTrackingStepSentTitle.tr;
+
+  static const String _orderTrackingStepSentSubtitle =
+      'order_tracking_step_sent_subtitle';
+  static String get orderTrackingStepSentSubtitle =>
+      _orderTrackingStepSentSubtitle.tr;
+
+  static const String _orderTrackingStepPreparingTitle =
+      'order_tracking_step_preparing_title';
+  static String get orderTrackingStepPreparingTitle =>
+      _orderTrackingStepPreparingTitle.tr;
+
+  static const String _orderTrackingStepPreparingSubtitle =
+      'order_tracking_step_preparing_subtitle';
+
+  /// `{store}` in the translation is replaced with the store's name.
+  static String orderTrackingStepPreparingSubtitle(String storeName) =>
+      _orderTrackingStepPreparingSubtitle.tr.replaceFirst('{store}', storeName);
+
+  static const String _orderTrackingStepCourierToStoreTitle =
+      'order_tracking_step_courier_to_store_title';
+  static String get orderTrackingStepCourierToStoreTitle =>
+      _orderTrackingStepCourierToStoreTitle.tr;
+
+  static const String _orderTrackingStepCourierToStoreSubtitle =
+      'order_tracking_step_courier_to_store_subtitle';
+  static String get orderTrackingStepCourierToStoreSubtitle =>
+      _orderTrackingStepCourierToStoreSubtitle.tr;
+
+  static const String _orderTrackingStepCourierToYouTitle =
+      'order_tracking_step_courier_to_you_title';
+  static String get orderTrackingStepCourierToYouTitle =>
+      _orderTrackingStepCourierToYouTitle.tr;
+
+  static const String _orderTrackingStepCourierToYouSubtitle =
+      'order_tracking_step_courier_to_you_subtitle';
+  static String get orderTrackingStepCourierToYouSubtitle =>
+      _orderTrackingStepCourierToYouSubtitle.tr;
+
+  static const String _orderTrackingStepDeliveredTitle =
+      'order_tracking_step_delivered_title';
+  static String get orderTrackingStepDeliveredTitle =>
+      _orderTrackingStepDeliveredTitle.tr;
+
+  static const String _orderTrackingStepDeliveredSubtitle =
+      'order_tracking_step_delivered_subtitle';
+  static String get orderTrackingStepDeliveredSubtitle =>
+      _orderTrackingStepDeliveredSubtitle.tr;
+
+  // --- Subscriptions ---
+  static const String _subscriptionsTitle = 'subscriptions_title';
+  static String get subscriptionsTitle => _subscriptionsTitle.tr;
+
+  static const String _subscriptionsSubtitle = 'subscriptions_subtitle';
+  static String get subscriptionsSubtitle => _subscriptionsSubtitle.tr;
+
+  static const String _subscriptionsAreaSelectorTitle =
+      'subscriptions_area_selector_title';
+  static String get subscriptionsAreaSelectorTitle =>
+      _subscriptionsAreaSelectorTitle.tr;
+
+  static const String _subscriptionsAreaFeeNote =
+      'subscriptions_area_fee_note';
+
+  /// `{area}` and `{fee}` in the translation are replaced with the
+  /// currently-selected area's name and delivery fee.
+  static String subscriptionsAreaFeeNote(String area, int fee) =>
+      _subscriptionsAreaFeeNote.tr
+          .replaceFirst('{area}', area)
+          .replaceFirst('{fee}', '$fee');
+
+  static const String _subscriptionsBestValueBadge =
+      'subscriptions_best_value_badge';
+  static String get subscriptionsBestValueBadge =>
+      _subscriptionsBestValueBadge.tr;
+
+  static const String _subscriptionsFooterNote = 'subscriptions_footer_note';
+  static String get subscriptionsFooterNote => _subscriptionsFooterNote.tr;
+
+  // --- Loyalty ---
+  static const String _loyaltyTitle = 'loyalty_title';
+  static String get loyaltyTitle => _loyaltyTitle.tr;
+
+  static const String _loyaltyAvailableBadge = 'loyalty_available_badge';
+  static String get loyaltyAvailableBadge => _loyaltyAvailableBadge.tr;
+
+  static const String _loyaltyProgressHeading = 'loyalty_progress_heading';
+  static String get loyaltyProgressHeading => _loyaltyProgressHeading.tr;
+
+  static const String _loyaltyProgressOfLabel = 'loyalty_progress_of_label';
+
+  /// `{target}` in the translation is replaced with the ring's target count.
+  static String loyaltyProgressOfLabel(int target) =>
+      _loyaltyProgressOfLabel.tr.replaceFirst('{target}', '$target');
+
+  static const String _loyaltyOrdersUnit = 'loyalty_orders_unit';
+  static String get loyaltyOrdersUnit => _loyaltyOrdersUnit.tr;
+
+  static const String _loyaltyRemainingOrdersTemplate =
+      'loyalty_remaining_orders_template';
+
+  /// Returns the translation with its `{count}` marker left intact — the
+  /// caller splits on that literal marker to colour just the number, so this
+  /// deliberately isn't a simple getter like the others above.
+  static String get loyaltyRemainingOrdersTemplate =>
+      _loyaltyRemainingOrdersTemplate.tr;
+
+  static const String _loyaltyCompletedOrdersLabel =
+      'loyalty_completed_orders_label';
+  static String get loyaltyCompletedOrdersLabel =>
+      _loyaltyCompletedOrdersLabel.tr;
+
+  static const String _loyaltyNoSubscriptionNote =
+      'loyalty_no_subscription_note';
+  static String get loyaltyNoSubscriptionNote => _loyaltyNoSubscriptionNote.tr;
+
+  static const String _loyaltyFreeDeliveryTitle = 'loyalty_free_delivery_title';
+  static String get loyaltyFreeDeliveryTitle => _loyaltyFreeDeliveryTitle.tr;
+
+  static const String _loyaltyFreeDeliverySubtitle =
+      'loyalty_free_delivery_subtitle';
+  static String get loyaltyFreeDeliverySubtitle =>
+      _loyaltyFreeDeliverySubtitle.tr;
+
+  static const String _loyaltyRecentOrdersTitle = 'loyalty_recent_orders_title';
+  static String get loyaltyRecentOrdersTitle => _loyaltyRecentOrdersTitle.tr;
+
+  static const String _loyaltyViewHistoryLink = 'loyalty_view_history_link';
+  static String get loyaltyViewHistoryLink => _loyaltyViewHistoryLink.tr;
+
+  static const String _loyaltyCompletedOrderLabel =
+      'loyalty_completed_order_label';
+  static String get loyaltyCompletedOrderLabel =>
+      _loyaltyCompletedOrderLabel.tr;
+
+  static const String _loyaltyOrderNowButton = 'loyalty_order_now_button';
+  static String get loyaltyOrderNowButton => _loyaltyOrderNowButton.tr;
+
+  // --- Orders ---
+  static const String _ordersTitle = 'orders_title';
+  static String get ordersTitle => _ordersTitle.tr;
+
+  static const String _ordersCountLabel = 'orders_count_label';
+
+  /// `{count}` in the translation is replaced with the total order count.
+  static String ordersCountLabel(int count) =>
+      _ordersCountLabel.tr.replaceFirst('{count}', '$count');
+
+  static const String _ordersFilterAll = 'orders_filter_all';
+  static String get ordersFilterAll => _ordersFilterAll.tr;
+
+  static const String _ordersFilterCurrent = 'orders_filter_current';
+  static String get ordersFilterCurrent => _ordersFilterCurrent.tr;
+
+  static const String _ordersFilterPast = 'orders_filter_past';
+  static String get ordersFilterPast => _ordersFilterPast.tr;
+
+  static const String _ordersCurrentSectionTitle =
+      'orders_current_section_title';
+  static String get ordersCurrentSectionTitle =>
+      _ordersCurrentSectionTitle.tr;
+
+  static const String _ordersViewTrackingLink = 'orders_view_tracking_link';
+  static String get ordersViewTrackingLink => _ordersViewTrackingLink.tr;
+
+  static const String _ordersStatusPreparing = 'orders_status_preparing';
+  static String get ordersStatusPreparing => _ordersStatusPreparing.tr;
+
+  static const String _ordersTrackButton = 'orders_track_button';
+  static String get ordersTrackButton => _ordersTrackButton.tr;
+
+  static const String _ordersPastSectionTitle = 'orders_past_section_title';
+  static String get ordersPastSectionTitle => _ordersPastSectionTitle.tr;
+
+  static const String _ordersNewestFirstLabel = 'orders_newest_first_label';
+  static String get ordersNewestFirstLabel => _ordersNewestFirstLabel.tr;
+
+  static const String _ordersStatusDelivered = 'orders_status_delivered';
+  static String get ordersStatusDelivered => _ordersStatusDelivered.tr;
+
+  static const String _ordersReorderButton = 'orders_reorder_button';
+  static String get ordersReorderButton => _ordersReorderButton.tr;
+
+  // --- Pharmacy ---
+  static const String _pharmacyTitle = 'pharmacy_title';
+  static String get pharmacyTitle => _pharmacyTitle.tr;
+
+  static const String _pharmacySubtitle = 'pharmacy_subtitle';
+  static String get pharmacySubtitle => _pharmacySubtitle.tr;
+
+  static const String _pharmacySelectTitle = 'pharmacy_select_title';
+  static String get pharmacySelectTitle => _pharmacySelectTitle.tr;
+
+  static const String _pharmacySelectSubtitle = 'pharmacy_select_subtitle';
+  static String get pharmacySelectSubtitle => _pharmacySelectSubtitle.tr;
+
+  static const String _pharmacyRequestLabel = 'pharmacy_request_label';
+  static String get pharmacyRequestLabel => _pharmacyRequestLabel.tr;
+
+  static const String _pharmacyRequestHint = 'pharmacy_request_hint';
+  static String get pharmacyRequestHint => _pharmacyRequestHint.tr;
+
+  static const String _pharmacyAttachmentLabel = 'pharmacy_attachment_label';
+  static String get pharmacyAttachmentLabel => _pharmacyAttachmentLabel.tr;
+
+  static const String _pharmacyWarningNote = 'pharmacy_warning_note';
+  static String get pharmacyWarningNote => _pharmacyWarningNote.tr;
+
+  static const String _pharmacySubmitButton = 'pharmacy_submit_button';
+  static String get pharmacySubmitButton => _pharmacySubmitButton.tr;
+
   // --- Validation ---
   static const String _fieldRequired = 'field_required';
   static String get fieldRequired => _fieldRequired.tr;
