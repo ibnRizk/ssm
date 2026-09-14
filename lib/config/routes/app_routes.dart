@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/utils/values/strings.dart';
 import '../../core/widgets/slider_photo.dart';
+import '../../features/account/presentation/screens/account_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
@@ -146,9 +146,7 @@ abstract class AppRoutes {
               GoRoute(
                 path: profile,
                 name: profileName,
-                builder: (_, __) => ShellTabPlaceholder(
-                  label: Strings.navProfile,
-                ),
+                builder: (_, __) => const AccountScreen(),
               ),
             ],
           ),
@@ -256,10 +254,8 @@ abstract class AppRoutes {
       // Outside the shell for the same reason as `orderTracking` above: a
       // pushed inner screen, so no bottom navigation bar here.
       //
-      // Not yet linked from anywhere — no built screen has an "Account" or
-      // "Points" entry point to hook it to yet (Profile is still a
-      // placeholder tab). Reachable via `context.push(AppRoutes.loyalty)`
-      // once one exists.
+      // Linked from the Account tab's "نقاط الولاء" settings row via
+      // `context.push(AppRoutes.loyalty)`.
       GoRoute(
         path: loyalty,
         name: loyaltyName,

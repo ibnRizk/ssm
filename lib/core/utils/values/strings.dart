@@ -602,6 +602,71 @@ abstract class Strings {
   static const String _pharmacySubmitButton = 'pharmacy_submit_button';
   static String get pharmacySubmitButton => _pharmacySubmitButton.tr;
 
+  // --- Account ---
+  static const String _accountTitle = 'account_title';
+  static String get accountTitle => _accountTitle.tr;
+
+  static const String _accountEditButton = 'account_edit_button';
+  static String get accountEditButton => _accountEditButton.tr;
+
+  static const String _accountMemberSince = 'account_member_since';
+
+  /// `{year}` in the translation is replaced with the join year.
+  static String accountMemberSince(int year) =>
+      _accountMemberSince.tr.replaceFirst('{year}', '$year');
+
+  static const String _accountSettingsSectionTitle =
+      'account_settings_section_title';
+  static String get accountSettingsSectionTitle =>
+      _accountSettingsSectionTitle.tr;
+
+  static const String _accountMyInfoTitle = 'account_my_info_title';
+  static String get accountMyInfoTitle => _accountMyInfoTitle.tr;
+
+  static const String _accountMyInfoSubtitle = 'account_my_info_subtitle';
+  static String get accountMyInfoSubtitle => _accountMyInfoSubtitle.tr;
+
+  static const String _accountAddressesTitle = 'account_addresses_title';
+  static String get accountAddressesTitle => _accountAddressesTitle.tr;
+
+  static const String _accountAddressesSubtitle =
+      'account_addresses_subtitle';
+  static String get accountAddressesSubtitle => _accountAddressesSubtitle.tr;
+
+  static const String _accountSubscriptionsTitle =
+      'account_subscriptions_title';
+  static String get accountSubscriptionsTitle =>
+      _accountSubscriptionsTitle.tr;
+
+  static const String _accountSubscriptionsSubtitleNone =
+      'account_subscriptions_subtitle_none';
+  static String get accountSubscriptionsSubtitleNone =>
+      _accountSubscriptionsSubtitleNone.tr;
+
+  static const String _accountLoyaltyTitle = 'account_loyalty_title';
+  static String get accountLoyaltyTitle => _accountLoyaltyTitle.tr;
+
+  static const String _accountLoyaltySubtitle = 'account_loyalty_subtitle';
+
+  /// `{completed}` and `{target}` in the translation are replaced with the
+  /// loyalty progress counts.
+  static String accountLoyaltySubtitle(int completed, int target) =>
+      _accountLoyaltySubtitle.tr
+          .replaceFirst('{completed}', '$completed')
+          .replaceFirst('{target}', '$target');
+
+  static const String _accountHelpTitle = 'account_help_title';
+  static String get accountHelpTitle => _accountHelpTitle.tr;
+
+  static const String _accountHelpSubtitle = 'account_help_subtitle';
+  static String get accountHelpSubtitle => _accountHelpSubtitle.tr;
+
+  static const String _accountLogoutButton = 'account_logout_button';
+  static String get accountLogoutButton => _accountLogoutButton.tr;
+
+  static const String _accountFooterTagline = 'account_footer_tagline';
+  static String get accountFooterTagline => _accountFooterTagline.tr;
+
   // --- Validation ---
   static const String _fieldRequired = 'field_required';
   static String get fieldRequired => _fieldRequired.tr;
