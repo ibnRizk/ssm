@@ -18,8 +18,6 @@
   "arabic": "Arabic",
   "settings": "Settings",
   "theme": "Theme",
-  "light_mode": "Light mode",
-  "dark_mode": "Dark mode",
   "field_required": "This field is required",
   "invalid_email": "Enter a valid email address",
   "invalid_phone": "Enter a valid phone number",

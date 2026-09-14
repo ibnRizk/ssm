@@ -4,13 +4,12 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'config/locale/app_localizations.dart';
-import 'config/themes/theme_cubit.dart';
 import 'core/api/app_interceptors.dart';
 import 'core/api/auth_event_bus.dart';
 import 'core/api/dio_consumer.dart';
 import 'core/services/local_storage/app_secure_storage.dart';
 import 'core/services/local_storage/app_shared_preferences.dart';
-import 'core/utils/values/app_colors.dart';
+import 'core/theme/app_colors.dart';
 import 'features/home/home_injection.dart';
 import 'features/language/language_injection.dart';
 
@@ -23,8 +22,8 @@ abstract class ServiceLocator {
   static final GetIt instance = GetIt.instance;
 
   static Future<void> init() async {
-    // Lets AppColors / AppLocalizations be re-registered on theme and locale
-    // changes instead of throwing.
+    // Lets AppLocalizations be re-registered on locale changes instead of
+    // throwing.
     instance.allowReassignment = true;
 
     // --- Core ---
@@ -36,7 +35,6 @@ abstract class ServiceLocator {
     _injectDioConsumer();
     injectAppColors(AppColors.light);
     injectRoutesStackSingleton(<String>[]);
-    instance.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
 
     // --- Features ---
     await initLanguageFeatureInjection();
@@ -84,9 +82,8 @@ abstract class ServiceLocator {
         ),
       );
 
-  /// Seeded at init with [AppColors.light], then refreshed from
-  /// `MaterialApp.builder` on every theme change so the context-free [colors]
-  /// getter tracks light/dark.
+  /// Backs the context-free [colors] getter. The app is light-only, so this
+  /// is registered once at init and never changes.
   static void injectAppColors(AppColors appColors) =>
       instance.registerSingleton<AppColors>(appColors);
 

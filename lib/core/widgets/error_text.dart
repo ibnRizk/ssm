@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../theme/app_colors.dart';
 import '../utils/enums.dart';
-import '../utils/values/app_colors.dart';
 import '../utils/values/strings.dart';
 import 'app_button.dart';
 

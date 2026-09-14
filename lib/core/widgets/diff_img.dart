@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '/core/theme/app_text_styles.dart';
 import '/core/utils/constants.dart';
 import '/core/utils/extension.dart';
-import '/core/utils/values/text_styles.dart';
 import '/injection_container.dart';
 
 class DiffImage extends StatelessWidget {
@@ -122,7 +122,7 @@ class DiffImage extends StatelessWidget {
                     : Center(
                         child: Text(
                           getInitials(userName ?? ''),
-                          style: TextStyles.bold16(
+                          style: AppTextStyles.title(
                             color: userNameColor == null
                                 ? Colors.black
                                 : colors.primary,

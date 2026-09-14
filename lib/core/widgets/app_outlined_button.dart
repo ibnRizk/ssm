@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../injection_container.dart';
-import '../utils/values/text_styles.dart';
+import '../theme/app_text_styles.dart';
 
 class AppOutlinedButton extends StatelessWidget {
   final void Function()? onPressed;
@@ -70,6 +70,7 @@ class AppOutlinedButton extends StatelessWidget {
 
   Widget get _text => Text(
     text,
-    style: textStyle ?? TextStyles.medium16(color: textColor ?? colors.primary),
+    style:
+        textStyle ?? AppTextStyles.button(color: textColor ?? colors.primary),
   );
 }

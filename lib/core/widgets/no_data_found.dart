@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../utils/values/app_colors.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 import '../utils/values/strings.dart';
-import '../utils/values/text_styles.dart';
 import 'gaps.dart';
 
 /// Compact empty state for lists and grids.
@@ -33,7 +33,7 @@ class NoDataFound extends StatelessWidget {
               color: context.colors.textSecondary,
             ),
           Gaps.vGap12,
-          Text(text ?? Strings.noDataFound, style: TextStyles.bold16()),
+          Text(text ?? Strings.noDataFound, style: AppTextStyles.title()),
         ],
       ),
     );

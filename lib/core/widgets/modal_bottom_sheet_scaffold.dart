@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../injection_container.dart';
-import '../utils/values/text_styles.dart';
+import '../theme/app_text_styles.dart';
 
 class ModalBottomSheetScaffold extends StatelessWidget {
   final String title;
@@ -45,7 +45,7 @@ class ModalBottomSheetScaffold extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyles.semiBold18(color: colors.textPrimary),
+                  style: AppTextStyles.h2(color: colors.textPrimary),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -65,7 +65,7 @@ class ModalBottomSheetScaffold extends StatelessWidget {
               ? Center(
                   child: Text(
                     subTitle,
-                    style: TextStyles.regular14(color: colors.textPrimary),
+                    style: AppTextStyles.body(color: colors.textPrimary),
                     textAlign: TextAlign.center,
                   ),
                 )

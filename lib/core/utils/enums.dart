@@ -2,8 +2,6 @@
 /// `lang/<code>.json`, and extend `AppLocalizationsSetup.supportedLocales`.
 enum LanguageCode { en, ar }
 
-enum Themes { light, dark }
-
 /// Where the user is in the app lifecycle — drives splash routing.
 enum UserCycle {
   firstOpen, // never seen onboarding

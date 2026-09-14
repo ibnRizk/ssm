@@ -64,15 +64,16 @@ flutter:
     - assets/images/
     - assets/icons/
 
-  # Drop your brand font into assets/fonts/ and uncomment.
-  # fonts:
-  #   - family: AppFont
-  #     fonts:
-  #       - asset: assets/fonts/AppFont-Regular.ttf
-  #         weight: 400
-  #       - asset: assets/fonts/AppFont-Medium.ttf
-  #         weight: 500
-  #       - asset: assets/fonts/AppFont-SemiBold.ttf
-  #         weight: 600
-  #       - asset: assets/fonts/AppFont-Bold.ttf
-  #         weight: 700
+  # Cairo, SIL OFL (see assets/fonts/OFL.txt). Static instances so every
+  # FontWeight maps to a real file — family name lives in AppFonts.primary.
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Cairo-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Cairo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Cairo-Bold.ttf
+          weight: 700

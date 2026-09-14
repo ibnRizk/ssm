@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/enum_extensions.dart';
 import '../../../../core/utils/enums.dart';
-import '../../../../core/utils/values/app_colors.dart';
 import '../../../../core/utils/values/strings.dart';
-import '../../../../core/utils/values/text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../cubit/locale_cubit/locale_cubit.dart';
 
@@ -67,7 +67,7 @@ class _LanguageTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      title: Text(code.displayName, style: TextStyles.medium20()),
+      title: Text(code.displayName, style: AppTextStyles.bodyLarge()),
       trailing: Radio<LanguageCode>(
         value: code,
         activeColor: context.colors.primary,

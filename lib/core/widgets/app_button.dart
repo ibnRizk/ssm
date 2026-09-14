@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../utils/values/app_colors.dart';
-import '../utils/values/text_styles.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_dimens.dart';
+import '../theme/app_text_styles.dart';
 
-/// Primary filled button.
+/// Primary filled button — the orange call to action used across the design.
 ///
 /// [btnText] is plain display text. Translate at the call site
 /// (`Strings.save`) — the source treated it as a translation key by default,
@@ -40,13 +41,13 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color background = color ?? context.colors.primary;
+    final Color background = color ?? context.colors.secondary;
     final Color foreground = textColor ?? Colors.white;
     final bool disabled = onPressed == null || isLoading;
 
     return SizedBox(
       width: width ?? double.infinity,
-      height: (height ?? 48.0).h,
+      height: (height ?? AppSizes.buttonHeight).h,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: background,
@@ -54,7 +55,9 @@ class AppButton extends StatelessWidget {
           disabledBackgroundColor: context.colors.border,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius?.r ?? 12.r),
+            borderRadius: BorderRadius.circular(
+              (borderRadius ?? AppRadius.lg).r,
+            ),
             side: BorderSide(color: borderColor ?? background),
           ),
         ),
@@ -77,7 +80,7 @@ class AppButton extends StatelessWidget {
     final Text label = Text(
       btnText ?? '',
       textAlign: TextAlign.center,
-      style: textStyle ?? TextStyles.semiBold18(color: foreground),
+      style: textStyle ?? AppTextStyles.button(color: foreground),
     );
 
     if (svgAsset == null) return label;

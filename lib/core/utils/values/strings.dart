@@ -66,12 +66,6 @@ abstract class Strings {
   static const String _theme = 'theme';
   static String get theme => _theme.tr;
 
-  static const String _lightMode = 'light_mode';
-  static String get lightMode => _lightMode.tr;
-
-  static const String _darkMode = 'dark_mode';
-  static String get darkMode => _darkMode.tr;
-
   // --- Validation ---
   static const String _fieldRequired = 'field_required';
   static String get fieldRequired => _fieldRequired.tr;

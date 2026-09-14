@@ -18,13 +18,6 @@ extension LanguageCodeExtension on LanguageCode {
   }
 }
 
-extension ThemesExtension on Themes {
-  static Themes fromString(String value) => Themes.values.firstWhere(
-    (Themes element) => element.name == value,
-    orElse: () => Themes.light,
-  );
-}
-
 extension UserTypeExtension on UserType {
   static UserType fromString(String value) => UserType.values.firstWhere(
     (UserType element) => element.name == value,

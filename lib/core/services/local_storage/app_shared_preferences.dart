@@ -8,7 +8,6 @@ import '../../utils/enums.dart';
 abstract class _Keys {
   static const String userId = 'userId';
   static const String user = 'user';
-  static const String appTheme = 'appTheme';
   static const String languageCode = 'languageCode';
   static const String userType = 'userType';
   static const String userCycle = 'userCycle';
@@ -46,13 +45,6 @@ abstract class AppSharedPreferences {
   Future<bool> saveLanguageCode(String value);
 
   Future<bool> removeLanguageCode();
-
-  // --- Theme ---
-  Themes getAppTheme();
-
-  Future<bool> saveAppTheme(Themes theme);
-
-  Future<bool> removeAppTheme();
 
   // --- User type / lifecycle ---
   UserType getUserType();
@@ -117,18 +109,6 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
 
   @override
   Future<bool> removeLanguageCode() => instance.remove(_Keys.languageCode);
-
-  // --- Theme ---
-  @override
-  Themes getAppTheme() =>
-      ThemesExtension.fromString(instance.getString(_Keys.appTheme) ?? '');
-
-  @override
-  Future<bool> saveAppTheme(Themes theme) =>
-      instance.setString(_Keys.appTheme, theme.name);
-
-  @override
-  Future<bool> removeAppTheme() => instance.remove(_Keys.appTheme);
 
   // --- User type / lifecycle ---
   @override

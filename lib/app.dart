@@ -7,10 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'config/env/app_env.dart';
 import 'config/locale/app_localizations_setup.dart';
 import 'config/routes/app_routes.dart';
-import 'config/themes/app_theme.dart';
-import 'config/themes/theme_cubit.dart';
-import 'core/utils/enums.dart';
-import 'core/utils/values/app_colors.dart';
+import 'core/theme/app_theme.dart';
 import 'features/language/language_injection.dart';
 import 'features/language/presentation/cubit/locale_cubit/locale_cubit.dart';
 import 'injection_container.dart';
@@ -50,9 +47,6 @@ class _AppState extends State<App> {
     return MultiBlocProvider(
       providers: <BlocProvider<StateStreamableSource<Object?>>>[
         ...languageBlocs,
-        BlocProvider<ThemeCubit>(
-          create: (_) => ServiceLocator.instance<ThemeCubit>(),
-        ),
       ],
       child: ScreenUtilInit(
         designSize: kDesignSize,
@@ -63,34 +57,19 @@ class _AppState extends State<App> {
             buildWhen: (LocaleState p, LocaleState c) =>
                 p.locale.languageCode != c.locale.languageCode,
             builder: (_, LocaleState localeState) {
-              return BlocBuilder<ThemeCubit, Themes>(
-                builder: (_, Themes theme) {
-                  return MaterialApp.router(
-                    title: AppEnv.appName,
-                    debugShowCheckedModeBanner: false,
-                    theme: lightTheme,
-                    darkTheme: darkTheme,
-                    themeMode: theme == Themes.dark
-                        ? ThemeMode.dark
-                        : ThemeMode.light,
-                    locale: localeState.locale,
-                    supportedLocales: AppLocalizationsSetup.supportedLocales,
-                    localizationsDelegates:
-                        AppLocalizationsSetup.localizationsDelegates,
-                    localeResolutionCallback:
-                        AppLocalizationsSetup.localeResolutionCallback,
-                    routerConfig: AppRoutes.router,
-                    builder: (BuildContext ctx, Widget? child) {
-                      // Keeps the context-free `colors` getter in sync with the
-                      // active theme, replacing the side effect the source had
-                      // inside AppColors.lerp().
-                      ServiceLocator.injectAppColors(
-                        Theme.of(ctx).extension<AppColors>()!,
-                      );
-                      return child ?? const SizedBox.shrink();
-                    },
-                  );
-                },
+              return MaterialApp.router(
+                title: AppEnv.appName,
+                debugShowCheckedModeBanner: false,
+                // Light only — the SSM design has no dark variant.
+                theme: appTheme,
+                themeMode: ThemeMode.light,
+                locale: localeState.locale,
+                supportedLocales: AppLocalizationsSetup.supportedLocales,
+                localizationsDelegates:
+                    AppLocalizationsSetup.localizationsDelegates,
+                localeResolutionCallback:
+                    AppLocalizationsSetup.localeResolutionCallback,
+                routerConfig: AppRoutes.router,
               );
             },
           );

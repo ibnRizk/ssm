@@ -1,63 +1,133 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_base/config/themes/app_theme.dart';
-import 'package:flutter_base/core/utils/values/app_colors.dart';
+import 'package:flutter_base/core/theme/app_colors.dart';
+import 'package:flutter_base/core/theme/app_text_styles.dart';
+import 'package:flutter_base/core/theme/app_theme.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Pumps a minimal app in [mode] and returns the resolved [AppColors].
-Future<AppColors> _resolveColors(WidgetTester tester, ThemeMode mode) async {
-  late AppColors resolved;
+const Size _designSize = Size(390, 844);
+
+/// Pumps a minimal themed app on a design-sized surface — so ScreenUtil's
+/// `.sp` scale is exactly 1 — and returns a context below the theme.
+Future<BuildContext> _pumpApp(WidgetTester tester) async {
+  tester.view.physicalSize = _designSize;
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+
+  late BuildContext resolved;
   await tester.pumpWidget(
     ScreenUtilInit(
-      designSize: const Size(390, 844),
+      designSize: _designSize,
       builder: (_, __) => MaterialApp(
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        themeMode: mode,
+        theme: appTheme,
         home: Builder(
           builder: (BuildContext context) {
-            resolved = context.colors;
+            resolved = context;
             return const SizedBox.shrink();
           },
         ),
       ),
     ),
   );
-  // Theme changes animate; settle so we read the endpoint, not a lerp frame.
   await tester.pumpAndSettle();
   return resolved;
 }
 
 void main() {
   group('AppColors', () {
-    test('lerp endpoints round-trip', () {
-      expect(AppColors.light.lerp(AppColors.dark, 0.0), AppColors.light);
-      expect(AppColors.light.lerp(AppColors.dark, 1.0), AppColors.dark);
+    test('primary is the brand navy', () {
+      expect(AppColors.light.primary, const Color(0xFF173C66));
     });
 
-    test('light and dark use distinct neutrals', () {
-      expect(AppColors.light.surface, isNot(AppColors.dark.surface));
-      expect(AppColors.light.textPrimary, isNot(AppColors.dark.textPrimary));
+    test('secondary is the brand orange', () {
+      expect(AppColors.light.secondary, const Color(0xFFF6921E));
+    });
+
+    test('background is off-white', () {
+      expect(AppColors.light.background, const Color(0xFFF8F9FA));
+    });
+
+    test('surface is pure white', () {
+      expect(AppColors.light.surface, const Color(0xFFFFFFFF));
+    });
+
+    test('lerp endpoints round-trip', () {
+      final AppColors other = AppColors.light.copyWith(
+        primary: const Color(0xFF000000),
+      );
+      expect(AppColors.light.lerp(other, 0.0), AppColors.light);
+      expect(AppColors.light.lerp(other, 1.0), other);
     });
 
     test('value equality holds', () {
       expect(AppColors.light, AppColors.light.copyWith());
       expect(AppColors.light.hashCode, AppColors.light.copyWith().hashCode);
-      expect(AppColors.light, isNot(AppColors.dark));
+      expect(
+        AppColors.light,
+        isNot(AppColors.light.copyWith(accent: const Color(0xFF000000))),
+      );
     });
   });
 
   group('Theme', () {
-    testWidgets('light theme exposes the AppColors extension', (
-      WidgetTester tester,
-    ) async {
-      expect(await _resolveColors(tester, ThemeMode.light), AppColors.light);
+    testWidgets('exposes the AppColors extension', (WidgetTester tester) async {
+      final BuildContext context = await _pumpApp(tester);
+      expect(context.colors, AppColors.light);
     });
 
-    testWidgets('dark theme exposes the AppColors extension', (
+    testWidgets('scaffold uses the background colour', (
       WidgetTester tester,
     ) async {
-      expect(await _resolveColors(tester, ThemeMode.dark), AppColors.dark);
+      final BuildContext context = await _pumpApp(tester);
+      expect(
+        Theme.of(context).scaffoldBackgroundColor,
+        AppColors.light.background,
+      );
+    });
+
+    testWidgets('text renders in Cairo', (WidgetTester tester) async {
+      final BuildContext context = await _pumpApp(tester);
+      expect(Theme.of(context).textTheme.bodyMedium?.fontFamily, 'Cairo');
+    });
+
+    testWidgets('elevated buttons use the orange action colour', (
+      WidgetTester tester,
+    ) async {
+      final BuildContext context = await _pumpApp(tester);
+      final Color? background = Theme.of(
+        context,
+      ).elevatedButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{});
+      expect(background, AppColors.light.secondary);
+    });
+  });
+
+  group('AppTextStyles', () {
+    testWidgets('h1 is 24 bold', (WidgetTester tester) async {
+      await _pumpApp(tester);
+      final TextStyle style = AppTextStyles.h1();
+      expect(style.fontSize, 24);
+      expect(style.fontWeight, FontWeight.w700);
+    });
+
+    testWidgets('h2 is 18 bold', (WidgetTester tester) async {
+      await _pumpApp(tester);
+      final TextStyle style = AppTextStyles.h2();
+      expect(style.fontSize, 18);
+      expect(style.fontWeight, FontWeight.w700);
+    });
+
+    testWidgets('body is 14 medium', (WidgetTester tester) async {
+      await _pumpApp(tester);
+      final TextStyle style = AppTextStyles.body();
+      expect(style.fontSize, 14);
+      expect(style.fontWeight, FontWeight.w500);
+    });
+
+    testWidgets('caption is 12 regular', (WidgetTester tester) async {
+      await _pumpApp(tester);
+      final TextStyle style = AppTextStyles.caption();
+      expect(style.fontSize, 12);
+      expect(style.fontWeight, FontWeight.w400);
     });
   });
 }

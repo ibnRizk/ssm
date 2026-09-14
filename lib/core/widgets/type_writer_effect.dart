@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../injection_container.dart';
-import '../utils/values/text_styles.dart';
+import '../theme/app_text_styles.dart';
 
 class TypeWriterEffect extends StatefulWidget {
   final String text;
@@ -58,7 +58,7 @@ class _TypewriterEffectState extends State<TypeWriterEffect> {
   Widget build(BuildContext context) {
     return Text(
       _displayText,
-      style: TextStyles.medium16(color: widget.color ?? colors.textPrimary),
+      style: AppTextStyles.bodyLarge(color: widget.color ?? colors.textPrimary),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );

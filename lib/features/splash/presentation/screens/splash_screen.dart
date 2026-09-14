@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../config/routes/app_routes.dart';
-import '../../../../core/utils/values/app_colors.dart';
+import '../../../../core/theme/app_colors.dart';
 
 /// Boot screen. Do warm-up work here — session restore, remote config,
 /// force-update check — then route based on the result.

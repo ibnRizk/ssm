@@ -3,8 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../theme/app_colors.dart';
 import 'enums.dart';
-import 'values/app_colors.dart';
 
 /// Shimmer base/highlight, kept here so [AppShimmer] has no colour of its own.
 const Color baseColorShimmer = Color(0xFFE9EBEF);

@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../injection_container.dart';
-import 'values/app_colors.dart';
+import '../theme/app_colors.dart';
 
 extension ImageExtension on num {
   /// Decode an image at the physical pixel size it will actually occupy,
