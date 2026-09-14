@@ -141,6 +141,101 @@ abstract class Strings {
   static const String _authLoginLink = 'auth_login_link';
   static String get authLoginLink => _authLoginLink.tr;
 
+  // --- Home ---
+  static const String _homeGreeting = 'home_greeting';
+  static String get homeGreeting => _homeGreeting.tr;
+
+  static const String _homeQuestion = 'home_question';
+  static String get homeQuestion => _homeQuestion.tr;
+
+  static const String _homeSearchHint = 'home_search_hint';
+  static String get homeSearchHint => _homeSearchHint.tr;
+
+  static const String _homeSubscriptionBadge = 'home_subscription_badge';
+  static String get homeSubscriptionBadge => _homeSubscriptionBadge.tr;
+
+  static const String _homeSubscriptionTitle = 'home_subscription_title';
+  static String get homeSubscriptionTitle => _homeSubscriptionTitle.tr;
+
+  static const String _homeSubscriptionSubtitle = 'home_subscription_subtitle';
+  static String get homeSubscriptionSubtitle => _homeSubscriptionSubtitle.tr;
+
+  static const String _homeCategoriesTitle = 'home_categories_title';
+  static String get homeCategoriesTitle => _homeCategoriesTitle.tr;
+
+  static const String _homeViewAll = 'home_view_all';
+  static String get homeViewAll => _homeViewAll.tr;
+
+  static const String _homeOffersTitle = 'home_offers_title';
+  static String get homeOffersTitle => _homeOffersTitle.tr;
+
+  static const String _homeOfferTitle = 'home_offer_title';
+  static String get homeOfferTitle => _homeOfferTitle.tr;
+
+  static const String _homeOfferSubtitle = 'home_offer_subtitle';
+  static String get homeOfferSubtitle => _homeOfferSubtitle.tr;
+
+  static const String _homeOfferButton = 'home_offer_button';
+  static String get homeOfferButton => _homeOfferButton.tr;
+
+  // --- Parcels ---
+  static const String _parcelsTitle = 'parcels_title';
+  static String get parcelsTitle => _parcelsTitle.tr;
+
+  static const String _parcelsBadgeNew = 'parcels_badge_new';
+  static String get parcelsBadgeNew => _parcelsBadgeNew.tr;
+
+  static const String _parcelsActionTitle = 'parcels_action_title';
+  static String get parcelsActionTitle => _parcelsActionTitle.tr;
+
+  static const String _parcelsActionSubtitle = 'parcels_action_subtitle';
+  static String get parcelsActionSubtitle => _parcelsActionSubtitle.tr;
+
+  static const String _parcelsActionBody = 'parcels_action_body';
+  static String get parcelsActionBody => _parcelsActionBody.tr;
+
+  static const String _parcelsActionButton = 'parcels_action_button';
+  static String get parcelsActionButton => _parcelsActionButton.tr;
+
+  static const String _parcelsTrackingTitle = 'parcels_tracking_title';
+  static String get parcelsTrackingTitle => _parcelsTrackingTitle.tr;
+
+  static const String _parcelsUpdateNow = 'parcels_update_now';
+  static String get parcelsUpdateNow => _parcelsUpdateNow.tr;
+
+  static const String _parcelsStepArrivedTitle = 'parcels_step_arrived_title';
+  static String get parcelsStepArrivedTitle => _parcelsStepArrivedTitle.tr;
+
+  static const String _parcelsStepArrivedSubtitle =
+      'parcels_step_arrived_subtitle';
+  static String get parcelsStepArrivedSubtitle =>
+      _parcelsStepArrivedSubtitle.tr;
+
+  static const String _parcelsStepDeliveringTitle =
+      'parcels_step_delivering_title';
+  static String get parcelsStepDeliveringTitle =>
+      _parcelsStepDeliveringTitle.tr;
+
+  static const String _parcelsStepDeliveringSubtitle =
+      'parcels_step_delivering_subtitle';
+  static String get parcelsStepDeliveringSubtitle =>
+      _parcelsStepDeliveringSubtitle.tr;
+
+  static const String _parcelsStepDeliveredTitle =
+      'parcels_step_delivered_title';
+  static String get parcelsStepDeliveredTitle => _parcelsStepDeliveredTitle.tr;
+
+  static const String _parcelsStepDeliveredSubtitle =
+      'parcels_step_delivered_subtitle';
+  static String get parcelsStepDeliveredSubtitle =>
+      _parcelsStepDeliveredSubtitle.tr;
+
+  static const String _parcelsPendingTitle = 'parcels_pending_title';
+  static String get parcelsPendingTitle => _parcelsPendingTitle.tr;
+
+  static const String _parcelsPendingSubtitle = 'parcels_pending_subtitle';
+  static String get parcelsPendingSubtitle => _parcelsPendingSubtitle.tr;
+
   // --- Validation ---
   static const String _fieldRequired = 'field_required';
   static String get fieldRequired => _fieldRequired.tr;

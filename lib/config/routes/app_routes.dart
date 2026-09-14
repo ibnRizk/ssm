@@ -5,6 +5,8 @@ import '../../core/utils/values/strings.dart';
 import '../../core/widgets/slider_photo.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/parcels/presentation/screens/parcels_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../injection_container.dart';
 import 'main_scaffold.dart';
@@ -68,7 +70,7 @@ abstract class AppRoutes {
               GoRoute(
                 path: home,
                 name: homeName,
-                builder: (_, __) => ShellTabPlaceholder(label: Strings.navHome),
+                builder: (_, __) => const HomeScreen(),
               ),
             ],
           ),
@@ -77,8 +79,9 @@ abstract class AppRoutes {
               GoRoute(
                 path: orders,
                 name: ordersName,
-                builder: (_, __) =>
-                    ShellTabPlaceholder(label: Strings.navOrders),
+                builder: (_, __) => ShellTabPlaceholder(
+                  label: Strings.navOrders,
+                ),
               ),
             ],
           ),
@@ -87,8 +90,7 @@ abstract class AppRoutes {
               GoRoute(
                 path: parcels,
                 name: parcelsName,
-                builder: (_, __) =>
-                    ShellTabPlaceholder(label: Strings.navParcels),
+                builder: (_, __) => const ParcelsScreen(),
               ),
             ],
           ),
@@ -97,8 +99,9 @@ abstract class AppRoutes {
               GoRoute(
                 path: subscriptions,
                 name: subscriptionsName,
-                builder: (_, __) =>
-                    ShellTabPlaceholder(label: Strings.navSubscriptions),
+                builder: (_, __) => ShellTabPlaceholder(
+                  label: Strings.navSubscriptions,
+                ),
               ),
             ],
           ),
@@ -107,8 +110,9 @@ abstract class AppRoutes {
               GoRoute(
                 path: profile,
                 name: profileName,
-                builder: (_, __) =>
-                    ShellTabPlaceholder(label: Strings.navProfile),
+                builder: (_, __) => ShellTabPlaceholder(
+                  label: Strings.navProfile,
+                ),
               ),
             ],
           ),
@@ -120,7 +124,8 @@ abstract class AppRoutes {
         name: photoViewerName,
         builder: (_, GoRouterState state) {
           final Map<String, dynamic> args =
-              (state.extra as Map<String, dynamic>?) ?? <String, dynamic>{};
+              (state.extra as Map<String, dynamic>?) ??
+              <String, dynamic>{};
           return SliderPhotoScreen(
             imagesFiles: args['imagesFiles'],
             images: args['images'],
@@ -130,14 +135,18 @@ abstract class AppRoutes {
         },
       ),
     ],
-    errorBuilder: (_, GoRouterState state) =>
-        Scaffold(body: Center(child: Text('No route found for ${state.uri}'))),
+    errorBuilder: (_, GoRouterState state) => Scaffold(
+      body: Center(
+        child: Text('No route found for ${state.uri}'),
+      ),
+    ),
   );
 
   static String get currentRoute =>
       routesStack.isEmpty ? splash : routesStack.last;
 
-  static void pushRouteToRoutesStack(String route) => routesStack.add(route);
+  static void pushRouteToRoutesStack(String route) =>
+      routesStack.add(route);
 
   static void popRouteFromRoutesStack() {
     if (routesStack.isNotEmpty) routesStack.removeLast();
