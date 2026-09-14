@@ -19,7 +19,7 @@ class OrderTrackingTimelineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
     return Container(
-      decoration: AppDecorations.card(),
+      decoration: AppDecorations.card(c),
       padding: EdgeInsets.all(AppSpacing.md.r),
       child: VerticalTimeline(
         steps: steps,

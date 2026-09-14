@@ -39,7 +39,7 @@ class SubscriptionPackageCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        decoration: AppDecorations.card(),
+        decoration: AppDecorations.card(c),
         padding: EdgeInsets.all(AppSpacing.md.r),
         child: Row(
           children: <Widget>[

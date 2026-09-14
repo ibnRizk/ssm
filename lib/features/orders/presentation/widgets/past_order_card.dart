@@ -38,7 +38,7 @@ class PastOrderCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(AppSpacing.md.r),
-      decoration: AppDecorations.card(),
+      decoration: AppDecorations.card(c),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

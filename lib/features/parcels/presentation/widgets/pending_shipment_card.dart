@@ -19,7 +19,7 @@ class PendingShipmentCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg.r),
       child: Container(
-        decoration: AppDecorations.card(),
+        decoration: AppDecorations.card(c),
         padding: EdgeInsets.all(AppSpacing.md.r),
         child: Row(
           children: <Widget>[

@@ -78,13 +78,34 @@ class HomeCategoriesSection extends StatelessWidget {
           ],
         ),
         SizedBox(height: AppSpacing.md.h),
-        _CategoryRow(items: _placeholderCategories.sublist(0, 3)),
-        SizedBox(height: AppSpacing.sm.h),
-        // Only 2 categories on this row — the design leaves the third slot
-        // (the row's *first*, i.e. rightmost, reading-order position) empty.
-        _CategoryRow(
-          items: _placeholderCategories.sublist(3, 5),
-          leadingGap: true,
+        // A `LayoutBuilder` so both rows share one item width: the first row
+        // sizes its 3 cards with `Expanded`, and the second row's 2 cards
+        // match that width explicitly so `Wrap` can center them as a pair
+        // instead of the old `Expanded` spacer pushing them to one side
+        // (which looked unbalanced under RTL).
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final double gap = AppSpacing.sm.w;
+            final double itemWidth = (constraints.maxWidth - gap * 2) / 3;
+            return Column(
+              children: <Widget>[
+                _CategoryRow(items: _placeholderCategories.sublist(0, 3)),
+                SizedBox(height: AppSpacing.sm.h),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: gap,
+                  children: <Widget>[
+                    for (final _HomeCategory category
+                        in _placeholderCategories.sublist(3, 5))
+                      SizedBox(
+                        width: itemWidth,
+                        child: _CategoryCard(category: category),
+                      ),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -93,18 +114,13 @@ class HomeCategoriesSection extends StatelessWidget {
 
 class _CategoryRow extends StatelessWidget {
   final List<_HomeCategory> items;
-  final bool leadingGap;
 
-  const _CategoryRow({required this.items, this.leadingGap = false});
+  const _CategoryRow({required this.items});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        if (leadingGap) ...<Widget>[
-          const Expanded(child: SizedBox()),
-          SizedBox(width: AppSpacing.sm.w),
-        ],
         for (int i = 0; i < items.length; i++) ...<Widget>[
           if (i > 0) SizedBox(width: AppSpacing.sm.w),
           Expanded(child: _CategoryCard(category: items[i])),
@@ -134,7 +150,7 @@ class _CategoryCard extends StatelessWidget {
                 color: c.successLight,
                 borderRadius: BorderRadius.circular(AppRadius.lg.r),
               )
-            : AppDecorations.card(),
+            : AppDecorations.card(c),
         child: Column(
           children: <Widget>[
             Container(

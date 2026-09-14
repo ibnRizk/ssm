@@ -56,7 +56,7 @@ class AccountScreen extends StatelessWidget {
               onTap: () {},
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.md.h),
-                decoration: AppDecorations.card(),
+                decoration: AppDecorations.card(c),
                 child: Center(
                   child: Text(
                     Strings.accountLogoutButton,

@@ -42,7 +42,7 @@ class RestaurantProductCard extends StatelessWidget {
     final AppColors c = context.colors;
     return Container(
       width: double.infinity,
-      decoration: AppDecorations.card(),
+      decoration: AppDecorations.card(c),
       padding: EdgeInsets.all(AppSpacing.md.r),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,

@@ -40,7 +40,7 @@ class HomeOffersSection extends StatelessWidget {
         ),
         SizedBox(height: AppSpacing.md.h),
         Container(
-          decoration: AppDecorations.card(),
+          decoration: AppDecorations.card(c),
           padding: EdgeInsets.all(AppSpacing.md.r),
           child: Row(
             children: <Widget>[

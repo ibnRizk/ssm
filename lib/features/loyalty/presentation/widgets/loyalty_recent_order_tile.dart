@@ -17,7 +17,7 @@ class LoyaltyRecentOrderTile extends StatelessWidget {
     final AppColors c = context.colors;
     return Container(
       width: double.infinity,
-      decoration: AppDecorations.card(),
+      decoration: AppDecorations.card(c),
       padding: EdgeInsets.symmetric(vertical: AppSpacing.md.h),
       child: Column(
         children: <Widget>[

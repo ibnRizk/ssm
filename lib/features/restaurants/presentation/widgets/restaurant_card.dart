@@ -45,7 +45,7 @@ class RestaurantCard extends StatelessWidget {
         children: <Widget>[
           Container(
             width: double.infinity,
-            decoration: AppDecorations.card(),
+            decoration: AppDecorations.card(c),
             padding: EdgeInsets.all(AppSpacing.md.r),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,

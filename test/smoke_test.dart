@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/core/theme/app_colors.dart';
+import 'package:flutter_base/core/theme/app_decorations.dart';
 import 'package:flutter_base/core/theme/app_text_styles.dart';
 import 'package:flutter_base/core/theme/app_theme.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -66,6 +67,31 @@ void main() {
         AppColors.light,
         isNot(AppColors.light.copyWith(accent: const Color(0xFF000000))),
       );
+    });
+  });
+
+  group('AppDecorations', () {
+    // Regression test: `card()` used to hardcode `Palette.surface` (white)
+    // regardless of theme, so every card built from it stayed white in dark
+    // mode and swallowed the light text on top of it.
+    testWidgets("card defaults to the given theme's surface colour", (
+      WidgetTester tester,
+    ) async {
+      await _pumpApp(tester);
+      expect(AppDecorations.card(AppColors.light).color, AppColors.light.surface);
+      expect(AppDecorations.card(AppColors.dark).color, AppColors.dark.surface);
+      expect(
+        AppDecorations.card(AppColors.dark).color,
+        isNot(AppColors.light.surface),
+      );
+    });
+
+    testWidgets('card respects an explicit colour override', (
+      WidgetTester tester,
+    ) async {
+      await _pumpApp(tester);
+      const Color override = Color(0xFF123456);
+      expect(AppDecorations.card(AppColors.dark, color: override).color, override);
     });
   });
 

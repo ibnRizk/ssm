@@ -23,12 +23,17 @@ abstract class AppShadows {
 }
 
 abstract class AppDecorations {
-  /// White rounded card with [AppShadows.card]. Use for `Container` /
-  /// `DecoratedBox` cards — Material's `Card` can't render a blurred shadow.
-  static BoxDecoration card({Color? color, double radius = AppRadius.lg}) =>
-      BoxDecoration(
-        color: color ?? Palette.surface,
-        borderRadius: BorderRadius.circular(radius.r),
-        boxShadow: AppShadows.card,
-      );
+  /// Rounded card with [AppShadows.card], surfaced in the current theme's
+  /// card colour by default (`c.surface` — white in light mode, dark gray in
+  /// dark mode). Use for `Container` / `DecoratedBox` cards — Material's
+  /// `Card` can't render a blurred shadow.
+  static BoxDecoration card(
+    AppColors c, {
+    Color? color,
+    double radius = AppRadius.lg,
+  }) => BoxDecoration(
+    color: color ?? c.surface,
+    borderRadius: BorderRadius.circular(radius.r),
+    boxShadow: AppShadows.card,
+  );
 }

@@ -120,7 +120,7 @@ class AccountSettingsSection extends StatelessWidget {
         ),
         SizedBox(height: AppSpacing.md.h),
         Container(
-          decoration: AppDecorations.card(),
+          decoration: AppDecorations.card(c),
           child: Column(
             children: <Widget>[
               for (int i = 0; i < tiles.length; i++) ...<Widget>[
