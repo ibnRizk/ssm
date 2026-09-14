@@ -7,8 +7,11 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/enum_extensions.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../../../../core/widgets/show_modal_bottom_sheet.dart';
 import 'account_settings_tile.dart';
+import 'language_selector_sheet.dart';
 
 /// Placeholder progress, mirroring `LoyaltyScreen`'s own placeholder numbers
 /// so the "70%" badge here matches what Loyalty shows once opened.
@@ -77,6 +80,17 @@ class AccountSettingsSection extends StatelessWidget {
         subtitle: Strings.accountHelpSubtitle,
         // TODO: open help & support once it exists.
         onTap: () {},
+      ),
+      AccountSettingsTile(
+        icon: Icons.language,
+        title: Strings.language,
+        subtitle: LanguageCodeExtension.fromString(
+          Localizations.localeOf(context).languageCode,
+        ).displayName,
+        onTap: () => showAppModalBottomSheet(
+          context: context,
+          child: const LanguageSelectorSheet(),
+        ),
       ),
     ];
 

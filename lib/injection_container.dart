@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'config/locale/app_localizations.dart';
+import 'config/locale/locale_cubit.dart';
 import 'core/api/app_interceptors.dart';
 import 'core/api/auth_event_bus.dart';
 import 'core/api/dio_consumer.dart';
@@ -35,6 +36,7 @@ abstract class ServiceLocator {
     _injectDioConsumer();
     injectAppColors(AppColors.light);
     injectRoutesStackSingleton(<String>[]);
+    _injectLocaleCubit();
 
     // --- Features ---
     await initHomeFeatureInjection();
@@ -60,6 +62,10 @@ abstract class ServiceLocator {
       () => AppSecureStorageImpl(instance: storage),
     );
   }
+
+  static void _injectLocaleCubit() => instance.registerLazySingleton<LocaleCubit>(
+    () => LocaleCubit(sharedPreferences: instance()),
+  );
 
   static void _injectDioConsumer() => instance
       .registerLazySingleton<DioConsumer>(() => DioConsumerImpl(client: Dio()));
@@ -120,6 +126,8 @@ AppColors get colors => ServiceLocator.instance<AppColors>();
 
 AppLocalizations get appLocalizations =>
     ServiceLocator.instance<AppLocalizations>();
+
+LocaleCubit get localeCubit => ServiceLocator.instance<LocaleCubit>();
 
 List<String> get routesStack =>
     ServiceLocator.instance<List<String>>(instanceName: 'routesStack');

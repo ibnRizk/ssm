@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'config/env/app_env.dart';
 import 'config/locale/app_localizations_setup.dart';
+import 'config/locale/locale_cubit.dart';
 import 'config/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'injection_container.dart';
@@ -46,17 +48,36 @@ class _AppState extends State<App> {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, __) {
-        return MaterialApp.router(
-          title: AppEnv.appName,
-          debugShowCheckedModeBanner: false,
-          // Light only — the SSM design has no dark variant.
-          theme: appTheme,
-          themeMode: ThemeMode.light,
-          supportedLocales: AppLocalizationsSetup.supportedLocales,
-          localizationsDelegates: AppLocalizationsSetup.localizationsDelegates,
-          localeResolutionCallback:
-              AppLocalizationsSetup.localeResolutionCallback,
-          routerConfig: AppRoutes.router,
+        return BlocProvider<LocaleCubit>.value(
+          value: localeCubit,
+          child: BlocBuilder<LocaleCubit, Locale?>(
+            builder: (BuildContext context, Locale? locale) {
+              return MaterialApp.router(
+                // `'key'.tr` reads a global singleton, not `context` — plain
+                // const widgets deep in the tree won't re-run `build()` just
+                // because `locale` changed above them. Keying on the locale
+                // forces Flutter to remount the whole visual subtree so text
+                // actually refreshes; `AppRoutes.router` is a singleton, so
+                // navigation position survives the remount.
+                key: ValueKey<Locale?>(locale),
+                title: AppEnv.appName,
+                debugShowCheckedModeBanner: false,
+                // Light only — the SSM design has no dark variant.
+                theme: appTheme,
+                themeMode: ThemeMode.light,
+                // Null until the user explicitly picks a language in the
+                // Account tab — `localeResolutionCallback` below then keeps
+                // following the device locale, same as before that choice.
+                locale: locale,
+                supportedLocales: AppLocalizationsSetup.supportedLocales,
+                localizationsDelegates:
+                    AppLocalizationsSetup.localizationsDelegates,
+                localeResolutionCallback:
+                    AppLocalizationsSetup.localeResolutionCallback,
+                routerConfig: AppRoutes.router,
+              );
+            },
+          ),
         );
       },
     );
