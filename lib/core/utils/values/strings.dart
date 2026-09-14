@@ -66,6 +66,81 @@ abstract class Strings {
   static const String _theme = 'theme';
   static String get theme => _theme.tr;
 
+  // --- Bottom navigation ---
+  static const String _navHome = 'nav_home';
+  static String get navHome => _navHome.tr;
+
+  static const String _navOrders = 'nav_orders';
+  static String get navOrders => _navOrders.tr;
+
+  static const String _navParcels = 'nav_parcels';
+  static String get navParcels => _navParcels.tr;
+
+  static const String _navSubscriptions = 'nav_subscriptions';
+  static String get navSubscriptions => _navSubscriptions.tr;
+
+  static const String _navProfile = 'nav_profile';
+  static String get navProfile => _navProfile.tr;
+
+  // --- Splash ---
+  static const String _splashTagline = 'splash_tagline';
+  static String get splashTagline => _splashTagline.tr;
+
+  static const String _splashSubtitle = 'splash_subtitle';
+  static String get splashSubtitle => _splashSubtitle.tr;
+
+  static const String _splashLoading = 'splash_loading';
+  static String get splashLoading => _splashLoading.tr;
+
+  // --- Auth ---
+  static const String _authWelcomeTitle = 'auth_welcome_title';
+  static String get authWelcomeTitle => _authWelcomeTitle.tr;
+
+  static const String _authWelcomeSubtitle = 'auth_welcome_subtitle';
+  static String get authWelcomeSubtitle => _authWelcomeSubtitle.tr;
+
+  static const String _authPhoneLabel = 'auth_phone_label';
+  static String get authPhoneLabel => _authPhoneLabel.tr;
+
+  static const String _authContinue = 'auth_continue';
+  static String get authContinue => _authContinue.tr;
+
+  static const String _authNoAccount = 'auth_no_account';
+  static String get authNoAccount => _authNoAccount.tr;
+
+  static const String _authCreateAccountLink = 'auth_create_account_link';
+  static String get authCreateAccountLink => _authCreateAccountLink.tr;
+
+  static const String _authTermsNotice = 'auth_terms_notice';
+  static String get authTermsNotice => _authTermsNotice.tr;
+
+  static const String _authRegisterTitle = 'auth_register_title';
+  static String get authRegisterTitle => _authRegisterTitle.tr;
+
+  static const String _authRegisterSubtitle = 'auth_register_subtitle';
+  static String get authRegisterSubtitle => _authRegisterSubtitle.tr;
+
+  static const String _authFullNameLabel = 'auth_full_name_label';
+  static String get authFullNameLabel => _authFullNameLabel.tr;
+
+  static const String _authFullNameHint = 'auth_full_name_hint';
+  static String get authFullNameHint => _authFullNameHint.tr;
+
+  static const String _authRegionLabel = 'auth_region_label';
+  static String get authRegionLabel => _authRegionLabel.tr;
+
+  static const String _authRegionHint = 'auth_region_hint';
+  static String get authRegionHint => _authRegionHint.tr;
+
+  static const String _authRegisterButton = 'auth_register_button';
+  static String get authRegisterButton => _authRegisterButton.tr;
+
+  static const String _authHaveAccount = 'auth_have_account';
+  static String get authHaveAccount => _authHaveAccount.tr;
+
+  static const String _authLoginLink = 'auth_login_link';
+  static String get authLoginLink => _authLoginLink.tr;
+
   // --- Validation ---
   static const String _fieldRequired = 'field_required';
   static String get fieldRequired => _fieldRequired.tr;

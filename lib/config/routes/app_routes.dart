@@ -1,24 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/utils/values/strings.dart';
 import '../../core/widgets/slider_photo.dart';
-import '../../features/home/presentation/pages/home_screen.dart';
-import '../../features/language/presentation/screens/change_language.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../injection_container.dart';
+import 'main_scaffold.dart';
 import 'navigator_observer.dart';
 
 abstract class AppRoutes {
   // --- Paths (for context.go / context.push) ---
   static const String splash = '/';
+  static const String login = '/login';
+  static const String register = '/register';
   static const String home = '/home';
-  static const String changeLanguage = '/change-language';
+  static const String orders = '/orders';
+  static const String parcels = '/parcels';
+  static const String subscriptions = '/subscriptions';
+  static const String profile = '/profile';
   static const String photoViewer = '/photo-viewer';
 
   // --- Names (for context.goNamed / context.pushNamed) ---
   static const String splashName = 'splash';
+  static const String loginName = 'login';
+  static const String registerName = 'register';
   static const String homeName = 'home';
-  static const String changeLanguageName = 'changeLanguage';
+  static const String ordersName = 'orders';
+  static const String parcelsName = 'parcels';
+  static const String subscriptionsName = 'subscriptions';
+  static const String profileName = 'profile';
   static const String photoViewerName = 'photoViewer';
 
   static final GoRouter router = GoRouter(
@@ -32,15 +44,77 @@ abstract class AppRoutes {
         builder: (_, __) => const SplashScreen(),
       ),
       GoRoute(
-        path: home,
-        name: homeName,
-        builder: (_, __) => const HomeScreen(),
+        path: login,
+        name: loginName,
+        builder: (_, __) => const LoginScreen(),
       ),
       GoRoute(
-        path: changeLanguage,
-        name: changeLanguageName,
-        builder: (_, __) => const ChangeLanguage(),
+        path: register,
+        name: registerName,
+        builder: (_, __) => const RegisterScreen(),
       ),
+
+      // Bottom-nav shell — each branch below keeps its own navigation stack
+      // (see MainScaffold). Push further screens *inside* a tab (e.g. order
+      // details) as children of that branch's GoRoute; routes outside the
+      // shell — auth, full-screen flows — belong at the top level, like
+      // `photoViewer` below.
+      StatefulShellRoute.indexedStack(
+        builder: (_, __, StatefulNavigationShell shell) =>
+            MainScaffold(navigationShell: shell),
+        branches: <StatefulShellBranch>[
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: home,
+                name: homeName,
+                builder: (_, __) => ShellTabPlaceholder(label: Strings.navHome),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: orders,
+                name: ordersName,
+                builder: (_, __) =>
+                    ShellTabPlaceholder(label: Strings.navOrders),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: parcels,
+                name: parcelsName,
+                builder: (_, __) =>
+                    ShellTabPlaceholder(label: Strings.navParcels),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: subscriptions,
+                name: subscriptionsName,
+                builder: (_, __) =>
+                    ShellTabPlaceholder(label: Strings.navSubscriptions),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: profile,
+                name: profileName,
+                builder: (_, __) =>
+                    ShellTabPlaceholder(label: Strings.navProfile),
+              ),
+            ],
+          ),
+        ],
+      ),
+
       GoRoute(
         path: photoViewer,
         name: photoViewerName,

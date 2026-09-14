@@ -11,7 +11,6 @@ import 'core/services/local_storage/app_secure_storage.dart';
 import 'core/services/local_storage/app_shared_preferences.dart';
 import 'core/theme/app_colors.dart';
 import 'features/home/home_injection.dart';
-import 'features/language/language_injection.dart';
 
 /// Composition root.
 ///
@@ -37,7 +36,6 @@ abstract class ServiceLocator {
     injectRoutesStackSingleton(<String>[]);
 
     // --- Features ---
-    await initLanguageFeatureInjection();
     await initHomeFeatureInjection();
     // Register new features here.
   }

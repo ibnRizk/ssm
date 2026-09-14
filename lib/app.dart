@@ -1,15 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'config/env/app_env.dart';
 import 'config/locale/app_localizations_setup.dart';
 import 'config/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
-import 'features/language/language_injection.dart';
-import 'features/language/presentation/cubit/locale_cubit/locale_cubit.dart';
 import 'injection_container.dart';
 
 /// Set this to your Figma frame size. Every `.w/.h/.sp/.r` is relative to it.
@@ -44,37 +41,24 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: <BlocProvider<StateStreamableSource<Object?>>>[
-        ...languageBlocs,
-      ],
-      child: ScreenUtilInit(
-        designSize: kDesignSize,
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (_, __) {
-          return BlocBuilder<LocaleCubit, LocaleState>(
-            buildWhen: (LocaleState p, LocaleState c) =>
-                p.locale.languageCode != c.locale.languageCode,
-            builder: (_, LocaleState localeState) {
-              return MaterialApp.router(
-                title: AppEnv.appName,
-                debugShowCheckedModeBanner: false,
-                // Light only — the SSM design has no dark variant.
-                theme: appTheme,
-                themeMode: ThemeMode.light,
-                locale: localeState.locale,
-                supportedLocales: AppLocalizationsSetup.supportedLocales,
-                localizationsDelegates:
-                    AppLocalizationsSetup.localizationsDelegates,
-                localeResolutionCallback:
-                    AppLocalizationsSetup.localeResolutionCallback,
-                routerConfig: AppRoutes.router,
-              );
-            },
-          );
-        },
-      ),
+    return ScreenUtilInit(
+      designSize: kDesignSize,
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (_, __) {
+        return MaterialApp.router(
+          title: AppEnv.appName,
+          debugShowCheckedModeBanner: false,
+          // Light only — the SSM design has no dark variant.
+          theme: appTheme,
+          themeMode: ThemeMode.light,
+          supportedLocales: AppLocalizationsSetup.supportedLocales,
+          localizationsDelegates: AppLocalizationsSetup.localizationsDelegates,
+          localeResolutionCallback:
+              AppLocalizationsSetup.localeResolutionCallback,
+          routerConfig: AppRoutes.router,
+        );
+      },
     );
   }
 }
