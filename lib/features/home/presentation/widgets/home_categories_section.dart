@@ -53,16 +53,20 @@ class HomeCategoriesSection extends StatelessWidget {
               ? state.categories
               : const <CatalogCategory>[],
           builder: (BuildContext context, List<CatalogCategory> categories) {
+            final String languageCode = Localizations.localeOf(
+              context,
+            ).languageCode;
             final List<Widget> cards = <Widget>[
               for (final CatalogCategory category in categories.take(
                 _maxCategories,
               ))
                 _CategoryCard(
-                  label: category.name,
+                  label: category.nameFor(languageCode),
                   imageUrl: category.imageUrl,
-                  // No category filter for stores exists in the API yet,
-                  // so every category opens the zone's store list.
-                  onTap: () => context.push(AppRoutes.restaurants),
+                  onTap: () => context.push(
+                    AppRoutes.categoryStoresPath(category.id),
+                    extra: category,
+                  ),
                 ),
               _CategoryCard(
                 label: Strings.homePharmacyCategory,

@@ -18,6 +18,13 @@ abstract class CatalogRepository {
     int pageSize = catalogPageSize,
   });
 
+  /// The stores listed under the category [categoryId]. [page] is 1-based.
+  Future<Either<Failure, CatalogPage<Store>>> getCategoryStores({
+    required int categoryId,
+    required int page,
+    int pageSize = catalogPageSize,
+  });
+
   /// Stores whose name matches [query]. [page] is 1-based.
   Future<Either<Failure, CatalogPage<Store>>> searchStores({
     required String query,

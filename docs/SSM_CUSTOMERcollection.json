@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "6140e7d3-fb7b-470f-9e51-d135801c328b",
+    "_postman_id": "e4661bf5-df17-48fc-9bd2-33ed27a09244",
     "name": "SSM Customer API",
     "description": "SSM mobile API for the **Customer** app. Auth: Passport bearer token from `/auth/sign-up` or `/auth/login`. Import together with `SSM_LOCAL.postman_environment.json`. See docs/SSM_CUSTOMER_API_GUIDE.md.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1734,7 +1734,7 @@
           ]
         },
         {
-          "name": "Categories",
+          "name": "Store categories",
           "request": {
             "method": "GET",
             "header": [
@@ -1769,7 +1769,7 @@
               ],
               "query": []
             },
-            "description": "",
+            "description": "SSM store types (Restaurant, Supermarket, Pharmacy, etc.). Select one, then call Stores in selected category.",
             "auth": {
               "type": "noauth"
             }
@@ -1786,14 +1786,96 @@
                   "try { json = pm.response.json(); } catch (e) { json = null; }",
                   "pm.test('Status is ' + EXPECTED.join(' or '), function () { pm.expect(EXPECTED).to.include(pm.response.code); });",
                   "pm.test('No server error', function () { pm.expect(pm.response.code).to.be.below(500); });",
-                  "pm.test('Response is JSON', function () { pm.expect(json).to.not.equal(null); });"
+                  "pm.test('Response is JSON', function () { pm.expect(json).to.not.equal(null); });",
+                  "if (EXPECTED.includes(pm.response.code)) {",
+                  "  { const v = (function () { try { return json[0].id; } catch (e) { return undefined; } })();",
+                  "    pm.test('Store category id returned', function () { pm.expect(v, 'store_category_id').to.not.equal(undefined); pm.expect(v).to.not.equal(null); });",
+                  "    if (v !== undefined && v !== null) { pm.environment.set('store_category_id', String(v)); } }",
+                  "  pm.test('Store categories returned', function () { pm.expect(json).to.be.an('array').that.is.not.empty; });",
+                  "}"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Stores in zone",
+          "name": "Stores in selected category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-localization",
+                "value": "en",
+                "type": "text"
+              },
+              {
+                "key": "zoneId",
+                "value": "[{{zone_id}}]",
+                "type": "text"
+              },
+              {
+                "key": "moduleId",
+                "value": "{{module_id}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/categories/stores/{{store_category_id}}?offset=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "categories",
+                "stores",
+                "{{store_category_id}}"
+              ],
+              "query": [
+                {
+                  "key": "offset",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Returns stores whose `ssm_store_category_id` matches the category selected from `GET /categories`.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const EXPECTED = [200];",
+                  "let json = null;",
+                  "try { json = pm.response.json(); } catch (e) { json = null; }",
+                  "pm.test('Status is ' + EXPECTED.join(' or '), function () { pm.expect(EXPECTED).to.include(pm.response.code); });",
+                  "pm.test('No server error', function () { pm.expect(pm.response.code).to.be.below(500); });",
+                  "pm.test('Response is JSON', function () { pm.expect(json).to.not.equal(null); });",
+                  "if (EXPECTED.includes(pm.response.code)) {",
+                  "  { const v = (function () { try { return json.stores[0].id; } catch (e) { return undefined; } })();",
+                  "    pm.test('Store id returned', function () { pm.expect(v, 'store_id').to.not.equal(undefined); pm.expect(v).to.not.equal(null); });",
+                  "    if (v !== undefined && v !== null) { pm.environment.set('store_id', String(v)); } }",
+                  "  pm.test('Selected category contains stores', function () { pm.expect(json.stores).to.be.an('array').that.is.not.empty; pm.expect(json.total_size).to.be.above(0); });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "All stores in zone",
           "request": {
             "method": "GET",
             "header": [
@@ -1839,7 +1921,7 @@
                 }
               ]
             },
-            "description": "",
+            "description": "Unfiltered store list. To open a category in the mobile app, use Stores in selected category instead.",
             "auth": {
               "type": "noauth"
             }
@@ -1858,9 +1940,6 @@
                   "pm.test('No server error', function () { pm.expect(pm.response.code).to.be.below(500); });",
                   "pm.test('Response is JSON', function () { pm.expect(json).to.not.equal(null); });",
                   "if (EXPECTED.includes(pm.response.code)) {",
-                  "  { const v = (function () { try { return json.stores[0].id; } catch (e) { return undefined; } })();",
-                  "    pm.test('Store id returned', function () { pm.expect(v, 'store_id').to.not.equal(undefined); pm.expect(v).to.not.equal(null); });",
-                  "    if (v !== undefined && v !== null) { pm.environment.set('store_id', String(v)); } }",
                   "  pm.test('Paged store list', function () { pm.expect(json.stores).to.be.an('array').that.is.not.empty; pm.expect(json).to.have.property('total_size'); });",
                   "}"
                 ]
@@ -2084,7 +2163,7 @@
           ]
         },
         {
-          "name": "Latest items of a store",
+          "name": "Products of selected store",
           "request": {
             "method": "GET",
             "header": [
@@ -2110,7 +2189,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/items/latest?category_id=0&store_id={{store_id}}&offset=1&limit=10&type=all",
+              "raw": "{{base_url}}/items/latest?category_id=0&store_id={{store_id}}&offset=1&limit=50&type=all",
               "host": [
                 "{{base_url}}"
               ],
@@ -2133,7 +2212,7 @@
                 },
                 {
                   "key": "limit",
-                  "value": "10"
+                  "value": "50"
                 },
                 {
                   "key": "type",
@@ -2141,7 +2220,7 @@
                 }
               ]
             },
-            "description": "",
+            "description": "Returns the products belonging to the store selected by Stores in selected category.",
             "auth": {
               "type": "noauth"
             }
@@ -2158,7 +2237,13 @@
                   "try { json = pm.response.json(); } catch (e) { json = null; }",
                   "pm.test('Status is ' + EXPECTED.join(' or '), function () { pm.expect(EXPECTED).to.include(pm.response.code); });",
                   "pm.test('No server error', function () { pm.expect(pm.response.code).to.be.below(500); });",
-                  "pm.test('Response is JSON', function () { pm.expect(json).to.not.equal(null); });"
+                  "pm.test('Response is JSON', function () { pm.expect(json).to.not.equal(null); });",
+                  "if (EXPECTED.includes(pm.response.code)) {",
+                  "  { const v = (function () { try { return json.products[0].id; } catch (e) { return undefined; } })();",
+                  "    pm.test('Item id returned', function () { pm.expect(v, 'item_id').to.not.equal(undefined); pm.expect(v).to.not.equal(null); });",
+                  "    if (v !== undefined && v !== null) { pm.environment.set('item_id', String(v)); } }",
+                  "  pm.test('Selected store contains products', function () { pm.expect(json.products).to.be.an('array').that.is.not.empty; pm.expect(json.total_size).to.be.above(0); });",
+                  "}"
                 ]
               }
             }

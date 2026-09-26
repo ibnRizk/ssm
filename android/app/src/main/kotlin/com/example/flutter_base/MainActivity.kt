@@ -1,4 +1,4 @@
-package com.example.flutter_base
+package com.ssm.user
 
 import io.flutter.embedding.android.FlutterActivity
 

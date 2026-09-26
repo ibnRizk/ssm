@@ -43,6 +43,10 @@ abstract class ApiEndpoints {
   // --- Catalog (need the `zoneId` / `moduleId` headers) ---
   static const String categories = '$_v1/categories';
 
+  /// The stores of one store type; paged like [allStores].
+  static String categoryStores(int categoryId) =>
+      '$categories/stores/$categoryId';
+
   /// `offset` is a 1-based page number, not a row offset.
   static const String allStores = '$_v1/stores/get-stores/all';
   static const String searchStores = '$_v1/stores/search';

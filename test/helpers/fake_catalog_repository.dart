@@ -14,9 +14,10 @@ class PendingCall<T> {
   final String method;
   final int page;
   final String? query;
+  final int? categoryId;
   final Completer<Either<Failure, T>> completer = Completer();
 
-  PendingCall(this.method, {this.page = 1, this.query});
+  PendingCall(this.method, {this.page = 1, this.query, this.categoryId});
 
   void succeed(T value) => completer.complete(Right<Failure, T>(value));
 
@@ -46,6 +47,21 @@ class FakeCatalogRepository implements CatalogRepository {
     final PendingCall<CatalogPage<Store>> call = PendingCall(
       'getStores',
       page: page,
+    );
+    storeCalls.add(call);
+    return call.completer.future;
+  }
+
+  @override
+  Future<Either<Failure, CatalogPage<Store>>> getCategoryStores({
+    required int categoryId,
+    required int page,
+    int pageSize = catalogPageSize,
+  }) {
+    final PendingCall<CatalogPage<Store>> call = PendingCall(
+      'getCategoryStores',
+      page: page,
+      categoryId: categoryId,
     );
     storeCalls.add(call);
     return call.completer.future;

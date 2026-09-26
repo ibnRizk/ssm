@@ -22,7 +22,7 @@ class RestaurantInfoCard extends StatelessWidget {
     final AppColors c = context.colors;
     final bool? isOpen = store.isOpen;
     final List<String> facts = <String>[
-      if (store.deliveryTime case final String time) time,
+      if (store.deliveryTimeLabel case final String time) time,
       if (store.deliveryFeeLabel case final String fee) fee,
     ];
     return Container(

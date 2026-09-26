@@ -11,6 +11,7 @@ import '../../../../core/utils/failure_message.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/error_text.dart';
 import '../../../../core/widgets/load_more_footer.dart';
+import '../../../catalog/domain/entities/catalog_category.dart';
 import '../../../catalog/presentation/widgets/store_card.dart';
 import '../cubit/stores_cubit.dart';
 import '../cubit/stores_state.dart';
@@ -20,9 +21,14 @@ import '../widgets/stores_search_field.dart';
 
 /// Stores list, pushed inside the Home tab's branch — the bottom navigation
 /// bar and its Scaffold live in [MainScaffold]. Expects a [StoresCubit]
-/// above it (provided at the route).
+/// above it (provided at the route); a category-scoped cubit lists that
+/// category's stores, without the zone-wide search.
 class RestaurantsScreen extends StatelessWidget {
-  const RestaurantsScreen({super.key});
+  /// The category tapped, for the title. Null for the unscoped list — or
+  /// a scoped one reached without it, which falls back to the generic title.
+  final CatalogCategory? category;
+
+  const RestaurantsScreen({super.key, this.category});
 
   /// How close to the end of the list the next page starts loading.
   static const double _loadMoreThreshold = 400;
@@ -30,6 +36,10 @@ class RestaurantsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
+    final bool scoped = context.read<StoresCubit>().categoryId != null;
+    final String? title = category?.nameFor(
+      Localizations.localeOf(context).languageCode,
+    );
     return SafeArea(
       bottom: false,
       child: RefreshIndicator(
@@ -59,6 +69,7 @@ class RestaurantsScreen extends StatelessWidget {
                           state is StoresLoaded ? state.totalSize : null,
                       builder: (BuildContext context, int? total) =>
                           RestaurantsHeader(
+                            title: title,
                             subtitle: total == null
                                 ? null
                                 : Strings.restaurantsSubtitle(total),
@@ -66,11 +77,13 @@ class RestaurantsScreen extends StatelessWidget {
                           ),
                     ),
                     SizedBox(height: AppSpacing.lg.h),
-                    StoresSearchField(
-                      onSearch: (String query) =>
-                          context.read<StoresCubit>().search(query),
-                    ),
-                    SizedBox(height: AppSpacing.md.h),
+                    if (!scoped) ...<Widget>[
+                      StoresSearchField(
+                        onSearch: (String query) =>
+                            context.read<StoresCubit>().search(query),
+                      ),
+                      SizedBox(height: AppSpacing.md.h),
+                    ],
                     const RestaurantFilterChips(),
                     SizedBox(height: AppSpacing.xl.h),
                     Text(
@@ -87,7 +100,7 @@ class RestaurantsScreen extends StatelessWidget {
                   AppSpacing.screen.w,
                   AppSpacing.xxl.h,
                 ),
-                sliver: const _StoresList(),
+                sliver: _StoresList(scoped: scoped),
               ),
             ],
           ),
@@ -98,7 +111,10 @@ class RestaurantsScreen extends StatelessWidget {
 }
 
 class _StoresList extends StatelessWidget {
-  const _StoresList();
+  /// Whether it lists one category's stores, for the empty-list wording.
+  final bool scoped;
+
+  const _StoresList({required this.scoped});
 
   @override
   Widget build(BuildContext context) {
@@ -110,9 +126,11 @@ class _StoresList extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.only(top: AppSpacing.xl.h),
               child: Text(
-                query.isEmpty
-                    ? Strings.homeStoresEmpty
-                    : Strings.restaurantsNoSearchResults,
+                switch ((query.isEmpty, scoped)) {
+                  (false, _) => Strings.restaurantsNoSearchResults,
+                  (true, true) => Strings.categoryStoresEmpty,
+                  (true, false) => Strings.homeStoresEmpty,
+                },
                 style: AppTextStyles.body(color: c.textSecondary),
                 textAlign: TextAlign.center,
               ),

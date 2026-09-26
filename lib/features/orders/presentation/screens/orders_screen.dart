@@ -61,11 +61,7 @@ class OrdersScreen extends StatelessWidget {
                   ),
                   sliver: SliverList.list(
                     children: <Widget>[
-                      BlocSelector<OrdersCubit, OrdersState, int?>(
-                        selector: (OrdersState state) => state.totalOrders,
-                        builder: (_, int? total) =>
-                            OrdersHeader(totalOrders: total),
-                      ),
+                      const OrdersHeader(),
                       SizedBox(height: AppSpacing.lg.h),
                       BlocSelector<OrdersCubit, OrdersState, OrdersFilter>(
                         selector: (OrdersState state) => state.filter,

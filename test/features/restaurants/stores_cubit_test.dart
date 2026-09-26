@@ -161,6 +161,70 @@ void main() {
     expect(_ids(cubit.state), <int>[7, 8]);
   });
 
+  group('scoped to a category', () {
+    late StoresCubit scoped;
+
+    setUp(() => scoped = StoresCubit(repository: catalog, categoryId: 3));
+
+    tearDown(() => scoped.close());
+
+    test('loads the first page of that category', () async {
+      final Future<void> load = scoped.load();
+      expect(catalog.storeCalls.single.method, 'getCategoryStores');
+      expect(catalog.storeCalls.single.categoryId, 3);
+      expect(catalog.storeCalls.single.page, 1);
+
+      catalog.storeCalls.single.succeed(storesPage(<int>[1, 2], total: 4));
+      await load;
+
+      expect(_ids(scoped.state), <int>[1, 2]);
+      expect((scoped.state as StoresLoaded).hasMore, isTrue);
+    });
+
+    test('loadMore pages through the same category', () async {
+      final Future<void> load = scoped.load();
+      catalog.storeCalls.last.succeed(storesPage(<int>[1, 2], total: 4));
+      await load;
+
+      final Future<void> more = scoped.loadMore();
+      expect(catalog.storeCalls.last.method, 'getCategoryStores');
+      expect(catalog.storeCalls.last.categoryId, 3);
+      expect(catalog.storeCalls.last.page, 2);
+
+      catalog.storeCalls.last.succeed(storesPage(<int>[3, 4], total: 4));
+      await more;
+
+      expect(_ids(scoped.state), <int>[1, 2, 3, 4]);
+      expect((scoped.state as StoresLoaded).hasMore, isFalse);
+    });
+
+    test('an empty page ends the list even if the total disagrees', () async {
+      final Future<void> load = scoped.load();
+      catalog.storeCalls.last.succeed(storesPage(<int>[], total: 10));
+      await load;
+
+      await scoped.loadMore();
+
+      expect((scoped.state as StoresLoaded).hasMore, isFalse);
+      expect(catalog.storeCalls, hasLength(1));
+    });
+
+    test('a page answering after a refresh is not appended', () async {
+      final Future<void> load = scoped.load();
+      catalog.storeCalls.last.succeed(storesPage(<int>[1, 2], total: 4));
+      await load;
+      final Future<void> more = scoped.loadMore();
+
+      final Future<void> refresh = scoped.load();
+      catalog.storeCalls.last.succeed(storesPage(<int>[5, 6], total: 4));
+      await refresh;
+      catalog.storeCalls[1].succeed(storesPage(<int>[3, 4], total: 4));
+      await more;
+
+      expect(_ids(scoped.state), <int>[5, 6]);
+    });
+  });
+
   test('paging resumes once the newest first-page load answers', () async {
     await loadFirstPage();
     final Future<void> refresh = cubit.load();

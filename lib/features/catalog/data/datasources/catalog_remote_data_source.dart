@@ -13,6 +13,12 @@ abstract class CatalogRemoteDataSource {
 
   Future<CatalogPage<Store>> getStores({required int page, required int limit});
 
+  Future<CatalogPage<Store>> getCategoryStores({
+    required int categoryId,
+    required int page,
+    required int limit,
+  });
+
   Future<CatalogPage<Store>> searchStores({
     required String query,
     required int page,
@@ -46,6 +52,18 @@ class CatalogRemoteDataSourceImpl implements CatalogRemoteDataSource {
   }) async => StoreModel.pageFromJson(
     await consumer.get(
       ApiEndpoints.allStores,
+      queryParameters: <String, dynamic>{'offset': page, 'limit': limit},
+    ),
+  );
+
+  @override
+  Future<CatalogPage<Store>> getCategoryStores({
+    required int categoryId,
+    required int page,
+    required int limit,
+  }) async => StoreModel.pageFromJson(
+    await consumer.get(
+      ApiEndpoints.categoryStores(categoryId),
       queryParameters: <String, dynamic>{'offset': page, 'limit': limit},
     ),
   );

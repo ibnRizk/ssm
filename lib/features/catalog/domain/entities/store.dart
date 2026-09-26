@@ -12,8 +12,17 @@ class Store extends Equatable {
   final double rating;
   final int ratingCount;
 
+  /// The store type it's listed under — a [CatalogCategory] id.
+  final int? storeCategoryId;
+
   /// Free text as the merchant entered it, e.g. `30-40 min`.
   final String? deliveryTime;
+
+  /// The fastest delivery, in minutes. Null when unknown.
+  final int? minDeliveryTime;
+
+  /// From the customer's location, in km, when the backend computed it.
+  final double? distance;
 
   /// The lowest delivery charge; the real fee depends on distance and is
   /// computed at checkout. Null when unknown.
@@ -33,9 +42,12 @@ class Store extends Equatable {
     this.logoUrl,
     this.coverUrl,
     this.address,
+    this.storeCategoryId,
     this.rating = 0,
     this.ratingCount = 0,
     this.deliveryTime,
+    this.minDeliveryTime,
+    this.distance,
     this.minimumDeliveryFee,
     this.freeDelivery = false,
     this.minimumOrder,
@@ -52,9 +64,12 @@ class Store extends Equatable {
     logoUrl,
     coverUrl,
     address,
+    storeCategoryId,
     rating,
     ratingCount,
     deliveryTime,
+    minDeliveryTime,
+    distance,
     minimumDeliveryFee,
     freeDelivery,
     minimumOrder,

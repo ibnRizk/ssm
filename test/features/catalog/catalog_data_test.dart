@@ -60,6 +60,41 @@ void main() {
       ]);
     });
 
+    test('reads the per-language names', () {
+      final CatalogCategory category = CatalogCategoryModel.listFromJson(
+        <dynamic>[
+          <String, dynamic>{
+            'id': 4,
+            'name': 'Restaurants',
+            'name_ar': 'مطاعم',
+            'name_en': 'Restaurants',
+            'image_full_url': 'https://cdn.example.com/c/4.png',
+          },
+        ],
+      ).single;
+
+      expect(
+        category.props,
+        const CatalogCategory(
+          id: 4,
+          name: 'Restaurants',
+          nameAr: 'مطاعم',
+          nameEn: 'Restaurants',
+          imageUrl: 'https://cdn.example.com/c/4.png',
+        ).props,
+      );
+    });
+
+    test('without name, falls back to a per-language one', () {
+      final CatalogCategory category = CatalogCategoryModel.listFromJson(
+        <dynamic>[
+          <String, dynamic>{'id': 4, 'name': ' ', 'name_ar': 'مطاعم'},
+        ],
+      ).single;
+
+      expect(category.name, 'مطاعم');
+    });
+
     test('throws ServerException when the body is not a list', () {
       expect(
         () => CatalogCategoryModel.listFromJson(<String, dynamic>{}),
@@ -107,6 +142,43 @@ void main() {
           tags: <String>['Burger', 'Grill'],
         ).props,
       );
+    });
+
+    test('reads the category, delivery time, distance and cover', () {
+      final Store store = StoreModel.fromJson(<String, dynamic>{
+        ..._storeJson(),
+        'cover_photo_full_url': 'https://cdn.example.com/s/c.png',
+        'ssm_store_category_id': '4',
+        'min_delivery_time': 25,
+        'distance': '2.75',
+      });
+
+      expect(store.coverUrl, 'https://cdn.example.com/s/c.png');
+      expect(store.storeCategoryId, 4);
+      expect(store.minDeliveryTime, 25);
+      expect(store.distance, 2.75);
+    });
+
+    test('drops an unset delivery time and a negative distance', () {
+      final Store store = StoreModel.fromJson(<String, dynamic>{
+        ..._storeJson(),
+        'min_delivery_time': 0,
+        'distance': -1,
+      });
+
+      expect(store.minDeliveryTime, isNull);
+      expect(store.distance, isNull);
+    });
+
+    test('ignores the bare logo and cover file names', () {
+      final Store store = StoreModel.fromJson(<String, dynamic>{
+        ..._storeJson(),
+        'logo': 'https://cdn.example.com/legacy.png',
+        'cover_photo': 'https://cdn.example.com/legacy.png',
+      });
+
+      expect(store.logoUrl, isNull);
+      expect(store.coverUrl, isNull);
     });
 
     test('a deactivated store is closed whatever open says', () {
@@ -211,6 +283,23 @@ void main() {
       expect(consumer.lastQuery, <String, dynamic>{'offset': 2, 'limit': 10});
     });
 
+    test("a category's stores go to its path, paged the same way", () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{
+          'total_size': 1,
+          'stores': <dynamic>[_storeJson(id: 9)],
+        },
+      );
+
+      final CatalogPage<Store> page = await CatalogRemoteDataSourceImpl(
+        consumer: consumer,
+      ).getCategoryStores(categoryId: 4, page: 2, limit: 10);
+
+      expect(consumer.lastPath, '/api/v1/categories/stores/4');
+      expect(consumer.lastQuery, <String, dynamic>{'offset': 2, 'limit': 10});
+      expect(page.items.single.id, 9);
+    });
+
     test('a search sends the name', () async {
       final FakeDioConsumer consumer = FakeDioConsumer(
         response: <String, dynamic>{'total_size': 0, 'stores': <dynamic>[]},
@@ -286,6 +375,19 @@ void main() {
       expect(
         result,
         const Left<Failure, List<CatalogCategory>>(ZoneUnavailableFailure()),
+      );
+      expect(consumer.lastPath, isNull);
+    });
+
+    test("a category's stores need the zone too", () async {
+      zone.answer = const Left<Failure, List<int>>(ZoneUnavailableFailure());
+
+      final Either<Failure, CatalogPage<Store>> result = await repository
+          .getCategoryStores(categoryId: 4, page: 1);
+
+      expect(
+        result,
+        const Left<Failure, CatalogPage<Store>>(ZoneUnavailableFailure()),
       );
       expect(consumer.lastPath, isNull);
     });

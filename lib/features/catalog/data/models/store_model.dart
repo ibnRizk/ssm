@@ -11,9 +11,12 @@ class StoreModel extends Store {
     super.logoUrl,
     super.coverUrl,
     super.address,
+    super.storeCategoryId,
     super.rating,
     super.ratingCount,
     super.deliveryTime,
+    super.minDeliveryTime,
+    super.distance,
     super.minimumDeliveryFee,
     super.freeDelivery,
     super.minimumOrder,
@@ -30,15 +33,16 @@ class StoreModel extends Store {
     return StoreModel(
       id: id,
       name: name,
-      logoUrl: jsonHttpUrl(json['logo_full_url']) ?? jsonHttpUrl(json['logo']),
-      coverUrl:
-          jsonHttpUrl(json['cover_photo_full_url']) ??
-          jsonHttpUrl(json['cover_photo']),
+      logoUrl: jsonHttpUrl(json['logo_full_url']),
+      coverUrl: jsonHttpUrl(json['cover_photo_full_url']),
       address: jsonString(json['address']),
+      storeCategoryId: jsonInt(json['ssm_store_category_id']),
       // `rating` is a per-star histogram on this backend, not the average.
       rating: jsonDouble(json['avg_rating']) ?? 0,
       ratingCount: jsonInt(json['rating_count']) ?? 0,
       deliveryTime: jsonString(json['delivery_time']),
+      minDeliveryTime: _positiveInt(json['min_delivery_time']),
+      distance: _nonNegativeDouble(json['distance']),
       minimumDeliveryFee: jsonDouble(json['minimum_shipping_charge']),
       freeDelivery: jsonBool(json['free_delivery']) ?? false,
       minimumOrder: jsonDouble(json['minimum_order']),
@@ -52,8 +56,8 @@ class StoreModel extends Store {
   factory StoreModel.fromJson(dynamic json) =>
       tryFromJson(json) ?? (throw const ServerException());
 
-  /// `{ "total_size", "limit", "offset", "stores": [...] }` — the store list
-  /// and search share it. Throws [ServerException] without a `stores` list.
+  /// `{ "total_size", "limit", "offset", "stores": [...] }` — the store
+  /// list, a category's stores and search share it. Throws [ServerException] without a `stores` list.
   static CatalogPage<Store> pageFromJson(dynamic json) {
     final dynamic stores = json is Map ? json['stores'] : null;
     if (stores is! List) throw const ServerException();
@@ -71,6 +75,17 @@ class StoreModel extends Store {
   static bool? _isOpen(Map<dynamic, dynamic> json) {
     if (jsonBool(json['active']) == false) return false;
     return jsonBool(json['open']);
+  }
+
+  /// A zero or negative time means the merchant left it unset.
+  static int? _positiveInt(dynamic value) {
+    final int? v = jsonInt(value);
+    return v != null && v > 0 ? v : null;
+  }
+
+  static double? _nonNegativeDouble(dynamic value) {
+    final double? v = jsonDouble(value);
+    return v != null && v.isFinite && v >= 0 ? v : null;
   }
 
   static List<String> _tags(dynamic cuisines) => cuisines is List

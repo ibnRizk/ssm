@@ -12,8 +12,12 @@ import 'presentation/cubit/stores_cubit.dart';
 /// repository they browse; the cart feature, the cart they fill.
 Future<void> initRestaurantsFeatureInjection() async {
   /// Cubits
-  ServiceLocator.instance.registerFactory<StoresCubit>(
-    () => StoresCubit(repository: ServiceLocator.instance()),
+  /// Param: the category to list, or null for every store of the zone.
+  ServiceLocator.instance.registerFactoryParam<StoresCubit, int?, void>(
+    (int? categoryId, _) => StoresCubit(
+      repository: ServiceLocator.instance(),
+      categoryId: categoryId,
+    ),
   );
 
   /// Params: the store id, and the list entry that was tapped (if any).

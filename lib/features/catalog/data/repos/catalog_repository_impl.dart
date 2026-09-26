@@ -33,6 +33,19 @@ class CatalogRepositoryImpl implements CatalogRepository {
   );
 
   @override
+  Future<Either<Failure, CatalogPage<Store>>> getCategoryStores({
+    required int categoryId,
+    required int page,
+    int pageSize = catalogPageSize,
+  }) => zoneRepository.inZone(
+    () => remote.getCategoryStores(
+      categoryId: categoryId,
+      page: page,
+      limit: pageSize,
+    ),
+  );
+
+  @override
   Future<Either<Failure, CatalogPage<Store>>> searchStores({
     required String query,
     required int page,

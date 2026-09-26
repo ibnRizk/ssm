@@ -7,12 +7,18 @@ import '../../../catalog/domain/entities/store.dart';
 import '../../../catalog/domain/repos/catalog_repository.dart';
 import 'stores_state.dart';
 
-/// Screen-scoped (provided at the stores route). Lists the zone's stores,
-/// or the ones matching a search, a page at a time.
+/// Screen-scoped (provided at the stores route). Lists the zone's stores —
+/// or one category's, when [categoryId] is set — or the ones matching a
+/// search, a page at a time.
 class StoresCubit extends Cubit<StoresState> {
   final CatalogRepository repository;
 
-  StoresCubit({required this.repository}) : super(const StoresInitial());
+  /// Scopes the unsearched list to one category. Search stays zone-wide
+  /// (the API can't filter it by category), so a scoped screen hides it.
+  final int? categoryId;
+
+  StoresCubit({required this.repository, this.categoryId})
+    : super(const StoresInitial());
 
   /// Bumped by every first-page load. An answer for an older generation —
   /// a search the customer has since changed, or a page of the previous
@@ -114,7 +120,12 @@ class StoresCubit extends Cubit<StoresState> {
   }
 
   Future<Either<Failure, CatalogPage<Store>>> _fetch(String query, int page) =>
-      query.isEmpty
-      ? repository.getStores(page: page)
-      : repository.searchStores(query: query, page: page);
+      switch ((query, categoryId)) {
+        ('', final int categoryId) => repository.getCategoryStores(
+          categoryId: categoryId,
+          page: page,
+        ),
+        ('', null) => repository.getStores(page: page),
+        _ => repository.searchStores(query: query, page: page),
+      };
 }

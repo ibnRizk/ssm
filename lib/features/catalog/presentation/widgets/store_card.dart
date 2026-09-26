@@ -23,7 +23,7 @@ class StoreCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
     final String? subtitle = store.subtitle;
-    final String? deliveryTime = store.deliveryTime;
+    final String? deliveryTime = store.deliveryTimeLabel;
     final String? feeLabel = store.deliveryFeeLabel;
     return GestureDetector(
       onTap: onTap,

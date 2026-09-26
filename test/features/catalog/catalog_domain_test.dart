@@ -1,3 +1,4 @@
+import 'package:flutter_base/features/catalog/domain/entities/catalog_category.dart';
 import 'package:flutter_base/features/catalog/domain/entities/catalog_page.dart';
 import 'package:flutter_base/features/catalog/domain/entities/store.dart';
 import 'package:flutter_base/features/catalog/domain/entities/store_item.dart';
@@ -43,6 +44,28 @@ void main() {
         const Store(id: 1, name: 'A', rating: 4.5, ratingCount: 3).hasRating,
         isTrue,
       );
+    });
+  });
+
+  group('CatalogCategory.nameFor', () {
+    const CatalogCategory category = CatalogCategory(
+      id: 1,
+      name: 'Restaurants',
+      nameAr: 'مطاعم',
+      nameEn: 'Restaurants',
+    );
+
+    test('picks the name in the given language', () {
+      expect(category.nameFor('ar'), 'مطاعم');
+      expect(category.nameFor('en'), 'Restaurants');
+    });
+
+    test('falls back to name without a translation', () {
+      expect(
+        const CatalogCategory(id: 1, name: 'Restaurants').nameFor('ar'),
+        'Restaurants',
+      );
+      expect(category.nameFor('fr'), 'Restaurants');
     });
   });
 

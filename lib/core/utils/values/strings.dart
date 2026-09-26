@@ -380,6 +380,9 @@ abstract class Strings {
   static String get restaurantsNoSearchResults =>
       _restaurantsNoSearchResults.tr;
 
+  static const String _categoryStoresEmpty = 'category_stores_empty';
+  static String get categoryStoresEmpty => _categoryStoresEmpty.tr;
+
   // --- Store (card & details) ---
   static const String _storeFreeDelivery = 'store_free_delivery';
   static String get storeFreeDelivery => _storeFreeDelivery.tr;
@@ -389,6 +392,12 @@ abstract class Strings {
   /// [amount] already carries its currency, e.g. `7 SAR`.
   static String storeDeliveryFrom(String amount) =>
       _storeDeliveryFrom.tr.replaceFirst('{amount}', amount);
+
+  static const String _storeDeliveryMinutes = 'store_delivery_minutes';
+
+  /// `{count}` in the translation is replaced with the minutes.
+  static String storeDeliveryMinutes(int count) =>
+      _storeDeliveryMinutes.tr.replaceFirst('{count}', '$count');
 
   static const String _storeClosedBadge = 'store_closed_badge';
   static String get storeClosedBadge => _storeClosedBadge.tr;

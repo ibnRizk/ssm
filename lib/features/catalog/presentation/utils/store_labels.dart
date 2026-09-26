@@ -15,6 +15,14 @@ extension StoreLabels on Store {
     return Strings.storeDeliveryFrom(formatSar(fee));
   }
 
+  /// The merchant's own wording (`30-40 min`), else the fastest delivery
+  /// in minutes, else null.
+  String? get deliveryTimeLabel {
+    if (deliveryTime case final String time) return time;
+    final int? minutes = minDeliveryTime;
+    return minutes == null ? null : Strings.storeDeliveryMinutes(minutes);
+  }
+
   /// Tags, else the address, for the line under the name.
   String? get subtitle => tags.isNotEmpty ? tags.join('  •  ') : address;
 }

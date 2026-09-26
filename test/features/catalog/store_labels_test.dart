@@ -33,6 +33,31 @@ void main() {
     });
   });
 
+  group('StoreLabels.deliveryTimeLabel', () {
+    test("prefers the merchant's own wording", () {
+      expect(
+        const Store(
+          id: 1,
+          name: 'A',
+          deliveryTime: '30-40 min',
+          minDeliveryTime: 25,
+        ).deliveryTimeLabel,
+        '30-40 min',
+      );
+    });
+
+    test('falls back to the fastest delivery in minutes', () {
+      expect(
+        const Store(id: 1, name: 'A', minDeliveryTime: 25).deliveryTimeLabel,
+        '25 min',
+      );
+    });
+
+    test('is null when neither is known', () {
+      expect(const Store(id: 1, name: 'A').deliveryTimeLabel, isNull);
+    });
+  });
+
   group('StoreLabels.subtitle', () {
     test('prefers the tags, falling back to the address', () {
       expect(

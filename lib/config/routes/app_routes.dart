@@ -18,6 +18,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/cart/presentation/cubit/cart_cubit.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
+import '../../features/catalog/domain/entities/catalog_category.dart';
 import '../../features/catalog/domain/entities/store.dart';
 import '../../features/checkout/presentation/cubit/checkout_cubit.dart';
 import '../../features/checkout/presentation/screens/order_confirmation_screen.dart';
@@ -64,6 +65,8 @@ abstract class AppRoutes {
   static String orderTrackingPath(int orderId) => '/order-tracking/$orderId';
   static const String loyalty = '/loyalty';
   static const String restaurants = '/home/restaurants';
+  static String categoryStoresPath(int categoryId) =>
+      '/home/categories/$categoryId';
   static const String pharmacyOrder = '/home/pharmacy';
   static const String editProfile = '/edit-profile';
   static const String addresses = '/addresses';
@@ -86,6 +89,7 @@ abstract class AppRoutes {
   static const String orderTrackingName = 'orderTracking';
   static const String loyaltyName = 'loyalty';
   static const String restaurantsName = 'restaurants';
+  static const String categoryStoresName = 'categoryStores';
   static const String pharmacyOrderName = 'pharmacyOrder';
   static const String editProfileName = 'editProfile';
   static const String addressesName = 'addresses';
@@ -149,6 +153,32 @@ abstract class AppRoutes {
                           ServiceLocator.instance<StoresCubit>()..load(),
                       child: const RestaurantsScreen(),
                     ),
+                  ),
+                  GoRoute(
+                    path: 'categories/:categoryId',
+                    name: categoryStoresName,
+                    builder: (_, GoRouterState state) {
+                      final int? categoryId = int.tryParse(
+                        state.pathParameters['categoryId'] ?? '',
+                      );
+                      if (categoryId == null) {
+                        return Center(
+                          child: Text('No route found for ${state.uri}'),
+                        );
+                      }
+                      // The tapped category, for the title; absent when the
+                      // route is reached any other way.
+                      final CatalogCategory? category =
+                          state.extra is CatalogCategory
+                          ? state.extra as CatalogCategory
+                          : null;
+                      return BlocProvider<StoresCubit>(
+                        create: (_) => ServiceLocator.instance<StoresCubit>(
+                          param1: categoryId,
+                        )..load(),
+                        child: RestaurantsScreen(category: category),
+                      );
+                    },
                   ),
                   GoRoute(
                     path: 'pharmacy',

@@ -14,11 +14,14 @@ import '../../../../core/utils/values/strings.dart';
 /// full-width-aligned layers centers the title on the whole header instead —
 /// the same trick [ParcelsHeader] uses.
 class RestaurantsHeader extends StatelessWidget {
+  /// E.g. the category's name; the generic stores title when null.
+  final String? title;
+
   /// E.g. the number of stores available; hidden while unknown.
   final String? subtitle;
   final VoidCallback? onBack;
 
-  const RestaurantsHeader({super.key, this.subtitle, this.onBack});
+  const RestaurantsHeader({super.key, this.title, this.subtitle, this.onBack});
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +34,17 @@ class RestaurantsHeader extends StatelessWidget {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
-                Strings.restaurantsTitle,
-                style: AppTextStyles.h1(color: c.textPrimary),
+              // Narrower than the header, so a long category name can't run
+              // under the back button or the logo.
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 48.r),
+                child: Text(
+                  title ?? Strings.restaurantsTitle,
+                  style: AppTextStyles.h1(color: c.textPrimary),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               if (subtitle case final String subtitle) ...<Widget>[
                 SizedBox(height: AppSpacing.xxs.h),

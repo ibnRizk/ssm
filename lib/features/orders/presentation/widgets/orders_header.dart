@@ -15,10 +15,7 @@ import '../../../../core/utils/values/strings.dart';
 /// TODO: pull the user's real initial once auth is wired up — 'ع' is a
 /// static placeholder for now (see [HomeHeader]'s equivalent TODO).
 class OrdersHeader extends StatelessWidget {
-  /// Null (count pill hidden) until it's known.
-  final int? totalOrders;
-
-  const OrdersHeader({super.key, required this.totalOrders});
+  const OrdersHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,45 +30,6 @@ class OrdersHeader extends StatelessWidget {
             Strings.ordersTitle,
             style: AppTextStyles.h1(color: c.textPrimary),
           ),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: GestureDetector(
-              onTap: () => context.go(AppRoutes.profile),
-              child: Container(
-                width: 40.r,
-                height: 40.r,
-                decoration: BoxDecoration(
-                  color: c.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    'ع',
-                    style: AppTextStyles.title(color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          if (totalOrders case final int total)
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm.w,
-                  vertical: AppSpacing.xxs.h,
-                ),
-                decoration: BoxDecoration(
-                  color: c.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                  border: Border.all(color: c.border),
-                ),
-                child: Text(
-                  Strings.ordersCountLabel(total),
-                  style: AppTextStyles.label(color: c.textSecondary),
-                ),
-              ),
-            ),
         ],
       ),
     );
