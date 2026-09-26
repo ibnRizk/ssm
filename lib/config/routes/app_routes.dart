@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/widgets/slider_photo.dart';
 import '../../features/account/presentation/screens/account_screen.dart';
+import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
@@ -73,12 +74,18 @@ abstract class AppRoutes {
       GoRoute(
         path: login,
         name: loginName,
-        builder: (_, __) => const LoginScreen(),
+        builder: (_, __) => BlocProvider<AuthCubit>(
+          create: (_) => ServiceLocator.instance<AuthCubit>(),
+          child: const LoginScreen(),
+        ),
       ),
       GoRoute(
         path: register,
         name: registerName,
-        builder: (_, __) => const RegisterScreen(),
+        builder: (_, __) => BlocProvider<AuthCubit>(
+          create: (_) => ServiceLocator.instance<AuthCubit>(),
+          child: const RegisterScreen(),
+        ),
       ),
 
       // Bottom-nav shell — each branch below keeps its own navigation stack

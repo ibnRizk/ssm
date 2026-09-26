@@ -12,5 +12,9 @@
 /// }
 /// ```
 abstract class ApiEndpoints {
-  // Add your endpoints here.
+  static const String _v1 = '/api/v1';
+
+  // --- Auth ---
+  static const String login = '$_v1/auth/login';
+  static const String signUp = '$_v1/auth/sign-up';
 }

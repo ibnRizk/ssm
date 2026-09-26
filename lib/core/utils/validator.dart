@@ -80,8 +80,8 @@ abstract class Validator {
     // return null;
 
     value = value.trim();
-    // if (value.length < 6) return TranslationBase.of(context).passwordValidate;
-    if (value.length < 6) return Strings.passwordTooShort;
+    // The backend rejects sign-up passwords shorter than 8 characters.
+    if (value.length < 8) return Strings.passwordTooShort;
 
     return null;
   }

@@ -23,6 +23,27 @@ class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure({this.message});
 }
 
+/// See [ForbiddenException] — validation errors and refusals, not only
+/// permissions.
+class ForbiddenFailure extends Failure {
+  @override
+  final String? message;
+
+  final String? code;
+
+  const ForbiddenFailure({this.message, this.code});
+
+  @override
+  List<Object?> get props => [message, code];
+}
+
+class TooManyRequestsFailure extends Failure {
+  @override
+  final String? message;
+
+  const TooManyRequestsFailure({this.message});
+}
+
 class CacheFailure extends Failure {
   @override
   final String? message;

@@ -54,6 +54,39 @@ class UnauthorizedException extends AppException {
   }
 }
 
+/// HTTP 403. The backend's legacy controllers (auth, cart, order, address)
+/// use it for validation errors and refusals, not only for permissions.
+class ForbiddenException extends AppException {
+  @override
+  final String? message;
+
+  /// `errors[0].code` — usually the offending field name (`phone`, `email`).
+  final String? code;
+
+  const ForbiddenException({this.message, this.code});
+
+  @override
+  Failure toFailure() {
+    return ForbiddenFailure(message: message, code: code);
+  }
+
+  @override
+  List<Object?> get props => [message, code];
+}
+
+/// HTTP 429 — the route is throttled.
+class TooManyRequestsException extends AppException {
+  @override
+  final String? message;
+
+  const TooManyRequestsException({this.message});
+
+  @override
+  Failure toFailure() {
+    return TooManyRequestsFailure(message: message);
+  }
+}
+
 class InternetConnectionException extends AppException {
   @override
   final String? message;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,22 +7,16 @@ import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/validator.dart';
 import '../../../../core/utils/values/strings.dart';
-import '../../../../core/widgets/app_button.dart';
+import '../cubit/auth_cubit.dart';
+import '../widgets/auth_labeled_field.dart';
+import '../widgets/auth_password_field.dart';
 import '../widgets/auth_phone_field.dart';
 import '../widgets/auth_scaffold.dart';
+import '../widgets/auth_state_listener.dart';
+import '../widgets/auth_submit_button.dart';
 import '../widgets/auth_toggle_link.dart';
-
-/// Placeholder SSM delivery zones — swap for real data once the backend
-/// exposes serviceable regions (the subscriptions and cart screens price
-/// delivery per zone the same way).
-const List<String> _ssmRegions = <String>[
-  'تربة',
-  'العلاوة',
-  'الحايرية',
-  'القويعية',
-  'الحشرج',
-];
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -31,99 +26,138 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
-  String? _region;
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
     _phoneController = TextEditingController();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
   void _submit() {
-    // TODO: wire to AuthCubit.register(name, phone, region) once the auth
-    // API contract exists. For now this proves the screen and the flow.
-    context.goNamed(AppRoutes.homeName);
+    FocusScope.of(context).unfocus();
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    context.read<AuthCubit>().register(
+      name: _nameController.text,
+      phone: _phoneController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return AuthScaffold(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(
-            Strings.authRegisterTitle,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.h1(color: context.colors.textPrimary),
-          ),
-          SizedBox(height: AppSpacing.xs.h),
-          Text(
-            Strings.authRegisterSubtitle,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body(color: context.colors.textSecondary),
-          ),
-          SizedBox(height: AppSpacing.xxl.h),
-          Text(
-            Strings.authFullNameLabel,
-            style: AppTextStyles.body(color: context.colors.textSecondary),
-          ),
-          SizedBox(height: AppSpacing.xs.h),
-          TextField(
-            controller: _nameController,
-            textInputAction: TextInputAction.next,
-            style: AppTextStyles.bodyLarge(color: context.colors.textPrimary),
-            decoration: InputDecoration(hintText: Strings.authFullNameHint),
-          ),
-          SizedBox(height: AppSpacing.lg.h),
-          Text(
-            Strings.authPhoneLabel,
-            style: AppTextStyles.body(color: context.colors.textSecondary),
-          ),
-          SizedBox(height: AppSpacing.xs.h),
-          AuthPhoneField(controller: _phoneController),
-          SizedBox(height: AppSpacing.lg.h),
-          Text(
-            Strings.authRegionLabel,
-            style: AppTextStyles.body(color: context.colors.textSecondary),
-          ),
-          SizedBox(height: AppSpacing.xs.h),
-          DropdownButtonFormField<String>(
-            initialValue: _region,
-            style: AppTextStyles.bodyLarge(color: context.colors.textPrimary),
-            icon: Icon(
-              Icons.keyboard_arrow_down,
-              color: context.colors.textSecondary,
-            ),
-            decoration: InputDecoration(hintText: Strings.authRegionHint),
-            items: _ssmRegions
-                .map(
-                  (String region) => DropdownMenuItem<String>(
-                    value: region,
-                    child: Text(region),
+    final TextStyle inputStyle = AppTextStyles.bodyLarge(
+      color: context.colors.textPrimary,
+    );
+
+    return AuthStateListener(
+      child: AuthScaffold(
+        child: Form(
+          key: _formKey,
+          child: AutofillGroup(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text(
+                  Strings.authRegisterTitle,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.h1(color: context.colors.textPrimary),
+                ),
+                SizedBox(height: AppSpacing.xs.h),
+                Text(
+                  Strings.authRegisterSubtitle,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body(
+                    color: context.colors.textSecondary,
                   ),
-                )
-                .toList(),
-            onChanged: (String? value) => setState(() => _region = value),
+                ),
+                SizedBox(height: AppSpacing.xxl.h),
+                AuthLabeledField(
+                  label: Strings.authFullNameLabel,
+                  child: TextFormField(
+                    controller: _nameController,
+                    textInputAction: TextInputAction.next,
+                    textCapitalization: TextCapitalization.words,
+                    autofillHints: const <String>[AutofillHints.name],
+                    style: inputStyle,
+                    decoration: InputDecoration(
+                      hintText: Strings.authFullNameHint,
+                    ),
+                    // The API takes one `name` field — require first + last.
+                    validator: (String? value) =>
+                        Validator.call(value: value, type: ValidatorType.name),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg.h),
+                AuthLabeledField(
+                  label: Strings.authPhoneLabel,
+                  child: AuthPhoneField(controller: _phoneController),
+                ),
+                SizedBox(height: AppSpacing.lg.h),
+                AuthLabeledField(
+                  label: Strings.authEmailLabel,
+                  child: TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autocorrect: false,
+                    autofillHints: const <String>[AutofillHints.email],
+                    style: inputStyle,
+                    decoration: InputDecoration(
+                      hintText: Strings.authEmailHint,
+                    ),
+                    validator: (String? value) => Validator.call(
+                      value: value?.trim(),
+                      type: ValidatorType.email,
+                    ),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg.h),
+                AuthLabeledField(
+                  label: Strings.authPasswordLabel,
+                  child: AuthPasswordField(
+                    controller: _passwordController,
+                    hintText: Strings.authNewPasswordHint,
+                    autofillHint: AutofillHints.newPassword,
+                    validator: (String? value) => Validator.call(
+                      value: value,
+                      type: ValidatorType.password,
+                    ),
+                    onSubmitted: (_) => _submit(),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.xl.h),
+                AuthSubmitButton(
+                  label: Strings.authRegisterButton,
+                  onPressed: _submit,
+                ),
+                SizedBox(height: AppSpacing.lg.h),
+                AuthToggleLink(
+                  question: Strings.authHaveAccount,
+                  action: Strings.authLoginLink,
+                  onTap: () => context.goNamed(AppRoutes.loginName),
+                ),
+              ],
+            ),
           ),
-          SizedBox(height: AppSpacing.xl.h),
-          AppButton(btnText: Strings.authRegisterButton, onPressed: _submit),
-          SizedBox(height: AppSpacing.lg.h),
-          AuthToggleLink(
-            question: Strings.authHaveAccount,
-            action: Strings.authLoginLink,
-            onTap: () => context.goNamed(AppRoutes.loginName),
-          ),
-        ],
+        ),
       ),
     );
   }

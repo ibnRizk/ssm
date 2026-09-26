@@ -1,15 +1,15 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../config/env/app_env.dart';
 import '../../injection_container.dart';
-import '../base_classes/api_error.dart';
 import '../error/exceptions.dart';
 import '../utils/extension.dart';
 import '../utils/log_utils.dart';
 import '../utils/values/strings.dart';
-import 'status_code.dart';
+import 'api_error_mapper.dart';
 
 /// Thin, typed wrapper over Dio. Data sources depend on this abstraction, not
 /// on Dio itself, which keeps them unit-testable with a fake consumer.
@@ -69,7 +69,9 @@ class DioConsumerImpl implements DioConsumer {
       };
 
     client.interceptors.add(appInterceptors);
-    if (AppEnv.enableNetworkLogs) {
+    // Bodies carry passwords and responses carry bearer tokens — never print
+    // them from a release build, whatever `.env` says.
+    if (AppEnv.enableNetworkLogs && kDebugMode) {
       client.interceptors.add(logInterceptor);
     }
   }
@@ -200,52 +202,9 @@ class DioConsumerImpl implements DioConsumer {
     } on SocketException {
       throw InternetConnectionException(message: Strings.noInternetConnection);
     } on DioException catch (error) {
-      _throwMappedError(error);
+      throw mapDioException(error);
     } catch (error) {
       throw ServerException(message: error.toString());
     }
-  }
-
-  /// Returns [Never] so the analyzer proves every branch throws. A `void`
-  /// version silently lets the caller's Future resolve with `null` whenever a
-  /// branch is missed.
-  Never _throwMappedError(DioException error) {
-    final int? status = error.response?.statusCode;
-    final dynamic data = error.response?.data;
-
-    if (status == StatusCode.unauthorized || status == StatusCode.forbidden) {
-      throw UnauthorizedException(message: _messageOf(data));
-    }
-
-    if (status == StatusCode.unProcessableContent) {
-      if (data is Map<String, dynamic>) {
-        throw ServerException(message: APIError.fromJson(data).getFirstError());
-      }
-      throw ServerException(message: _messageOf(data));
-    }
-
-    switch (error.type) {
-      case DioExceptionType.connectionError:
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-        throw InternetConnectionException(
-          message: Strings.noInternetConnection,
-        );
-      case DioExceptionType.cancel:
-        throw ServerException(message: Strings.requestCancelled);
-      default:
-        throw ServerException(message: _messageOf(data));
-    }
-  }
-
-  /// Indexing `data['message']` directly throws whenever the server answers
-  /// with an HTML error page or a bare string, masking the real failure.
-  String _messageOf(dynamic data) {
-    if (data is Map && data['message'] != null) {
-      return data['message'].toString();
-    }
-    if (data == null) return Strings.somethingWentWrong;
-    return data.toString();
   }
 }

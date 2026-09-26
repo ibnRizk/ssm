@@ -102,8 +102,26 @@ abstract class Strings {
   static const String _authPhoneLabel = 'auth_phone_label';
   static String get authPhoneLabel => _authPhoneLabel.tr;
 
-  static const String _authContinue = 'auth_continue';
-  static String get authContinue => _authContinue.tr;
+  static const String _authPasswordLabel = 'auth_password_label';
+  static String get authPasswordLabel => _authPasswordLabel.tr;
+
+  static const String _authPasswordHint = 'auth_password_hint';
+  static String get authPasswordHint => _authPasswordHint.tr;
+
+  static const String _authShowPassword = 'auth_show_password';
+  static String get authShowPassword => _authShowPassword.tr;
+
+  static const String _authHidePassword = 'auth_hide_password';
+  static String get authHidePassword => _authHidePassword.tr;
+
+  static const String _authLoginButton = 'auth_login_button';
+  static String get authLoginButton => _authLoginButton.tr;
+
+  static const String _authInvalidCredentials = 'auth_invalid_credentials';
+  static String get authInvalidCredentials => _authInvalidCredentials.tr;
+
+  static const String _authTooManyAttempts = 'auth_too_many_attempts';
+  static String get authTooManyAttempts => _authTooManyAttempts.tr;
 
   static const String _authNoAccount = 'auth_no_account';
   static String get authNoAccount => _authNoAccount.tr;
@@ -126,11 +144,14 @@ abstract class Strings {
   static const String _authFullNameHint = 'auth_full_name_hint';
   static String get authFullNameHint => _authFullNameHint.tr;
 
-  static const String _authRegionLabel = 'auth_region_label';
-  static String get authRegionLabel => _authRegionLabel.tr;
+  static const String _authEmailLabel = 'auth_email_label';
+  static String get authEmailLabel => _authEmailLabel.tr;
 
-  static const String _authRegionHint = 'auth_region_hint';
-  static String get authRegionHint => _authRegionHint.tr;
+  static const String _authEmailHint = 'auth_email_hint';
+  static String get authEmailHint => _authEmailHint.tr;
+
+  static const String _authNewPasswordHint = 'auth_new_password_hint';
+  static String get authNewPasswordHint => _authNewPasswordHint.tr;
 
   static const String _authRegisterButton = 'auth_register_button';
   static String get authRegisterButton => _authRegisterButton.tr;
