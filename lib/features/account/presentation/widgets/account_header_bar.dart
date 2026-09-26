@@ -27,26 +27,6 @@ class AccountHeaderBar extends StatelessWidget {
             Strings.accountTitle,
             style: AppTextStyles.h1(color: c.textPrimary),
           ),
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: GestureDetector(
-              // TODO: open the app settings screen once it exists.
-              onTap: () {},
-              child: Container(
-                width: 36.r,
-                height: 36.r,
-                decoration: BoxDecoration(
-                  color: c.background,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.settings_outlined,
-                  size: 18.r,
-                  color: c.textPrimary,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

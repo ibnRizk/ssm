@@ -34,24 +34,11 @@ class AccountSettingsSection extends StatelessWidget {
 
     final List<Widget> tiles = <Widget>[
       AccountSettingsTile(
-        icon: Icons.badge_outlined,
-        title: Strings.accountMyInfoTitle,
-        subtitle: Strings.accountMyInfoSubtitle,
-        // TODO: open the "edit my info" screen once it exists.
-        onTap: () {},
-      ),
-      AccountSettingsTile(
         icon: Icons.location_on_outlined,
         title: Strings.accountAddressesTitle,
         subtitle: Strings.accountAddressesSubtitle,
         // TODO: open the addresses list screen once it exists.
         onTap: () {},
-      ),
-      AccountSettingsTile(
-        icon: Icons.card_membership_outlined,
-        title: Strings.accountSubscriptionsTitle,
-        subtitle: Strings.accountSubscriptionsSubtitleNone,
-        onTap: () => context.go(AppRoutes.subscriptions),
       ),
       AccountSettingsTile(
         icon: Icons.card_giftcard_outlined,

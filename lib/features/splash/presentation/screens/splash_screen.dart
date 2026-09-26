@@ -8,6 +8,7 @@ import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/app_assets.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../../../../injection_container.dart';
 
 /// How long the boot animation runs. Kept in one place so the progress bar's
 /// fill and the navigation delay below can never drift apart.
@@ -38,8 +39,13 @@ class _SplashScreenState extends State<SplashScreen>
     // Replace with real startup work. Branch on
     // `sharedPreferences.getUserCycle()` once you have onboarding/auth.
     await Future<void>.delayed(_bootDuration);
+    final String? token = await secureStorage.getAccessToken();
     if (!mounted) return;
-    context.goNamed(AppRoutes.homeName);
+    if (token != null && token.isNotEmpty) {
+      context.goNamed(AppRoutes.homeName);
+    } else {
+      context.goNamed(AppRoutes.loginName);
+    }
   }
 
   @override
