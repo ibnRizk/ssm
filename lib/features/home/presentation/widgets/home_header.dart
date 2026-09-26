@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../cubit/home_cubit.dart';
+import '../cubit/home_state.dart';
 
 /// Greeting + question on the start side, avatar on the end side. The order
 /// is deliberate: [Row] lays children start-to-end, and under the app's RTL
 /// Arabic layout "start" is the right edge — so text-first/avatar-last is
 /// what puts the avatar on the physical left without hardcoding a side.
-///
-/// TODO: pull the display name and greeting (morning/evening) from the
-/// authenticated user once auth is wired up — [Strings.homeGreeting] is a
-/// static placeholder for now.
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
@@ -27,9 +26,17 @@ class HomeHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                Strings.homeGreeting,
-                style: AppTextStyles.body(color: c.textSecondary),
+              BlocSelector<HomeCubit, HomeState, String?>(
+                selector: (HomeState state) =>
+                    state is HomeLoaded ? state.customerName : null,
+                builder: (BuildContext context, String? name) => Text(
+                  name == null
+                      ? Strings.homeGreetingGeneric
+                      : Strings.homeGreeting(name),
+                  style: AppTextStyles.body(color: c.textSecondary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               SizedBox(height: AppSpacing.xxs.h),
               Text(

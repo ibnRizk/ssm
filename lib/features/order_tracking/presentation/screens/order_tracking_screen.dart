@@ -17,7 +17,7 @@ import '../widgets/order_tracking_timeline_card.dart';
 /// (with a fake "tracking" tab).
 ///
 /// Fully self-contained: unlike Cart/Order Confirmation, it doesn't read
-/// [StoreCartCubit] — once an order is placed there's nothing left to add or
+/// [CartCubit] — once an order is placed there's nothing left to add or
 /// remove, just a status to watch, so [storeName]/[orderNumber] are plain
 /// constructor params instead.
 class OrderTrackingScreen extends StatelessWidget {

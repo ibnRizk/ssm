@@ -1,29 +1,48 @@
 import 'package:equatable/equatable.dart';
 
-abstract class HomeState extends Equatable {
+import '../../../../core/error/failures.dart';
+import '../../../catalog/domain/entities/catalog_category.dart';
+import '../../../catalog/domain/entities/store.dart';
+
+sealed class HomeState extends Equatable {
   const HomeState();
 
   @override
   List<Object?> get props => [];
 }
 
-class HomeInitial extends HomeState {
+final class HomeInitial extends HomeState {
   const HomeInitial();
 }
 
-class HomeLoading extends HomeState {
+final class HomeLoading extends HomeState {
   const HomeLoading();
 }
 
-class HomeSuccess extends HomeState {
-  const HomeSuccess();
-}
+final class HomeLoaded extends HomeState {
+  /// Null when the profile couldn't be fetched — the greeting goes generic.
+  final String? customerName;
+  final List<CatalogCategory> categories;
 
-class HomeError extends HomeState {
-  final String message;
+  /// The first stores of the zone — a preview, not the full list.
+  final List<Store> stores;
 
-  const HomeError({required this.message});
+  const HomeLoaded({
+    required this.categories,
+    required this.stores,
+    this.customerName,
+  });
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [customerName, categories, stores];
+}
+
+/// The catalog couldn't be fetched — the screen has nothing to browse.
+final class HomeError extends HomeState {
+  final Failure failure;
+
+  const HomeError(this.failure);
+
+  @override
+  List<Object?> get props => [failure];
 }

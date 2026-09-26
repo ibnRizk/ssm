@@ -1,0 +1,306 @@
+import 'package:dartz/dartz.dart';
+import 'package:flutter_base/core/api/api_endpoints.dart';
+import 'package:flutter_base/core/error/exceptions.dart';
+import 'package:flutter_base/core/error/failures.dart';
+import 'package:flutter_base/core/zone/zone_repository.dart';
+import 'package:flutter_base/features/catalog/data/datasources/catalog_remote_data_source.dart';
+import 'package:flutter_base/features/catalog/data/models/catalog_category_model.dart';
+import 'package:flutter_base/features/catalog/data/models/store_item_model.dart';
+import 'package:flutter_base/features/catalog/data/models/store_model.dart';
+import 'package:flutter_base/features/catalog/data/repos/catalog_repository_impl.dart';
+import 'package:flutter_base/features/catalog/domain/entities/catalog_category.dart';
+import 'package:flutter_base/features/catalog/domain/entities/catalog_page.dart';
+import 'package:flutter_base/features/catalog/domain/entities/store.dart';
+import 'package:flutter_base/features/catalog/domain/entities/store_item.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../helpers/fake_dio_consumer.dart';
+
+class _FakeZoneRepository implements ZoneRepository {
+  Either<Failure, List<int>> answer = const Right<Failure, List<int>>(<int>[1]);
+  int calls = 0;
+
+  @override
+  Future<Either<Failure, List<int>>> ensureZoneIds() async {
+    calls++;
+    return answer;
+  }
+
+  @override
+  Future<Either<Failure, Unit>> selectZoneIds(List<int> zoneIds) =>
+      throw UnimplementedError();
+}
+
+Map<String, dynamic> _storeJson({Object? id = 1, Object? name = 'Mazaq'}) =>
+    <String, dynamic>{'id': id, 'name': name};
+
+void main() {
+  group('CatalogCategoryModel.listFromJson', () {
+    test('reads a bare array, skipping unusable entries', () {
+      final List<CatalogCategoryModel> categories =
+          CatalogCategoryModel.listFromJson(<dynamic>[
+            <String, dynamic>{
+              'id': 1,
+              'name': 'Burgers',
+              'image_full_url': 'https://cdn.example.com/c/1.png',
+            },
+            <String, dynamic>{'id': '2', 'name': 'Pizza', 'image': 'x.png'},
+            <String, dynamic>{'name': 'No id'},
+          ]);
+
+      // Props, not ==: a model never equals its entity (runtimeType differs).
+      expect(categories.map((CatalogCategory c) => c.props), <List<Object?>>[
+        const CatalogCategory(
+          id: 1,
+          name: 'Burgers',
+          imageUrl: 'https://cdn.example.com/c/1.png',
+        ).props,
+        // A bare file name can't be loaded, so there's no image.
+        const CatalogCategory(id: 2, name: 'Pizza').props,
+      ]);
+    });
+
+    test('throws ServerException when the body is not a list', () {
+      expect(
+        () => CatalogCategoryModel.listFromJson(<String, dynamic>{}),
+        throwsA(isA<ServerException>()),
+      );
+    });
+  });
+
+  group('StoreModel', () {
+    test('maps the store fields the app shows', () {
+      final Store store = StoreModel.fromJson(<String, dynamic>{
+        'id': 7,
+        'name': 'Mazaq',
+        'logo_full_url': 'https://cdn.example.com/s/7.png',
+        'address': 'Turbah',
+        'avg_rating': '4.8',
+        'rating_count': 120,
+        // A per-star histogram on this backend — not the average.
+        'rating': <int>[100, 10, 5, 3, 2],
+        'delivery_time': '25-35 min',
+        'minimum_shipping_charge': '7.00',
+        'free_delivery': 0,
+        'minimum_order': 20,
+        'active': 1,
+        'open': 1,
+        'cuisine': <dynamic>[
+          <String, dynamic>{'id': 1, 'name': 'Burger'},
+          <String, dynamic>{'id': 2, 'name': 'Grill'},
+        ],
+      });
+
+      expect(
+        store.props,
+        const Store(
+          id: 7,
+          name: 'Mazaq',
+          logoUrl: 'https://cdn.example.com/s/7.png',
+          address: 'Turbah',
+          rating: 4.8,
+          ratingCount: 120,
+          deliveryTime: '25-35 min',
+          minimumDeliveryFee: 7,
+          minimumOrder: 20,
+          isOpen: true,
+          tags: <String>['Burger', 'Grill'],
+        ).props,
+      );
+    });
+
+    test('a deactivated store is closed whatever open says', () {
+      final Store store = StoreModel.fromJson(<String, dynamic>{
+        ..._storeJson(),
+        'active': false,
+        'open': 1,
+      });
+
+      expect(store.isOpen, isFalse);
+    });
+
+    test('leaves isOpen null when the backend does not say', () {
+      expect(StoreModel.fromJson(_storeJson()).isOpen, isNull);
+    });
+
+    test('fromJson throws ServerException without an id', () {
+      expect(
+        () => StoreModel.fromJson(_storeJson(id: null)),
+        throwsA(isA<ServerException>()),
+      );
+    });
+
+    test('pageFromJson reads stores and the total, skipping bad ones', () {
+      final CatalogPage<Store> page = StoreModel.pageFromJson(<String, dynamic>{
+        'total_size': '12',
+        'limit': 10,
+        'offset': 1,
+        'stores': <dynamic>[_storeJson(), _storeJson(name: null)],
+      });
+
+      expect(page.items.map((Store s) => s.id), <int>[1]);
+      expect(page.totalSize, 12);
+    });
+
+    test('pageFromJson throws ServerException without a stores list', () {
+      expect(
+        () => StoreModel.pageFromJson(<String, dynamic>{'total_size': 0}),
+        throwsA(isA<ServerException>()),
+      );
+    });
+  });
+
+  group('StoreItemModel.pageFromJson', () {
+    test('reads products with their discount', () {
+      final CatalogPage<StoreItem> page = StoreItemModel.pageFromJson(
+        <String, dynamic>{
+          'total_size': 1,
+          'products': <dynamic>[
+            <String, dynamic>{
+              'id': 3,
+              'name': 'SSM Burger Meal',
+              'description': 'Beef burger, fries and a drink',
+              'price': '28.00',
+              'discount': 10,
+              'discount_type': 'percent',
+              'store_id': 7,
+            },
+          ],
+        },
+      );
+
+      expect(
+        page.items.single.props,
+        const StoreItem(
+          id: 3,
+          name: 'SSM Burger Meal',
+          description: 'Beef burger, fries and a drink',
+          price: 28,
+          discount: 10,
+          discountType: DiscountType.percent,
+          storeId: 7,
+        ).props,
+      );
+    });
+
+    test('skips a product without a price', () {
+      final CatalogPage<StoreItem> page = StoreItemModel.pageFromJson(
+        <String, dynamic>{
+          'total_size': 1,
+          'products': <dynamic>[
+            <String, dynamic>{'id': 3, 'name': 'Free?'},
+          ],
+        },
+      );
+
+      expect(page.items, isEmpty);
+    });
+  });
+
+  group('CatalogRemoteDataSource', () {
+    test('stores are paged by the 1-based offset', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{'total_size': 0, 'stores': <dynamic>[]},
+      );
+
+      await CatalogRemoteDataSourceImpl(
+        consumer: consumer,
+      ).getStores(page: 2, limit: 10);
+
+      expect(consumer.lastPath, ApiEndpoints.allStores);
+      expect(consumer.lastQuery, <String, dynamic>{'offset': 2, 'limit': 10});
+    });
+
+    test('a search sends the name', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{'total_size': 0, 'stores': <dynamic>[]},
+      );
+
+      await CatalogRemoteDataSourceImpl(
+        consumer: consumer,
+      ).searchStores(query: 'burger', page: 1, limit: 10);
+
+      expect(consumer.lastPath, ApiEndpoints.searchStores);
+      expect(consumer.lastQuery?['name'], 'burger');
+    });
+
+    test('store details go to the store id path', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: _storeJson(id: 7),
+      );
+
+      await CatalogRemoteDataSourceImpl(consumer: consumer).getStoreDetails(7);
+
+      expect(consumer.lastPath, ApiEndpoints.storeDetails(7));
+    });
+
+    test('store items filter by store, across every category', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{'total_size': 0, 'products': <dynamic>[]},
+      );
+
+      await CatalogRemoteDataSourceImpl(
+        consumer: consumer,
+      ).getStoreItems(storeId: 7, page: 1, limit: 10);
+
+      expect(consumer.lastPath, ApiEndpoints.latestItems);
+      expect(consumer.lastQuery, <String, dynamic>{
+        'store_id': 7,
+        'category_id': 0,
+        'offset': 1,
+        'limit': 10,
+        'type': 'all',
+      });
+    });
+  });
+
+  group('CatalogRepositoryImpl', () {
+    late FakeDioConsumer consumer;
+    late _FakeZoneRepository zone;
+    late CatalogRepositoryImpl repository;
+
+    setUp(() {
+      consumer = FakeDioConsumer(response: <dynamic>[]);
+      zone = _FakeZoneRepository();
+      repository = CatalogRepositoryImpl(
+        remote: CatalogRemoteDataSourceImpl(consumer: consumer),
+        zoneRepository: zone,
+      );
+    });
+
+    test('resolves the zone before calling the catalog', () async {
+      final Either<Failure, List<CatalogCategory>> result = await repository
+          .getCategories();
+
+      expect(result.isRight(), isTrue);
+      expect(zone.calls, 1);
+      expect(consumer.lastPath, ApiEndpoints.categories);
+    });
+
+    test('without a zone, fails without calling the catalog', () async {
+      zone.answer = const Left<Failure, List<int>>(ZoneUnavailableFailure());
+
+      final Either<Failure, List<CatalogCategory>> result = await repository
+          .getCategories();
+
+      expect(
+        result,
+        const Left<Failure, List<CatalogCategory>>(ZoneUnavailableFailure()),
+      );
+      expect(consumer.lastPath, isNull);
+    });
+
+    test('maps a thrown exception to a failure', () async {
+      consumer.error = const ServerException(message: 'Store not found');
+
+      final Either<Failure, Store> result = await repository.getStoreDetails(
+        999,
+      );
+
+      expect(
+        result,
+        const Left<Failure, Store>(ServerFailure(message: 'Store not found')),
+      );
+    });
+  });
+}

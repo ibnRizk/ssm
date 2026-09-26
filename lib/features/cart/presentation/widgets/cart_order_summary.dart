@@ -4,29 +4,24 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/money_format.dart';
 import '../../../../core/utils/values/strings.dart';
 
-/// Placeholder delivery-fee copy — swap for the resolved zone/fee tiers once
-/// the pricing feature exists.
-const String _placeholderDeliveryFeeLabel = 'رسوم التوصيل · تربة';
-const String _placeholderDeliveryFeeNote = 'تختلف حسب منطقتك: 10 / 15 / 20 / 25 ر.س';
-
-/// Subtotal → delivery-fee highlight → bold total. [subtotal] and
-/// [deliveryFee] are summed here rather than passed pre-added, so the total
-/// can never drift out of sync with its two inputs.
+/// Subtotal → delivery-fee highlight → bold total. The total is summed here
+/// rather than passed pre-added, so it can never drift out of sync with its
+/// inputs. The cart endpoints don't quote a delivery fee — it depends on the
+/// address and is settled at checkout — so while [deliveryFee] is null the
+/// highlight says so and the total excludes it.
 class CartOrderSummary extends StatelessWidget {
-  final int subtotal;
-  final int deliveryFee;
+  final double subtotal;
+  final double? deliveryFee;
 
-  const CartOrderSummary({
-    super.key,
-    required this.subtotal,
-    required this.deliveryFee,
-  });
+  const CartOrderSummary({super.key, required this.subtotal, this.deliveryFee});
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
+    final double? fee = deliveryFee;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -39,7 +34,7 @@ class CartOrderSummary extends StatelessWidget {
               ),
             ),
             Text(
-              '$subtotal ر.س',
+              formatSar(subtotal),
               style: AppTextStyles.titleSmall(color: c.textPrimary),
             ),
           ],
@@ -55,27 +50,22 @@ class CartOrderSummary extends StatelessWidget {
           child: Row(
             children: <Widget>[
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      _placeholderDeliveryFeeLabel,
-                      style: AppTextStyles.body(color: Colors.white),
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      _placeholderDeliveryFeeNote,
-                      style: AppTextStyles.caption(
-                        color: Colors.white.withValues(alpha: 0.7),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  Strings.orderConfirmationDeliveryFeeLabel,
+                  style: AppTextStyles.body(color: Colors.white),
                 ),
               ),
               SizedBox(width: AppSpacing.sm.w),
-              Text(
-                '$deliveryFee ر.س',
-                style: AppTextStyles.h2(color: c.secondary),
+              Flexible(
+                child: Text(
+                  fee == null
+                      ? Strings.cartDeliveryFeeAtCheckout
+                      : formatSar(fee),
+                  textAlign: TextAlign.end,
+                  style: fee == null
+                      ? AppTextStyles.body(color: c.secondary)
+                      : AppTextStyles.h2(color: c.secondary),
+                ),
               ),
             ],
           ),
@@ -85,12 +75,14 @@ class CartOrderSummary extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: Text(
-                Strings.cartTotalLabel,
+                fee == null
+                    ? Strings.cartTotalBeforeDelivery
+                    : Strings.cartTotalLabel,
                 style: AppTextStyles.title(color: c.textPrimary),
               ),
             ),
             Text(
-              '${subtotal + deliveryFee} ر.س',
+              formatSar(subtotal + (fee ?? 0)),
               style: AppTextStyles.h2(color: c.secondary),
             ),
           ],

@@ -164,7 +164,12 @@ abstract class Strings {
 
   // --- Home ---
   static const String _homeGreeting = 'home_greeting';
-  static String get homeGreeting => _homeGreeting.tr;
+  static String homeGreeting(String name) =>
+      _homeGreeting.tr.replaceFirst('{name}', name);
+
+  /// When the customer's name isn't known.
+  static const String _homeGreetingGeneric = 'home_greeting_generic';
+  static String get homeGreetingGeneric => _homeGreetingGeneric.tr;
 
   static const String _homeQuestion = 'home_question';
   static String get homeQuestion => _homeQuestion.tr;
@@ -186,6 +191,15 @@ abstract class Strings {
 
   static const String _homeViewAll = 'home_view_all';
   static String get homeViewAll => _homeViewAll.tr;
+
+  static const String _homePharmacyCategory = 'home_pharmacy_category';
+  static String get homePharmacyCategory => _homePharmacyCategory.tr;
+
+  static const String _homeStoresTitle = 'home_stores_title';
+  static String get homeStoresTitle => _homeStoresTitle.tr;
+
+  static const String _homeStoresEmpty = 'home_stores_empty';
+  static String get homeStoresEmpty => _homeStoresEmpty.tr;
 
   static const String _homeOffersTitle = 'home_offers_title';
   static String get homeOffersTitle => _homeOffersTitle.tr;
@@ -213,8 +227,7 @@ abstract class Strings {
   static const String _parcelsActionTitle = 'parcels_action_title';
   static String get parcelsActionTitle => _parcelsActionTitle.tr;
 
-  static const String _parcelsShipmentReference =
-      'parcels_shipment_reference';
+  static const String _parcelsShipmentReference = 'parcels_shipment_reference';
 
   /// `{reference}` in the translation is replaced with e.g. `SSM-P2048`.
   static String parcelsShipmentReference(String reference) =>
@@ -231,8 +244,7 @@ abstract class Strings {
 
   static const String _parcelsActionButtonUpdate =
       'parcels_action_button_update';
-  static String get parcelsActionButtonUpdate =>
-      _parcelsActionButtonUpdate.tr;
+  static String get parcelsActionButtonUpdate => _parcelsActionButtonUpdate.tr;
 
   static const String _parcelsDropoffSheetSubtitle =
       'parcels_dropoff_sheet_subtitle';
@@ -272,8 +284,7 @@ abstract class Strings {
   static const String _parcelsUpdatedJustNow = 'parcels_updated_just_now';
   static String get parcelsUpdatedJustNow => _parcelsUpdatedJustNow.tr;
 
-  static const String _parcelsUpdatedMinutesAgo =
-      'parcels_updated_minutes_ago';
+  static const String _parcelsUpdatedMinutesAgo = 'parcels_updated_minutes_ago';
 
   /// `{count}` in the translation is replaced with the minutes elapsed.
   static String parcelsUpdatedMinutesAgo(int count) =>
@@ -348,7 +359,8 @@ abstract class Strings {
   static String get restaurantsTitle => _restaurantsTitle.tr;
 
   static const String _restaurantsSubtitle = 'restaurants_subtitle';
-  static String get restaurantsSubtitle => _restaurantsSubtitle.tr;
+  static String restaurantsSubtitle(int count) =>
+      _restaurantsSubtitle.tr.replaceFirst('{count}', '$count');
 
   static const String _restaurantsFilterNearest = 'restaurants_filter_nearest';
   static String get restaurantsFilterNearest => _restaurantsFilterNearest.tr;
@@ -363,32 +375,37 @@ abstract class Strings {
   static const String _restaurantsSectionTitle = 'restaurants_section_title';
   static String get restaurantsSectionTitle => _restaurantsSectionTitle.tr;
 
-  static const String _restaurantsBadgeTodayOffer =
-      'restaurants_badge_today_offer';
-  static String get restaurantsBadgeTodayOffer =>
-      _restaurantsBadgeTodayOffer.tr;
+  static const String _restaurantsNoSearchResults =
+      'restaurants_no_search_results';
+  static String get restaurantsNoSearchResults =>
+      _restaurantsNoSearchResults.tr;
 
-  // --- Store details ---
+  // --- Store (card & details) ---
+  static const String _storeFreeDelivery = 'store_free_delivery';
+  static String get storeFreeDelivery => _storeFreeDelivery.tr;
+
+  static const String _storeDeliveryFrom = 'store_delivery_from';
+
+  /// [amount] already carries its currency, e.g. `7 SAR`.
+  static String storeDeliveryFrom(String amount) =>
+      _storeDeliveryFrom.tr.replaceFirst('{amount}', amount);
+
+  static const String _storeClosedBadge = 'store_closed_badge';
+  static String get storeClosedBadge => _storeClosedBadge.tr;
+
+  /// In place of a rating, for a store nobody has rated yet.
+  static const String _storeNewBadge = 'store_new_badge';
+  static String get storeNewBadge => _storeNewBadge.tr;
+
   static const String _storeDetailsOpenNowBadge =
       'store_details_open_now_badge';
   static String get storeDetailsOpenNowBadge => _storeDetailsOpenNowBadge.tr;
 
-  static const String _storeDetailsTabMostOrdered =
-      'store_details_tab_most_ordered';
-  static String get storeDetailsTabMostOrdered =>
-      _storeDetailsTabMostOrdered.tr;
-
-  static const String _storeDetailsTabMeals = 'store_details_tab_meals';
-  static String get storeDetailsTabMeals => _storeDetailsTabMeals.tr;
-
-  static const String _storeDetailsTabAddons = 'store_details_tab_addons';
-  static String get storeDetailsTabAddons => _storeDetailsTabAddons.tr;
-
   static const String _storeDetailsSectionTitle = 'store_details_section_title';
   static String get storeDetailsSectionTitle => _storeDetailsSectionTitle.tr;
 
-  static const String _storeDetailsAddonsTitle = 'store_details_addons_title';
-  static String get storeDetailsAddonsTitle => _storeDetailsAddonsTitle.tr;
+  static const String _storeDetailsNoItems = 'store_details_no_items';
+  static String get storeDetailsNoItems => _storeDetailsNoItems.tr;
 
   static const String _storeDetailsCartViewButton =
       'store_details_cart_view_button';
@@ -397,10 +414,22 @@ abstract class Strings {
 
   static const String _storeDetailsCartCount = 'store_details_cart_count';
 
-  /// `{count}` in the translation is replaced with the live cart total —
-  /// the only translation key in this file that needs a parameter.
+  /// `{count}` in the translation is replaced with the live cart total.
   static String storeDetailsCartCount(int count) =>
       _storeDetailsCartCount.tr.replaceFirst('{count}', '$count');
+
+  // --- Catalog lists ---
+  /// Tap-to-retry row at the end of a paginated list.
+  static const String _loadMoreFailed = 'load_more_failed';
+  static String get loadMoreFailed => _loadMoreFailed.tr;
+
+  /// The backend has no delivery zone to browse.
+  static const String _zoneUnavailable = 'zone_unavailable';
+  static String get zoneUnavailable => _zoneUnavailable.tr;
+
+  /// The camera or gallery refused to open — usually access denied.
+  static const String _mediaPickerFailed = 'media_picker_failed';
+  static String get mediaPickerFailed => _mediaPickerFailed.tr;
 
   // --- Cart ---
   static const String _cartTitle = 'cart_title';
@@ -417,6 +446,29 @@ abstract class Strings {
 
   static const String _cartContinueButton = 'cart_continue_button';
   static String get cartContinueButton => _cartContinueButton.tr;
+
+  static const String _cartRemoveItem = 'cart_remove_item';
+  static String get cartRemoveItem => _cartRemoveItem.tr;
+
+  /// The cart endpoints quote no delivery fee — it depends on the address.
+  static const String _cartDeliveryFeeAtCheckout =
+      'cart_delivery_fee_at_checkout';
+  static String get cartDeliveryFeeAtCheckout => _cartDeliveryFeeAtCheckout.tr;
+
+  static const String _cartTotalBeforeDelivery = 'cart_total_before_delivery';
+  static String get cartTotalBeforeDelivery => _cartTotalBeforeDelivery.tr;
+
+  static const String _cartLineGone = 'cart_line_gone';
+  static String get cartLineGone => _cartLineGone.tr;
+
+  static const String _cartOtherStoreTitle = 'cart_other_store_title';
+  static String get cartOtherStoreTitle => _cartOtherStoreTitle.tr;
+
+  static const String _cartOtherStoreBody = 'cart_other_store_body';
+  static String get cartOtherStoreBody => _cartOtherStoreBody.tr;
+
+  static const String _cartOtherStoreConfirm = 'cart_other_store_confirm';
+  static String get cartOtherStoreConfirm => _cartOtherStoreConfirm.tr;
 
   // --- Order confirmation ---
   static const String _orderConfirmationTitle = 'order_confirmation_title';
@@ -781,6 +833,47 @@ abstract class Strings {
 
   static const String _pharmacySubmitButton = 'pharmacy_submit_button';
   static String get pharmacySubmitButton => _pharmacySubmitButton.tr;
+
+  static const String _pharmacyAddressLabel = 'pharmacy_address_label';
+  static String get pharmacyAddressLabel => _pharmacyAddressLabel.tr;
+
+  static const String _pharmacyAddressPlaceholder =
+      'pharmacy_address_placeholder';
+  static String get pharmacyAddressPlaceholder =>
+      _pharmacyAddressPlaceholder.tr;
+
+  static const String _pharmacyAddAddress = 'pharmacy_add_address';
+  static String get pharmacyAddAddress => _pharmacyAddAddress.tr;
+
+  static const String _pharmacyNoPharmacies = 'pharmacy_no_pharmacies';
+  static String get pharmacyNoPharmacies => _pharmacyNoPharmacies.tr;
+
+  static const String _pharmacyIssueNoPharmacy = 'pharmacy_issue_no_pharmacy';
+  static String get pharmacyIssueNoPharmacy => _pharmacyIssueNoPharmacy.tr;
+
+  static const String _pharmacyIssueNoAddress = 'pharmacy_issue_no_address';
+  static String get pharmacyIssueNoAddress => _pharmacyIssueNoAddress.tr;
+
+  static const String _pharmacyIssueNoContent = 'pharmacy_issue_no_content';
+  static String get pharmacyIssueNoContent => _pharmacyIssueNoContent.tr;
+
+  static const String _pharmacyImageTooLarge = 'pharmacy_image_too_large';
+  static String get pharmacyImageTooLarge => _pharmacyImageTooLarge.tr;
+
+  static const String _pharmacyImageUnsupported = 'pharmacy_image_unsupported';
+  static String get pharmacyImageUnsupported => _pharmacyImageUnsupported.tr;
+
+  static const String _pharmacyTakePhoto = 'pharmacy_take_photo';
+  static String get pharmacyTakePhoto => _pharmacyTakePhoto.tr;
+
+  static const String _pharmacyChoosePhoto = 'pharmacy_choose_photo';
+  static String get pharmacyChoosePhoto => _pharmacyChoosePhoto.tr;
+
+  static const String _pharmacyRemovePhoto = 'pharmacy_remove_photo';
+  static String get pharmacyRemovePhoto => _pharmacyRemovePhoto.tr;
+
+  static const String _pharmacySentTitle = 'pharmacy_sent_title';
+  static String get pharmacySentTitle => _pharmacySentTitle.tr;
 
   // --- Account ---
   static const String _accountTitle = 'account_title';

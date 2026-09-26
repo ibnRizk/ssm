@@ -74,6 +74,52 @@ class ForbiddenException extends AppException {
   List<Object?> get props => [message, code];
 }
 
+/// HTTP 404 — missing, or someone else's (the backend answers both alike).
+class NotFoundException extends AppException {
+  @override
+  final String? message;
+
+  const NotFoundException({this.message});
+
+  @override
+  Failure toFailure() {
+    return NotFoundFailure(message: message);
+  }
+}
+
+/// HTTP 409 — the action isn't allowed in the resource's current state
+/// (e.g. `otp-not-available` before the order is out for delivery).
+class ConflictException extends AppException {
+  @override
+  final String? message;
+
+  /// `errors[0].code`, e.g. `otp-not-available`.
+  final String? code;
+
+  const ConflictException({this.message, this.code});
+
+  @override
+  Failure toFailure() {
+    return ConflictFailure(message: message, code: code);
+  }
+
+  @override
+  List<Object?> get props => [message, code];
+}
+
+/// See [MediaPickerFailure].
+class MediaPickerException extends AppException {
+  @override
+  final String? message;
+
+  const MediaPickerException({this.message});
+
+  @override
+  Failure toFailure() {
+    return MediaPickerFailure(message: message);
+  }
+}
+
 /// HTTP 429 — the route is throttled.
 class TooManyRequestsException extends AppException {
   @override

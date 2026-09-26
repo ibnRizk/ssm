@@ -6,6 +6,10 @@
 	<string>$(MAPS_API_KEY)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to pin a delivery address.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose a photo of your prescription to send to the pharmacy.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take a photo of your prescription to send to the pharmacy.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

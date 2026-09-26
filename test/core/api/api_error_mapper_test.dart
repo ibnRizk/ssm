@@ -18,6 +18,14 @@ DioException _badResponse(int status, dynamic data) {
 
 void main() {
   group('mapDioException', () {
+    test('404 maps to NotFoundException with the body message', () {
+      final AppException result = mapDioException(
+        _badResponse(404, <String, dynamic>{'message': 'Cart item not found'}),
+      );
+
+      expect(result, const NotFoundException(message: 'Cart item not found'));
+    });
+
     test('401 wrong credentials maps to UnauthorizedException', () {
       final AppException result = mapDioException(
         _badResponse(401, <String, dynamic>{

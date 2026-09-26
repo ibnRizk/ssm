@@ -10,6 +10,9 @@ extension FailureMessage on Failure {
   String get userMessage => switch (this) {
     NetworkFailure(:final String? message) =>
       message ?? Strings.noInternetConnection,
+    ZoneUnavailableFailure() => Strings.zoneUnavailable,
+    // The platform's message is technical and not localized.
+    MediaPickerFailure() => Strings.mediaPickerFailed,
     LocationFailure(:final reason) => switch (reason) {
       LocationFailureReason.serviceDisabled => Strings.locationServiceDisabled,
       LocationFailureReason.permissionDenied =>

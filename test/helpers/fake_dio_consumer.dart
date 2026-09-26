@@ -11,6 +11,7 @@ class FakeDioConsumer implements DioConsumer {
   String? lastPath;
   Map<String, dynamic>? lastBody;
   Map<String, dynamic>? lastQuery;
+  FormData? lastFormData;
 
   FakeDioConsumer({this.response});
 
@@ -19,8 +20,10 @@ class FakeDioConsumer implements DioConsumer {
     String path, {
     Map<String, dynamic>? body,
     Map<String, dynamic>? query,
+    FormData? formData,
   }) async {
     lastVerb = verb;
+    lastFormData = formData;
     lastPath = path;
     lastBody = body;
     lastQuery = query;
@@ -38,7 +41,13 @@ class FakeDioConsumer implements DioConsumer {
     FormData? formData,
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
-  }) => _record('POST', path, body: body, query: queryParameters);
+  }) => _record(
+    'POST',
+    path,
+    body: body,
+    query: queryParameters,
+    formData: formData,
+  );
 
   @override
   Future<dynamic> put(
@@ -61,7 +70,13 @@ class FakeDioConsumer implements DioConsumer {
     String path, {
     Map<String, dynamic>? queryParameters,
     Object? data,
-  }) => _record('DELETE', path, query: queryParameters);
+  }) => _record(
+    'DELETE',
+    path,
+    query: queryParameters,
+    // A DELETE body (e.g. `cart_id`) is recorded like a POST body.
+    body: data is Map<String, dynamic> ? data : null,
+  );
 
   @override
   void updateLanguageCodeHeader() {}

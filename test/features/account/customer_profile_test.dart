@@ -74,4 +74,20 @@ void main() {
       expect(const CustomerProfile(name: '  ', phone: '').initial, '?');
     });
   });
+
+  group('CustomerProfile.firstName', () {
+    test('is the first word of the name', () {
+      expect(
+        const CustomerProfile(
+          name: '  Sara   Customer ',
+          phone: '+1',
+        ).firstName,
+        'Sara',
+      );
+    });
+
+    test('is null for a blank name', () {
+      expect(const CustomerProfile(name: '  ', phone: '+1').firstName, isNull);
+    });
+  });
 }

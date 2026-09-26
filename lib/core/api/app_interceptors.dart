@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../config/locale/app_localizations.dart';
+import '../zone/zone_repository.dart';
 import '/injection_container.dart';
 
 class AppInterceptors extends Interceptor {
@@ -15,9 +17,20 @@ class AppInterceptors extends Interceptor {
     // always matches the language the UI is currently showing.
     options.headers['X-localization'] = _languageCode;
     //options.headers['Authorization'] = 'Bearer 3|tiLlHT6fseS3KLa5yiDLur94T6HCibEw2opQ4NYS27f0ce1d';
+    options.headers.addAll(zoneHeaders(sharedPreferences.getZoneIds()));
 
     super.onRequest(options, handler);
   }
+
+  /// Catalog, cart and order calls are scoped by these headers. Read per
+  /// request so switching the delivery address takes effect immediately;
+  /// harmless on endpoints that ignore them. `zoneId` is omitted until a zone
+  /// is known — an empty array would be rejected, not treated as "any zone".
+  @visibleForTesting
+  static Map<String, String> zoneHeaders(List<int> zoneIds) => <String, String>{
+    'moduleId': '$defaultModuleId',
+    if (zoneIds.isNotEmpty) 'zoneId': jsonEncode(zoneIds),
+  };
 
   static String get _languageCode {
     if (ServiceLocator.instance.isRegistered<AppLocalizations>()) {

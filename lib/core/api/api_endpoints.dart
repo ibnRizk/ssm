@@ -40,6 +40,42 @@ abstract class ApiEndpoints {
   // --- Zones ---
   static const String zoneList = '$_v1/zone/list';
 
+  // --- Catalog (need the `zoneId` / `moduleId` headers) ---
+  static const String categories = '$_v1/categories';
+
+  /// `offset` is a 1-based page number, not a row offset.
+  static const String allStores = '$_v1/stores/get-stores/all';
+  static const String searchStores = '$_v1/stores/search';
+  static String storeDetails(int storeId) => '$_v1/stores/details/$storeId';
+
+  /// Filtered by the `store_id` / `category_id` query parameters.
+  static const String latestItems = '$_v1/items/latest';
+
+  // --- Cart (needs the zone headers) ---
+  static const String cartList = '$_v1/customer/cart/list';
+  static const String cartAdd = '$_v1/customer/cart/add';
+  static const String cartUpdate = '$_v1/customer/cart/update';
+
+  /// A DELETE whose `cart_id` goes in the JSON body.
+  static const String cartRemoveItem = '$_v1/customer/cart/remove-item';
+
+  // --- Orders (need the zone headers) ---
+  static const String orderPlace = '$_v1/customer/order/place';
+
+  /// Legacy shapes; both take the id as the `order_id` query parameter.
+  static const String orderDetails = '$_v1/customer/order/details';
+  static const String orderTrack = '$_v1/customer/order/track';
+
+  /// The SSM shape, with the canonical `ssm_status`.
+  static String orderTracking(int orderId) =>
+      '$_v1/customer/orders/$orderId/tracking';
+  static String deliveryOtpRequest(int orderId) =>
+      '$_v1/customer/orders/$orderId/delivery-otp/request';
+
+  // --- Pharmacy requests ---
+  /// Multipart: the prescription image travels as the `prescription` file.
+  static const String pharmacyRequests = '$_v1/customer/pharmacy-requests';
+
   // --- Delivery subscriptions ---
   /// Takes the zone as the `zone_id` query parameter.
   static const String subscriptionPlans = '$_v1/customer/subscription-plans';

@@ -11,6 +11,7 @@ abstract class _Keys {
   static const String languageCode = 'languageCode';
   static const String userType = 'userType';
   static const String userCycle = 'userCycle';
+  static const String zoneIds = 'zoneIds';
 }
 
 /// Non-sensitive key/value storage. Anything secret (tokens, refresh tokens)
@@ -63,6 +64,14 @@ abstract class AppSharedPreferences {
   Future<bool> saveUserCycle(UserCycle value);
 
   Future<bool> removeUserCycle();
+
+  // --- Delivery zone ---
+  /// The zone ids sent in the `zoneId` header; empty until one is resolved.
+  List<int> getZoneIds();
+
+  Future<bool> saveZoneIds(List<int> ids);
+
+  Future<bool> removeZoneIds();
 
   Future<bool> clearAll();
 }
@@ -143,6 +152,23 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
 
   @override
   Future<bool> removeUserCycle() => instance.remove(_Keys.userCycle);
+
+  // --- Delivery zone ---
+  @override
+  List<int> getZoneIds() =>
+      (instance.getStringList(_Keys.zoneIds) ?? const <String>[])
+          .map(int.tryParse)
+          .whereType<int>()
+          .toList(growable: false);
+
+  @override
+  Future<bool> saveZoneIds(List<int> ids) => instance.setStringList(
+    _Keys.zoneIds,
+    ids.map((int id) => '$id').toList(growable: false),
+  );
+
+  @override
+  Future<bool> removeZoneIds() => instance.remove(_Keys.zoneIds);
 
   @override
   Future<bool> clearAll() => instance.clear();

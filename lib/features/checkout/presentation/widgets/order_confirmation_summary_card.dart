@@ -5,14 +5,15 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/money_format.dart';
 import '../../../../core/utils/values/strings.dart';
 
 /// Products value → delivery fee → bold total, in one white card. [total] is
 /// summed here rather than passed pre-added, so it can never drift out of
 /// sync with the two rows above it.
 class OrderConfirmationSummaryCard extends StatelessWidget {
-  final int subtotal;
-  final int deliveryFee;
+  final double subtotal;
+  final double deliveryFee;
 
   const OrderConfirmationSummaryCard({
     super.key,
@@ -52,7 +53,7 @@ class OrderConfirmationSummaryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${subtotal + deliveryFee} ر.س',
+                formatSar(subtotal + deliveryFee),
                 style: AppTextStyles.h2(color: c.secondary),
               ),
             ],
@@ -65,7 +66,7 @@ class OrderConfirmationSummaryCard extends StatelessWidget {
 
 class _SummaryRow extends StatelessWidget {
   final String label;
-  final int amount;
+  final double amount;
   final AppColors c;
 
   const _SummaryRow({
@@ -82,7 +83,7 @@ class _SummaryRow extends StatelessWidget {
           child: Text(label, style: AppTextStyles.body(color: c.textSecondary)),
         ),
         Text(
-          '$amount ر.س',
+          formatSar(amount),
           style: AppTextStyles.titleSmall(color: c.textPrimary),
         ),
       ],

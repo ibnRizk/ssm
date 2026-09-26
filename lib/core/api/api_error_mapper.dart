@@ -9,8 +9,8 @@ import 'status_code.dart';
 ///
 /// Status codes follow the backend contract in
 /// `docs/SSM_CUSTOMER_API_GUIDE.md`: 401 bad credentials or token, 403 legacy
-/// validation/refusal (`{"errors":[{"code","message"}]}`), 422 SSM
-/// validation, 429 throttling.
+/// validation/refusal (`{"errors":[{"code","message"}]}`), 404 missing or
+/// not yours, 422 SSM validation, 429 throttling.
 ///
 /// Messages are `null` when the body carries none — the presentation layer
 /// picks a localized fallback, instead of a raw HTML page or JSON dump
@@ -23,6 +23,13 @@ AppException mapDioException(DioException error) {
       return UnauthorizedException(message: apiErrorMessage(data));
     case StatusCode.forbidden:
       return ForbiddenException(
+        message: apiErrorMessage(data),
+        code: apiErrorCode(data),
+      );
+    case StatusCode.notFound:
+      return NotFoundException(message: apiErrorMessage(data));
+    case StatusCode.conflict:
+      return ConflictException(
         message: apiErrorMessage(data),
         code: apiErrorCode(data),
       );

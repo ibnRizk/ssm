@@ -10,8 +10,8 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/simple_app_bar.dart';
-import '../../../restaurants/presentation/cubit/store_cart_cubit.dart';
-import '../../../restaurants/presentation/cubit/store_cart_state.dart';
+import '../../../cart/presentation/cubit/cart_cubit.dart';
+import '../../../cart/presentation/cubit/cart_state.dart';
 import '../widgets/order_confirmation_address_card.dart';
 import '../widgets/order_confirmation_delivery_fee_section.dart';
 import '../widgets/order_confirmation_payment_card.dart';
@@ -36,7 +36,7 @@ const List<DeliveryArea> _placeholderAreas = <DeliveryArea>[
 /// outside [MainScaffold]'s shell, same treatment as Cart and Store Details,
 /// so no bottom navigation bar here even though the design mock included one.
 ///
-/// [StoreCartCubit] is handed in via the route (the same instance Cart was
+/// [CartCubit] is handed in via the route (the same instance Cart was
 /// using — see `AppRoutes.orderConfirmation`), so the products-value row
 /// stays in sync with the cart. Which delivery area is picked, though, is
 /// local UI state owned right here: it only feeds this screen's own total,
@@ -64,8 +64,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         onBack: () => context.pop(),
       ),
       body: SafeArea(
-        child: BlocBuilder<StoreCartCubit, StoreCartState>(
-          builder: (BuildContext context, StoreCartState state) {
+        child: BlocBuilder<CartCubit, CartState>(
+          builder: (BuildContext context, CartState state) {
+            final double subtotal = state is CartLoaded
+                ? state.cart.subtotal
+                : 0;
             return SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
                 AppSpacing.screen.w,
@@ -111,8 +114,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                   ),
                   SizedBox(height: AppSpacing.sm.h),
                   OrderConfirmationSummaryCard(
-                    subtotal: state.subtotal,
-                    deliveryFee: deliveryFee,
+                    subtotal: subtotal,
+                    deliveryFee: deliveryFee.toDouble(),
                   ),
                   SizedBox(height: AppSpacing.lg.h),
                   AppButton(

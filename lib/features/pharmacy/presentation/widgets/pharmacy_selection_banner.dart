@@ -7,16 +7,17 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
 
 /// The pastel-green "choose a pharmacy" prompt at the top of the order form.
-///
-/// TODO: open the pharmacy picker once that flow exists.
+/// Once one is chosen, [selectedName] replaces the prompt's subtitle.
 class PharmacySelectionBanner extends StatelessWidget {
+  final String? selectedName;
   final VoidCallback? onTap;
 
-  const PharmacySelectionBanner({super.key, this.onTap});
+  const PharmacySelectionBanner({super.key, this.selectedName, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
+    final String? name = selectedName;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -36,13 +37,21 @@ class PharmacySelectionBanner extends StatelessWidget {
                   style: AppTextStyles.titleSmall(color: c.success),
                 ),
                 SizedBox(width: AppSpacing.xs.w),
-                Icon(Icons.add, color: c.success, size: 18.r),
+                Icon(
+                  name == null ? Icons.add : Icons.edit_outlined,
+                  color: c.success,
+                  size: 18.r,
+                ),
               ],
             ),
             SizedBox(height: AppSpacing.xxs.h),
             Text(
-              Strings.pharmacySelectSubtitle,
-              style: AppTextStyles.caption(color: c.textSecondary),
+              name ?? Strings.pharmacySelectSubtitle,
+              style: name == null
+                  ? AppTextStyles.caption(color: c.textSecondary)
+                  : AppTextStyles.body(color: c.textPrimary),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

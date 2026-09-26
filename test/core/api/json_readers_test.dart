@@ -38,4 +38,37 @@ void main() {
       expect(jsonString(7), isNull);
     });
   });
+
+  group('jsonHttpUrl', () {
+    test('keeps absolute http and https URLs', () {
+      expect(
+        jsonHttpUrl('https://cdn.example.com/store/logo.png'),
+        'https://cdn.example.com/store/logo.png',
+      );
+      expect(
+        jsonHttpUrl(' http://example.com/a.png '),
+        'http://example.com/a.png',
+      );
+    });
+
+    test('is null for a bare file name or another scheme', () {
+      expect(jsonHttpUrl('2024-01-01-logo.png'), isNull);
+      expect(jsonHttpUrl('file:///tmp/logo.png'), isNull);
+      expect(jsonHttpUrl(null), isNull);
+    });
+  });
+
+  group('jsonBool', () {
+    test('reads booleans, 0/1 and their string forms', () {
+      expect(jsonBool(true), isTrue);
+      expect(jsonBool(1), isTrue);
+      expect(jsonBool('0'), isFalse);
+      expect(jsonBool('false'), isFalse);
+    });
+
+    test('is null for anything else', () {
+      expect(jsonBool('open'), isNull);
+      expect(jsonBool(null), isNull);
+    });
+  });
 }

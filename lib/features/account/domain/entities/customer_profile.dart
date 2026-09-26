@@ -28,6 +28,13 @@ class CustomerProfile extends Equatable {
     return String.fromCharCode(trimmed.runes.first).toUpperCase();
   }
 
+  /// The first word of [name] ("First Last" is one field), or null when the
+  /// name is blank.
+  String? get firstName {
+    final String trimmed = name.trim();
+    return trimmed.isEmpty ? null : trimmed.split(RegExp(r'\s+')).first;
+  }
+
   int? get memberSinceYear => createdAt?.year;
 
   /// This profile with the editable fields replaced by [update]; the

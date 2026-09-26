@@ -6,40 +6,32 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../cubit/store_cart_cubit.dart';
+import '../../../../core/utils/money_format.dart';
+import '../../../../core/widgets/app_network_image.dart';
+import '../../../cart/presentation/cubit/cart_cubit.dart';
+import '../../../cart/presentation/cubit/cart_state.dart';
+import '../../../catalog/domain/entities/store_item.dart';
 
-/// A single menu item: image tile, name/description/price, and the orange
-/// "add to cart" button. Tapping "+" dispatches to [StoreCartCubit] — the
-/// running total shows up in the floating cart bar, not on the card itself.
+/// A single menu item: image tile, name/description/price (with the list
+/// price struck through when discounted), and the orange "add to cart"
+/// button. The running total shows up in the floating cart bar.
 class RestaurantProductCard extends StatelessWidget {
-  final String id;
-  final String name;
-  final String description;
-  final int price;
-  final IconData icon;
-  final Color iconBackground;
-  final Color iconColor;
+  final StoreItem item;
 
-  /// The line item's subtitle once it's in the cart — the store name, so a
-  /// cart with items from multiple stores (once that's possible) still
-  /// shows where each one came from.
-  final String storeName;
+  /// The store whose menu this is — the item itself may not say, and the
+  /// cart needs it to keep to one store.
+  final int storeId;
 
   const RestaurantProductCard({
     super.key,
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.icon,
-    required this.iconBackground,
-    required this.iconColor,
-    required this.storeName,
+    required this.item,
+    required this.storeId,
   });
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
+    final String? description = item.description;
     return Container(
       width: double.infinity,
       decoration: AppDecorations.card(c),
@@ -47,14 +39,19 @@ class RestaurantProductCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Container(
+          AppNetworkImage(
+            url: item.imageUrl,
             width: 64.r,
             height: 64.r,
-            decoration: BoxDecoration(
-              color: iconBackground,
-              borderRadius: BorderRadius.circular(AppRadius.lg.r),
+            borderRadius: BorderRadius.circular(AppRadius.lg.r),
+            fallback: ColoredBox(
+              color: c.secondaryLight,
+              child: Icon(
+                Icons.fastfood_outlined,
+                color: c.secondary,
+                size: 28.r,
+              ),
             ),
-            child: Icon(icon, color: iconColor, size: 28.r),
           ),
           SizedBox(width: AppSpacing.sm.w),
           Expanded(
@@ -62,45 +59,86 @@ class RestaurantProductCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  name,
+                  item.name,
                   style: AppTextStyles.titleSmall(color: c.textPrimary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  description,
-                  style: AppTextStyles.caption(color: c.textSecondary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                if (description != null) ...<Widget>[
+                  SizedBox(height: 2.h),
+                  Text(
+                    description,
+                    style: AppTextStyles.caption(color: c.textSecondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
                 SizedBox(height: AppSpacing.xs.h),
-                Text(
-                  '$price ر.س',
-                  style: AppTextStyles.titleSmall(color: c.textPrimary),
+                Row(
+                  children: <Widget>[
+                    Text(
+                      formatSar(item.finalPrice),
+                      style: AppTextStyles.titleSmall(color: c.textPrimary),
+                    ),
+                    if (item.hasDiscount) ...<Widget>[
+                      SizedBox(width: AppSpacing.xs.w),
+                      Text(
+                        formatSar(item.price),
+                        style: AppTextStyles.caption(
+                          color: c.textHint,
+                        ).copyWith(decoration: TextDecoration.lineThrough),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
           ),
           SizedBox(width: AppSpacing.xs.w),
-          GestureDetector(
-            onTap: () => context.read<StoreCartCubit>().addProduct(
-              productId: id,
-              name: name,
-              subtitle: storeName,
-              unitPrice: price,
-            ),
-            child: Container(
-              width: 32.r,
-              height: 32.r,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: c.secondary,
-              ),
-              child: const Icon(Icons.add, color: Colors.white, size: 18),
-            ),
-          ),
+          _AddButton(item: item, storeId: storeId),
         ],
+      ),
+    );
+  }
+}
+
+/// Rebuilds alone when this item starts or stops being added.
+class _AddButton extends StatelessWidget {
+  final StoreItem item;
+  final int storeId;
+
+  const _AddButton({required this.item, required this.storeId});
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors c = context.colors;
+    return BlocSelector<CartCubit, CartState, bool>(
+      selector: (CartState state) =>
+          state is CartLoaded && state.addingItemIds.contains(item.id),
+      builder: (BuildContext context, bool adding) => GestureDetector(
+        onTap: adding
+            ? null
+            : () => context.read<CartCubit>().addItem(
+                CartItemRequest(
+                  itemId: item.id,
+                  storeId: item.storeId ?? storeId,
+                  unitPrice: item.finalPrice,
+                ),
+              ),
+        child: Container(
+          width: 32.r,
+          height: 32.r,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: c.secondary),
+          child: adding
+              ? Padding(
+                  padding: EdgeInsets.all(8.r),
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(Icons.add, color: Colors.white, size: 18),
+        ),
       ),
     );
   }

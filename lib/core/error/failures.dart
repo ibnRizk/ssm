@@ -37,6 +37,27 @@ class ForbiddenFailure extends Failure {
   List<Object?> get props => [message, code];
 }
 
+/// HTTP 404 — see [NotFoundException].
+class NotFoundFailure extends Failure {
+  @override
+  final String? message;
+
+  const NotFoundFailure({this.message});
+}
+
+/// HTTP 409 — see [ConflictException].
+class ConflictFailure extends Failure {
+  @override
+  final String? message;
+
+  final String? code;
+
+  const ConflictFailure({this.message, this.code});
+
+  @override
+  List<Object?> get props => [message, code];
+}
+
 class TooManyRequestsFailure extends Failure {
   @override
   final String? message;
@@ -63,6 +84,22 @@ class FetchDataFailure extends Failure {
   final String? message;
 
   const FetchDataFailure({this.message});
+}
+
+/// The camera or photo gallery couldn't be opened — usually access denied.
+class MediaPickerFailure extends Failure {
+  @override
+  final String? message;
+
+  const MediaPickerFailure({this.message});
+}
+
+/// The backend has no delivery zone to scope catalog calls to.
+class ZoneUnavailableFailure extends Failure {
+  @override
+  final String? message;
+
+  const ZoneUnavailableFailure({this.message});
 }
 
 /// Why the device couldn't produce a position — each needs a different

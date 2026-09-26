@@ -16,8 +16,11 @@ import '../../features/addresses/presentation/screens/addresses_screen.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/cart/presentation/cubit/cart_cubit.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/checkout/presentation/screens/order_confirmation_screen.dart';
+import '../../features/catalog/domain/entities/store.dart';
+import '../../features/home/presentation/cubit/home_cubit.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/loyalty/presentation/cubit/loyalty_cubit.dart';
 import '../../features/loyalty/presentation/screens/loyalty_screen.dart';
@@ -25,8 +28,10 @@ import '../../features/order_tracking/presentation/screens/order_tracking_screen
 import '../../features/orders/presentation/screens/orders_screen.dart';
 import '../../features/parcels/presentation/cubit/parcels_cubit.dart';
 import '../../features/parcels/presentation/screens/parcels_screen.dart';
+import '../../features/pharmacy/presentation/cubit/pharmacy_order_cubit.dart';
 import '../../features/pharmacy/presentation/screens/pharmacy_order_screen.dart';
-import '../../features/restaurants/presentation/cubit/store_cart_cubit.dart';
+import '../../features/restaurants/presentation/cubit/store_details_cubit.dart';
+import '../../features/restaurants/presentation/cubit/stores_cubit.dart';
 import '../../features/restaurants/presentation/screens/restaurant_details_screen.dart';
 import '../../features/restaurants/presentation/screens/restaurants_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
@@ -47,7 +52,8 @@ abstract class AppRoutes {
   static const String subscriptions = '/subscriptions';
   static const String profile = '/profile';
   static const String photoViewer = '/photo-viewer';
-  static const String storeDetails = '/store-details';
+  static const String storeDetails = '/store-details/:storeId';
+  static String storeDetailsPath(int storeId) => '/store-details/$storeId';
   static const String cart = '/cart';
   static const String orderConfirmation = '/order-confirmation';
   static const String orderTracking = '/order-tracking';
@@ -122,7 +128,10 @@ abstract class AppRoutes {
               GoRoute(
                 path: home,
                 name: homeName,
-                builder: (_, __) => const HomeScreen(),
+                builder: (_, __) => BlocProvider<HomeCubit>(
+                  create: (_) => ServiceLocator.instance<HomeCubit>()..load(),
+                  child: const HomeScreen(),
+                ),
                 routes: <RouteBase>[
                   // Relative to `home` — these stay inside its branch, so
                   // MainScaffold's bottom nav stays visible, unlike
@@ -130,12 +139,21 @@ abstract class AppRoutes {
                   GoRoute(
                     path: 'restaurants',
                     name: restaurantsName,
-                    builder: (_, __) => const RestaurantsScreen(),
+                    builder: (_, __) => BlocProvider<StoresCubit>(
+                      create: (_) =>
+                          ServiceLocator.instance<StoresCubit>()..load(),
+                      child: const RestaurantsScreen(),
+                    ),
                   ),
                   GoRoute(
                     path: 'pharmacy',
                     name: pharmacyOrderName,
-                    builder: (_, __) => const PharmacyOrderScreen(),
+                    builder: (_, __) => BlocProvider<PharmacyOrderCubit>(
+                      create: (_) =>
+                          ServiceLocator.instance<PharmacyOrderCubit>()
+                            ..loadOptions(),
+                      child: const PharmacyOrderScreen(),
+                    ),
                   ),
                 ],
               ),
@@ -223,17 +241,32 @@ abstract class AppRoutes {
         path: storeDetails,
         name: storeDetailsName,
         builder: (_, GoRouterState state) {
-          final Map<String, dynamic> args =
-              (state.extra as Map<String, dynamic>?) ?? <String, dynamic>{};
-          final String? storeName = args['storeName'] as String?;
-          final String? storeSubtitle = args['storeSubtitle'] as String?;
-          return BlocProvider<StoreCartCubit>(
-            create: (_) => ServiceLocator.instance<StoreCartCubit>(),
-            child: RestaurantDetailsScreen(
-              storeName: storeName ?? RestaurantDetailsScreen.defaultStoreName,
-              storeSubtitle:
-                  storeSubtitle ?? RestaurantDetailsScreen.defaultStoreSubtitle,
-            ),
+          final int? storeId = int.tryParse(
+            state.pathParameters['storeId'] ?? '',
+          );
+          if (storeId == null) {
+            return Scaffold(
+              body: Center(child: Text('No route found for ${state.uri}')),
+            );
+          }
+          // The tapped list entry, so the header shows before the details
+          // load; absent when the route is reached any other way.
+          final Store? preview = state.extra is Store
+              ? state.extra as Store
+              : null;
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider<StoreDetailsCubit>(
+                create: (_) => ServiceLocator.instance<StoreDetailsCubit>(
+                  param1: storeId,
+                  param2: preview,
+                )..load(),
+              ),
+              BlocProvider<CartCubit>(
+                create: (_) => ServiceLocator.instance<CartCubit>()..load(),
+              ),
+            ],
+            child: const RestaurantDetailsScreen(),
           );
         },
       ),
@@ -244,20 +277,8 @@ abstract class AppRoutes {
       GoRoute(
         path: cart,
         name: cartName,
-        builder: (_, GoRouterState state) {
-          // The pushing screen hands its own `StoreCartCubit` instance
-          // through `extra` so the cart reflects what was actually added —
-          // a fresh `ServiceLocator.instance<StoreCartCubit>()` here would
-          // resolve a brand-new, empty cart from get_it's factory. The
-          // fallback only matters if this route is ever reached directly.
-          final StoreCartCubit cubit =
-              (state.extra as StoreCartCubit?) ??
-              ServiceLocator.instance<StoreCartCubit>();
-          return BlocProvider<StoreCartCubit>.value(
-            value: cubit,
-            child: const CartScreen(),
-          );
-        },
+        builder: (_, GoRouterState state) =>
+            _cartScope(state.extra, const CartScreen()),
       ),
 
       // Outside the shell for the same reason as `cart` above: a pushed
@@ -266,15 +287,8 @@ abstract class AppRoutes {
       GoRoute(
         path: orderConfirmation,
         name: orderConfirmationName,
-        builder: (_, GoRouterState state) {
-          final StoreCartCubit cubit =
-              (state.extra as StoreCartCubit?) ??
-              ServiceLocator.instance<StoreCartCubit>();
-          return BlocProvider<StoreCartCubit>.value(
-            value: cubit,
-            child: const OrderConfirmationScreen(),
-          );
-        },
+        builder: (_, GoRouterState state) =>
+            _cartScope(state.extra, const OrderConfirmationScreen()),
       ),
 
       // Outside the shell for the same reason as `orderConfirmation` above:
@@ -364,6 +378,16 @@ abstract class AppRoutes {
     errorBuilder: (_, GoRouterState state) =>
         Scaffold(body: Center(child: Text('No route found for ${state.uri}'))),
   );
+
+  /// Cart and Checkout share the [CartCubit] the pushing screen hands over
+  /// through `extra`, so they show — and change — the same cart. Reached
+  /// any other way, they get (and close) a fresh one that loads the cart.
+  static Widget _cartScope(Object? extra, Widget child) => extra is CartCubit
+      ? BlocProvider<CartCubit>.value(value: extra, child: child)
+      : BlocProvider<CartCubit>(
+          create: (_) => ServiceLocator.instance<CartCubit>()..load(),
+          child: child,
+        );
 
   static String get currentRoute =>
       routesStack.isEmpty ? splash : routesStack.last;

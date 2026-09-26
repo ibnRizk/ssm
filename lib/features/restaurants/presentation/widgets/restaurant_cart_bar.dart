@@ -6,12 +6,11 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
-import '../cubit/store_cart_cubit.dart';
-import '../cubit/store_cart_state.dart';
+import '../../../cart/presentation/cubit/cart_cubit.dart';
+import '../../../cart/presentation/cubit/cart_state.dart';
 
-/// The fixed "view cart" button docked under the scrollable body.
-///
-/// TODO: navigate to the real cart/checkout screen once it exists.
+/// The fixed "view cart" button docked under the scrollable body, with the
+/// live number of units in the server-side cart.
 class RestaurantCartBar extends StatelessWidget {
   final VoidCallback? onViewCart;
 
@@ -29,8 +28,9 @@ class RestaurantCartBar extends StatelessWidget {
           AppSpacing.screen.w,
           AppSpacing.sm.h,
         ),
-        child: BlocSelector<StoreCartCubit, StoreCartState, int>(
-          selector: (StoreCartState state) => state.totalItemCount,
+        child: BlocSelector<CartCubit, CartState, int>(
+          selector: (CartState state) =>
+              state is CartLoaded ? state.cart.itemCount : 0,
           builder: (BuildContext context, int itemCount) {
             return GestureDetector(
               onTap: onViewCart,

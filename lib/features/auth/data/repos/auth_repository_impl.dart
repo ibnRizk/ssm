@@ -31,6 +31,8 @@ class AuthRepositoryImpl implements AuthRepository {
       await secureStorage.removeAccessToken();
       await sharedPreferences.removeUser();
       await sharedPreferences.removeUserId();
+      // The next customer on this device must resolve their own zone.
+      await sharedPreferences.removeZoneIds();
     } catch (_) {
       return const Left(CacheFailure());
     }

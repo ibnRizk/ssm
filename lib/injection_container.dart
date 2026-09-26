@@ -15,11 +15,17 @@ import 'core/services/local_storage/app_secure_storage.dart';
 import 'core/services/local_storage/app_shared_preferences.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/theme_cubit.dart';
+import 'core/zone/zone_remote_data_source.dart';
+import 'core/zone/zone_repository.dart';
+import 'core/zone/zone_repository_impl.dart';
 import 'features/account/account_injection.dart';
 import 'features/addresses/addresses_injection.dart';
 import 'features/auth/auth_injection.dart';
+import 'features/cart/cart_injection.dart';
+import 'features/catalog/catalog_injection.dart';
 import 'features/home/home_injection.dart';
 import 'features/parcels/parcels_injection.dart';
+import 'features/pharmacy/pharmacy_injection.dart';
 import 'features/loyalty/loyalty_injection.dart';
 import 'features/restaurants/restaurants_injection.dart';
 import 'features/subscriptions/subscriptions_injection.dart';
@@ -45,6 +51,7 @@ abstract class ServiceLocator {
     _injectLogInterceptor();
     _injectDioConsumer();
     _injectLocation();
+    _injectZone();
     injectAppColors(AppColors.light);
     injectRoutesStackSingleton(<String>[]);
     _injectLocaleCubit();
@@ -55,8 +62,11 @@ abstract class ServiceLocator {
     await initAccountFeatureInjection();
     await initAddressesFeatureInjection();
     await initLoyaltyFeatureInjection();
+    await initCatalogFeatureInjection();
+    await initCartFeatureInjection();
     await initHomeFeatureInjection();
     await initParcelsFeatureInjection();
+    await initPharmacyFeatureInjection();
     await initRestaurantsFeatureInjection();
     await initSubscriptionsFeatureInjection();
     // Register new features here.
@@ -100,6 +110,17 @@ abstract class ServiceLocator {
     );
     instance.registerLazySingleton<LocationRepository>(
       () => LocationRepositoryImpl(device: instance()),
+    );
+  }
+
+  /// The delivery zone behind the `zoneId` header — shared by every
+  /// shopping feature (catalog now; cart and orders next).
+  static void _injectZone() {
+    instance.registerLazySingleton<ZoneRemoteDataSource>(
+      () => ZoneRemoteDataSourceImpl(consumer: instance()),
+    );
+    instance.registerLazySingleton<ZoneRepository>(
+      () => ZoneRepositoryImpl(remote: instance(), preferences: instance()),
     );
   }
 
