@@ -795,15 +795,11 @@ abstract class Strings {
   static const String _addressLocationLabel = 'address_location_label';
   static String get addressLocationLabel => _addressLocationLabel.tr;
 
-  static const String _addressUseCurrentLocation =
-      'address_use_current_location';
-  static String get addressUseCurrentLocation => _addressUseCurrentLocation.tr;
+  static const String _addressMapHint = 'address_map_hint';
+  static String get addressMapHint => _addressMapHint.tr;
 
   static const String _addressLocateButton = 'address_locate_button';
   static String get addressLocateButton => _addressLocateButton.tr;
-
-  static const String _addressUpdateLocation = 'address_update_location';
-  static String get addressUpdateLocation => _addressUpdateLocation.tr;
 
   static const String _addressLocationPicked = 'address_location_picked';
   static String get addressLocationPicked => _addressLocationPicked.tr;

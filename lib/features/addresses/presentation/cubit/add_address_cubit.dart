@@ -34,8 +34,24 @@ class AddAddressCubit extends Cubit<AddAddressState> {
     result.fold(
       (Failure failure) =>
           emit(AddAddressState(location: state.location, failure: failure)),
-      (GeoPoint location) => emit(AddAddressState(location: location)),
+      (GeoPoint location) => emit(
+        AddAddressState(
+          location: location,
+          locationSource: LocationSource.device,
+        ),
+      ),
     );
+  }
+
+  /// The customer placed the map pin. Clears a previous location problem
+  /// (e.g. "outside our delivery area") — they're fixing it. Ignored while
+  /// the address is being submitted.
+  void pickLocation(GeoPoint location) {
+    if (state.status == AddAddressStatus.submitting ||
+        state.location == location) {
+      return;
+    }
+    emit(AddAddressState(status: state.status, location: location));
   }
 
   /// No-op until a location has been picked — the form requires one.

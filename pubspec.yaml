@@ -52,6 +52,7 @@ dependencies:
 
   # --- Device ---
   geolocator: ^14.0.2
+  google_maps_flutter: ^2.18.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4

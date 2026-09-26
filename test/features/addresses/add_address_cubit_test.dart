@@ -77,7 +77,13 @@ void main() {
     test('stores the device location', () async {
       await locateAt(_riyadh);
 
-      expect(cubit.state, const AddAddressState(location: _riyadh));
+      expect(
+        cubit.state,
+        const AddAddressState(
+          location: _riyadh,
+          locationSource: LocationSource.device,
+        ),
+      );
     });
 
     test('reports why the location is unavailable', () async {
@@ -106,6 +112,40 @@ void main() {
       await first;
 
       expect(location.calls, 1);
+    });
+  });
+
+  group('pickLocation', () {
+    const GeoPoint pinned = GeoPoint(latitude: 21.2146, longitude: 41.633);
+
+    test('stores a pin placed on the map', () {
+      cubit.pickLocation(pinned);
+
+      expect(cubit.state, const AddAddressState(location: pinned));
+    });
+
+    test('clears an out-of-coverage error so the customer can retry', () async {
+      await locateAt(_riyadh);
+      final Future<void> pending = submit();
+      addresses.add.complete(
+        const Left<Failure, Unit>(ForbiddenFailure(code: outOfCoverageCode)),
+      );
+      await pending;
+
+      cubit.pickLocation(pinned);
+
+      expect(cubit.state.failure, isNull);
+      expect(cubit.state.location, pinned);
+    });
+
+    test('is ignored while the address is being submitted', () async {
+      await locateAt(_riyadh);
+      unawaited(submit());
+
+      cubit.pickLocation(pinned);
+
+      expect(cubit.state.location, _riyadh);
+      addresses.add.complete(const Right<Failure, Unit>(unit));
     });
   });
 

@@ -11,13 +11,14 @@ import '../../domain/entities/address.dart';
 import '../cubit/add_address_cubit.dart';
 import '../cubit/add_address_state.dart';
 import '../utils/address_messages.dart';
+import 'address_map_picker.dart';
 
-/// The address's GPS point, filled from the device location. Takes part in
-/// the enclosing [Form] — submitting without a point shows "required" here.
+/// The address's map pin. Takes part in the enclosing [Form] — submitting
+/// without a pin shows "required" here.
 ///
-/// Location problems — GPS off, access denied, or the point being outside
+/// Location problems — GPS off, access denied, or the pin being outside
 /// every delivery zone (403 `coordinates` on submit) — are shown inline
-/// below the box, where the customer can retry.
+/// below the map, where the customer can move the pin and retry.
 class AddressLocationField extends StatelessWidget {
   const AddressLocationField({super.key});
 
@@ -27,125 +28,69 @@ class AddressLocationField extends StatelessWidget {
       validator: (_) => context.read<AddAddressCubit>().state.location == null
           ? Strings.addressLocationRequired
           : null,
-      builder: (FormFieldState<GeoPoint> field) =>
+      builder: (FormFieldState<GeoPoint> field) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const AddressMapPicker(),
+          SizedBox(height: AppSpacing.xs.h),
           BlocBuilder<AddAddressCubit, AddAddressState>(
             buildWhen: (AddAddressState previous, AddAddressState current) =>
                 previous.location != current.location ||
-                previous.failure != current.failure ||
-                previous.isBusy != current.isBusy,
+                previous.failure != current.failure,
             builder: (BuildContext context, AddAddressState state) {
               final Failure? failure = state.failure;
               final String? error = failure != null && failure.isLocationProblem
                   ? failure.addressMessage
-                  // Once a point is picked, the "required" error is stale.
+                  // Once a pin is placed, the "required" error is stale.
                   : (state.location == null ? field.errorText : null);
-              return _LocationBox(
-                location: state.location,
-                isLocating: state.status == AddAddressStatus.locating,
-                enabled: !state.isBusy,
-                error: error,
-              );
+              return _LocationStatus(location: state.location, error: error);
             },
           ),
+        ],
+      ),
     );
   }
 }
 
-class _LocationBox extends StatelessWidget {
+/// One line under the map: the error, the picked coordinates, or a hint.
+class _LocationStatus extends StatelessWidget {
   final GeoPoint? location;
-  final bool isLocating;
-  final bool enabled;
   final String? error;
 
-  const _LocationBox({
-    required this.location,
-    required this.isLocating,
-    required this.enabled,
-    required this.error,
-  });
+  const _LocationStatus({required this.location, required this.error});
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
     final GeoPoint? point = location;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.md.w,
-            vertical: AppSpacing.sm.h,
+    final (IconData icon, Color color, String text) = switch ((error, point)) {
+      (final String message, _) => (Icons.error_outline, c.error, message),
+      (null, final GeoPoint p) => (
+        Icons.check_circle,
+        c.success,
+        '${Strings.addressLocationPicked} · '
+            '${p.latitude.toStringAsFixed(5)}, '
+            '${p.longitude.toStringAsFixed(5)}',
+      ),
+      (null, null) => (
+        Icons.pan_tool_alt_outlined,
+        c.textHint,
+        Strings.addressMapHint,
+      ),
+    };
+    return Padding(
+      padding: EdgeInsetsDirectional.only(start: AppSpacing.xs.w),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Icon(icon, size: 16.r, color: color),
+          SizedBox(width: AppSpacing.xs.w),
+          Expanded(
+            child: Text(text, style: AppTextStyles.caption(color: color)),
           ),
-          decoration: BoxDecoration(
-            color: c.surface,
-            borderRadius: BorderRadius.circular(AppRadius.lg.r),
-            border: Border.all(color: error != null ? c.error : c.border),
-          ),
-          child: Row(
-            children: <Widget>[
-              Icon(
-                point == null ? Icons.my_location : Icons.check_circle,
-                size: 20.r,
-                color: point == null ? c.textHint : c.success,
-              ),
-              SizedBox(width: AppSpacing.sm.w),
-              Expanded(
-                child: point == null
-                    ? Text(
-                        Strings.addressUseCurrentLocation,
-                        style: AppTextStyles.body(color: c.textSecondary),
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            Strings.addressLocationPicked,
-                            style: AppTextStyles.titleSmall(
-                              color: c.textPrimary,
-                            ),
-                          ),
-                          Text(
-                            '${point.latitude.toStringAsFixed(5)}, '
-                            '${point.longitude.toStringAsFixed(5)}',
-                            textDirection: TextDirection.ltr,
-                            style: AppTextStyles.caption(
-                              color: c.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
-              if (isLocating)
-                SizedBox(
-                  width: 20.r,
-                  height: 20.r,
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                )
-              else
-                TextButton(
-                  onPressed: enabled
-                      ? () => context.read<AddAddressCubit>().locate()
-                      : null,
-                  style: TextButton.styleFrom(foregroundColor: c.secondary),
-                  child: Text(
-                    point == null
-                        ? Strings.addressLocateButton
-                        : Strings.addressUpdateLocation,
-                  ),
-                ),
-            ],
-          ),
-        ),
-        if (error case final String message)
-          Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: AppSpacing.md.w,
-              top: AppSpacing.xs.h,
-            ),
-            child: Text(message, style: AppTextStyles.caption(color: c.error)),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
