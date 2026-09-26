@@ -11,4 +11,8 @@ abstract class AuthRepository {
   Future<Either<Failure, Unit>> login(LoginCredentials credentials);
 
   Future<Either<Failure, Unit>> register(RegistrationDetails details);
+
+  /// Local only — the customer API has no logout endpoint. Discards the
+  /// session token and any cached profile.
+  Future<Either<Failure, Unit>> logout();
 }

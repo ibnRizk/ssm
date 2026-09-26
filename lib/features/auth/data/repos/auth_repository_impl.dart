@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/services/local_storage/app_secure_storage.dart';
+import '../../../../core/services/local_storage/app_shared_preferences.dart';
 import '../../domain/entities/login_credentials.dart';
 import '../../domain/entities/registration_details.dart';
 import '../../domain/repos/auth_repository.dart';
@@ -14,8 +15,27 @@ import '../models/responses/auth_token_response.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remote;
   final AppSecureStorage secureStorage;
+  final AppSharedPreferences sharedPreferences;
 
-  const AuthRepositoryImpl({required this.remote, required this.secureStorage});
+  const AuthRepositoryImpl({
+    required this.remote,
+    required this.secureStorage,
+    required this.sharedPreferences,
+  });
+
+  @override
+  Future<Either<Failure, Unit>> logout() async {
+    try {
+      // Token first: once it's gone the session is over, even if clearing
+      // the profile cache below fails.
+      await secureStorage.removeAccessToken();
+      await sharedPreferences.removeUser();
+      await sharedPreferences.removeUserId();
+    } catch (_) {
+      return const Left(CacheFailure());
+    }
+    return const Right(unit);
+  }
 
   @override
   Future<Either<Failure, Unit>> login(LoginCredentials credentials) =>

@@ -30,6 +30,15 @@ class _FakeRepository implements AuthRepository {
     await gate?.future;
     return result;
   }
+
+  int logoutCalls = 0;
+
+  @override
+  Future<Either<Failure, Unit>> logout() async {
+    logoutCalls++;
+    await gate?.future;
+    return result;
+  }
 }
 
 void main() {
@@ -45,6 +54,46 @@ void main() {
 
   test('starts in AuthInitial', () {
     expect(cubit.state, const AuthInitial());
+  });
+
+  group('logout', () {
+    test('emits loading then unauthenticated', () async {
+      final Future<void> expectation = expectLater(
+        cubit.stream,
+        emitsInOrder(<AuthState>[
+          const AuthLoading(),
+          const AuthUnauthenticated(),
+        ]),
+      );
+
+      await cubit.logout();
+      await expectation;
+    });
+
+    test('emits the failure and stays signed in when storage fails', () async {
+      repository.result = const Left<Failure, Unit>(CacheFailure());
+      final Future<void> expectation = expectLater(
+        cubit.stream,
+        emitsInOrder(<AuthState>[
+          const AuthLoading(),
+          const AuthError(CacheFailure()),
+        ]),
+      );
+
+      await cubit.logout();
+      await expectation;
+    });
+
+    test('ignores a second tap while the first is in flight', () async {
+      repository.gate = Completer<void>();
+
+      final Future<void> first = cubit.logout();
+      await cubit.logout();
+      repository.gate!.complete();
+      await first;
+
+      expect(repository.logoutCalls, 1);
+    });
   });
 
   group('login', () {

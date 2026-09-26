@@ -19,6 +19,7 @@ Future<void> initAuthFeatureInjection() async {
     () => AuthRepositoryImpl(
       remote: ServiceLocator.instance(),
       secureStorage: ServiceLocator.instance(),
+      sharedPreferences: ServiceLocator.instance(),
     ),
   );
 

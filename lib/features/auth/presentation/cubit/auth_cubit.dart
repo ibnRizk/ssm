@@ -40,7 +40,14 @@ class AuthCubit extends Cubit<AuthState> {
     ),
   );
 
-  Future<void> _submit(Future<Either<Failure, Unit>> Function() request) async {
+  /// Purely local — the customer API has no logout endpoint.
+  Future<void> logout() =>
+      _submit(repository.logout, onSuccess: const AuthUnauthenticated());
+
+  Future<void> _submit(
+    Future<Either<Failure, Unit>> Function() request, {
+    AuthState onSuccess = const AuthSuccess(),
+  }) async {
     // Auth routes are throttled (10/min) — never fire a second request
     // while one is in flight.
     if (state is AuthLoading) return;
@@ -49,7 +56,7 @@ class AuthCubit extends Cubit<AuthState> {
     if (isClosed) return;
     result.fold(
       (Failure failure) => emit(AuthError(failure)),
-      (_) => emit(const AuthSuccess()),
+      (_) => emit(onSuccess),
     );
   }
 }

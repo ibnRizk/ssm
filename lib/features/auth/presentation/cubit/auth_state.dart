@@ -22,6 +22,11 @@ final class AuthSuccess extends AuthState {
   const AuthSuccess();
 }
 
+/// The session was discarded locally — the customer is signed out.
+final class AuthUnauthenticated extends AuthState {
+  const AuthUnauthenticated();
+}
+
 /// Carries the typed [Failure], not a string, so the UI decides the wording
 /// (and the cubit stays free of localization).
 final class AuthError extends AuthState {

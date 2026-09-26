@@ -8,9 +8,13 @@ import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../utils/auth_failure_message.dart';
 
-/// One-shot side effects shared by Login and Register: enter the app once
-/// the session is stored, or surface the failure in a snack bar. Never
-/// rebuilds [child].
+/// One-shot side effects shared by Login, Register and Logout: enter the app
+/// once the session is stored, leave it once the session is discarded, or
+/// surface the failure in a snack bar. Never rebuilds [child].
+///
+/// `go` (not `push`) replaces the whole route stack — the auth screens are
+/// top-level routes outside the bottom-nav shell, so after either transition
+/// the Android back button has nothing to return to.
 class AuthStateListener extends StatelessWidget {
   final Widget child;
 
@@ -23,6 +27,8 @@ class AuthStateListener extends StatelessWidget {
         switch (state) {
           case AuthSuccess():
             context.goNamed(AppRoutes.homeName);
+          case AuthUnauthenticated():
+            context.goNamed(AppRoutes.loginName);
           case AuthError(:final failure):
             showAppSnackBar(
               context: context,

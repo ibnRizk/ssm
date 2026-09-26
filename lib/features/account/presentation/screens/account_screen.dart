@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/values/strings.dart';
 import '../widgets/account_footer.dart';
 import '../widgets/account_header_bar.dart';
+import '../widgets/account_logout_button.dart';
 import '../widgets/account_profile_card.dart';
 import '../widgets/account_settings_section.dart';
 
@@ -25,7 +22,6 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppColors c = context.colors;
     return SafeArea(
       bottom: false,
       child: SingleChildScrollView(
@@ -51,20 +47,7 @@ class AccountScreen extends StatelessWidget {
             SizedBox(height: AppSpacing.xl.h),
             const AccountSettingsSection(),
             SizedBox(height: AppSpacing.lg.h),
-            GestureDetector(
-              // TODO: wire up sign-out once auth session state exists.
-              onTap: () {},
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.md.h),
-                decoration: AppDecorations.card(c),
-                child: Center(
-                  child: Text(
-                    Strings.accountLogoutButton,
-                    style: AppTextStyles.title(color: c.error),
-                  ),
-                ),
-              ),
-            ),
+            const AccountLogoutButton(),
             SizedBox(height: AppSpacing.xl.h),
             const AccountFooter(),
           ],

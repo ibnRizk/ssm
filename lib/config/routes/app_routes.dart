@@ -153,7 +153,11 @@ abstract class AppRoutes {
               GoRoute(
                 path: profile,
                 name: profileName,
-                builder: (_, __) => const AccountScreen(),
+                // Hosts the logout action — see `AccountLogoutButton`.
+                builder: (_, __) => BlocProvider<AuthCubit>(
+                  create: (_) => ServiceLocator.instance<AuthCubit>(),
+                  child: const AccountScreen(),
+                ),
               ),
             ],
           ),

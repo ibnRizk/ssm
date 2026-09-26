@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_base/core/error/exceptions.dart';
 import 'package:flutter_base/core/error/failures.dart';
 import 'package:flutter_base/core/services/local_storage/app_secure_storage.dart';
+import 'package:flutter_base/core/services/local_storage/app_shared_preferences.dart';
 import 'package:flutter_base/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:flutter_base/features/auth/data/models/requests/login_request.dart';
 import 'package:flutter_base/features/auth/data/models/requests/register_request.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_base/features/auth/domain/entities/login_credentials.dar
 import 'package:flutter_base/features/auth/domain/entities/registration_details.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeRemote implements AuthRemoteDataSource {
   Object? error;
@@ -51,7 +53,10 @@ class _FakeSecureStorage extends AppSecureStorage {
   }
 
   @override
-  Future<void> removeAccessToken() async => token = null;
+  Future<void> removeAccessToken() async {
+    if (failWrites) throw Exception('keystore unavailable');
+    token = null;
+  }
 
   @override
   Future<String?> getDeviceToken() async => null;
@@ -81,12 +86,52 @@ const RegistrationDetails _details = RegistrationDetails(
 void main() {
   late _FakeRemote remote;
   late _FakeSecureStorage storage;
+  late AppSharedPreferences preferences;
   late AuthRepositoryImpl repository;
 
-  setUp(() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
     remote = _FakeRemote();
     storage = _FakeSecureStorage();
-    repository = AuthRepositoryImpl(remote: remote, secureStorage: storage);
+    preferences = AppSharedPreferencesImpl(
+      instance: await SharedPreferences.getInstance(),
+    );
+    repository = AuthRepositoryImpl(
+      remote: remote,
+      secureStorage: storage,
+      sharedPreferences: preferences,
+    );
+  });
+
+  group('logout', () {
+    test('discards the stored token', () async {
+      storage.token = 'token-123';
+
+      final Either<Failure, Unit> result = await repository.logout();
+
+      expect(result, const Right<Failure, Unit>(unit));
+      expect(storage.token, isNull);
+    });
+
+    test('discards the cached profile', () async {
+      await preferences.saveUser(<String, dynamic>{'id': 7, 'name': 'Sara'});
+      await preferences.saveUserId(7);
+
+      await repository.logout();
+
+      expect(preferences.getUser(), isNull);
+      expect(preferences.getUserId(), isNull);
+    });
+
+    test('reports CacheFailure when the token cannot be removed', () async {
+      storage
+        ..token = 'token-123'
+        ..failWrites = true;
+
+      final Either<Failure, Unit> result = await repository.logout();
+
+      expect(result, const Left<Failure, Unit>(CacheFailure()));
+    });
   });
 
   group('login', () {
