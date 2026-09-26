@@ -25,7 +25,9 @@ class AddressLocationField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FormField<GeoPoint>(
-      validator: (_) => context.read<AddAddressCubit>().state.location == null
+      validator: (_) =>
+          context.read<AddAddressCubit>().state.location ==
+              null
           ? Strings.addressLocationRequired
           : null,
       builder: (FormFieldState<GeoPoint> field) => Column(
@@ -35,17 +37,32 @@ class AddressLocationField extends StatelessWidget {
           const AddressMapPicker(),
           SizedBox(height: AppSpacing.xs.h),
           BlocBuilder<AddAddressCubit, AddAddressState>(
-            buildWhen: (AddAddressState previous, AddAddressState current) =>
-                previous.location != current.location ||
-                previous.failure != current.failure,
-            builder: (BuildContext context, AddAddressState state) {
-              final Failure? failure = state.failure;
-              final String? error = failure != null && failure.isLocationProblem
-                  ? failure.addressMessage
-                  // Once a pin is placed, the "required" error is stale.
-                  : (state.location == null ? field.errorText : null);
-              return _LocationStatus(location: state.location, error: error);
-            },
+            buildWhen:
+                (
+                  AddAddressState previous,
+                  AddAddressState current,
+                ) =>
+                    previous.location != current.location ||
+                    previous.failure != current.failure,
+            builder:
+                (
+                  BuildContext context,
+                  AddAddressState state,
+                ) {
+                  final Failure? failure = state.failure;
+                  final String? error =
+                      failure != null &&
+                          failure.isLocationProblem
+                      ? failure.addressmssage
+                      // Once a pin is placed, the "required" error is stale.
+                      : (state.location == null
+                            ? field.errorText
+                            : null);
+                  return _LocationStatus(
+                    location: state.location,
+                    error: error,
+                  );
+                },
           ),
         ],
       ),
@@ -58,14 +75,25 @@ class _LocationStatus extends StatelessWidget {
   final GeoPoint? location;
   final String? error;
 
-  const _LocationStatus({required this.location, required this.error});
+  const _LocationStatus({
+    required this.location,
+    required this.error,
+  });
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
     final GeoPoint? point = location;
-    final (IconData icon, Color color, String text) = switch ((error, point)) {
-      (final String message, _) => (Icons.error_outline, c.error, message),
+    final (
+      IconData icon,
+      Color color,
+      String text,
+    ) = switch ((error, point)) {
+      (final String message, _) => (
+        Icons.error_outline,
+        c.error,
+        message,
+      ),
       (null, final GeoPoint p) => (
         Icons.check_circle,
         c.success,
@@ -80,14 +108,19 @@ class _LocationStatus extends StatelessWidget {
       ),
     };
     return Padding(
-      padding: EdgeInsetsDirectional.only(start: AppSpacing.xs.w),
+      padding: EdgeInsetsDirectional.only(
+        start: AppSpacing.xs.w,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Icon(icon, size: 16.r, color: color),
           SizedBox(width: AppSpacing.xs.w),
           Expanded(
-            child: Text(text, style: AppTextStyles.caption(color: color)),
+            child: Text(
+              text,
+              style: AppTextStyles.caption(color: color),
+            ),
           ),
         ],
       ),

@@ -25,11 +25,13 @@ class AddAddressForm extends StatefulWidget {
   const AddAddressForm({super.key});
 
   @override
-  State<AddAddressForm> createState() => _AddAddressFormState();
+  State<AddAddressForm> createState() =>
+      _AddAddressFormState();
 }
 
 class _AddAddressFormState extends State<AddAddressForm> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey =
+      GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
   late final TextEditingController _addressController;
@@ -53,7 +55,8 @@ class _AddAddressFormState extends State<AddAddressForm> {
 
   void _submit() {
     FocusScope.of(context).unfocus();
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!(_formKey.currentState?.validate() ?? false))
+      return;
     context.read<AddAddressCubit>().submit(
       type: _type,
       contactPersonName: _nameController.text,
@@ -62,7 +65,10 @@ class _AddAddressFormState extends State<AddAddressForm> {
     );
   }
 
-  void _onStateChanged(BuildContext context, AddAddressState state) {
+  void _onStateChanged(
+    BuildContext context,
+    AddAddressState state,
+  ) {
     if (state.status == AddAddressStatus.success) {
       showAppSnackBar(
         context: context,
@@ -78,7 +84,7 @@ class _AddAddressFormState extends State<AddAddressForm> {
     if (failure != null && !failure.isLocationProblem) {
       showAppSnackBar(
         context: context,
-        message: failure.addressMessage,
+        message: failure.addressmssage,
         type: ToastType.error,
       );
     }
@@ -91,9 +97,13 @@ class _AddAddressFormState extends State<AddAddressForm> {
     );
 
     return BlocListener<AddAddressCubit, AddAddressState>(
-      listenWhen: (AddAddressState previous, AddAddressState current) =>
-          previous.status != current.status ||
-          previous.failure != current.failure,
+      listenWhen:
+          (
+            AddAddressState previous,
+            AddAddressState current,
+          ) =>
+              previous.status != current.status ||
+              previous.failure != current.failure,
       listener: _onStateChanged,
       child: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
@@ -111,7 +121,8 @@ class _AddAddressFormState extends State<AddAddressForm> {
                 label: Strings.addressTypeLabel,
                 child: AddressTypeSelector(
                   selected: _type,
-                  onChanged: (AddressType type) => setState(() => _type = type),
+                  onChanged: (AddressType type) =>
+                      setState(() => _type = type),
                 ),
               ),
               SizedBox(height: AppSpacing.lg.h),
@@ -132,10 +143,11 @@ class _AddAddressFormState extends State<AddAddressForm> {
                   decoration: InputDecoration(
                     hintText: Strings.addressDetailsHint,
                   ),
-                  validator: (String? value) => Validator.call(
-                    value: value,
-                    type: ValidatorType.standard,
-                  ),
+                  validator: (String? value) =>
+                      Validator.call(
+                        value: value,
+                        type: ValidatorType.standard,
+                      ),
                 ),
               ),
               SizedBox(height: AppSpacing.lg.h),
@@ -144,16 +156,21 @@ class _AddAddressFormState extends State<AddAddressForm> {
                 child: TextFormField(
                   controller: _nameController,
                   textInputAction: TextInputAction.next,
-                  textCapitalization: TextCapitalization.words,
-                  autofillHints: const <String>[AutofillHints.name],
+                  textCapitalization:
+                      TextCapitalization.words,
+                  autofillHints: const <String>[
+                    AutofillHints.name,
+                  ],
                   style: inputStyle,
                   decoration: InputDecoration(
-                    hintText: Strings.addressContactNameHint,
+                    hintText:
+                        Strings.addressContactNameHint,
                   ),
-                  validator: (String? value) => Validator.call(
-                    value: value,
-                    type: ValidatorType.standard,
-                  ),
+                  validator: (String? value) =>
+                      Validator.call(
+                        value: value,
+                        type: ValidatorType.standard,
+                      ),
                 ),
               ),
               SizedBox(height: AppSpacing.lg.h),
@@ -166,17 +183,31 @@ class _AddAddressFormState extends State<AddAddressForm> {
               ),
               SizedBox(height: AppSpacing.xl.h),
               // Only the button rebuilds while a request runs.
-              BlocSelector<AddAddressCubit, AddAddressState, (bool, bool)>(
-                selector: (AddAddressState state) =>
-                    (state.status == AddAddressStatus.submitting, state.isBusy),
-                builder: (BuildContext context, (bool, bool) flags) {
-                  final (bool isSubmitting, bool isBusy) = flags;
-                  return AppButton(
-                    btnText: Strings.save,
-                    isLoading: isSubmitting,
-                    onPressed: isBusy ? null : _submit,
-                  );
-                },
+              BlocSelector<
+                AddAddressCubit,
+                AddAddressState,
+                (bool, bool)
+              >(
+                selector: (AddAddressState state) => (
+                  state.status ==
+                      AddAddressStatus.submitting,
+                  state.isBusy,
+                ),
+                builder:
+                    (
+                      BuildContext context,
+                      (bool, bool) flags,
+                    ) {
+                      final (
+                        bool isSubmitting,
+                        bool isBusy,
+                      ) = flags;
+                      return AppButton(
+                        btnText: Strings.save,
+                        isLoading: isSubmitting,
+                        onPressed: isBusy ? null : _submit,
+                      );
+                    },
               ),
             ],
           ),

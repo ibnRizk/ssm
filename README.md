@@ -1,4 +1,4 @@
-# ssme
+# ssm
 
 Team base architecture boilerplate. Clean Architecture + Cubit + GetIt + Dio + go_router, with JSON-file i18n and a light/dark design-token theme.
 

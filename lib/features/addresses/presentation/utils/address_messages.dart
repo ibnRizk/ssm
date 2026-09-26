@@ -10,11 +10,13 @@ extension AddressFailureMessage on Failure {
   bool get isLocationProblem =>
       this is LocationFailure ||
       (this is ForbiddenFailure &&
-          (this as ForbiddenFailure).code == outOfCoverageCode);
+          (this as ForbiddenFailure).code ==
+              outOfCoverageCode);
 
   /// Location failures are worded by [FailureMessage.userMessage].
-  String get addressMessage => switch (this) {
-    ForbiddenFailure(code: outOfCoverageCode) => Strings.addressOutOfCoverage,
+  String get addressmssage => switch (this) {
+    ForbiddenFailure(code: outOfCoverageCode) =>
+      Strings.addressOutOfCoverage,
     _ => userMessage,
   };
 }
