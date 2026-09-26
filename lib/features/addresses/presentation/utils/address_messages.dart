@@ -12,16 +12,9 @@ extension AddressFailureMessage on Failure {
       (this is ForbiddenFailure &&
           (this as ForbiddenFailure).code == outOfCoverageCode);
 
+  /// Location failures are worded by [FailureMessage.userMessage].
   String get addressMessage => switch (this) {
     ForbiddenFailure(code: outOfCoverageCode) => Strings.addressOutOfCoverage,
-    LocationFailure(:final reason) => switch (reason) {
-      LocationFailureReason.serviceDisabled => Strings.locationServiceDisabled,
-      LocationFailureReason.permissionDenied =>
-        Strings.locationPermissionDenied,
-      LocationFailureReason.deniedForever =>
-        Strings.locationPermissionDeniedForever,
-      LocationFailureReason.unavailable => Strings.locationUnavailable,
-    },
     _ => userMessage,
   };
 }

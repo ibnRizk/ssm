@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_base/core/error/failures.dart';
 import 'package:flutter_base/features/addresses/domain/entities/address.dart';
 import 'package:flutter_base/features/addresses/domain/repos/address_repository.dart';
-import 'package:flutter_base/features/addresses/domain/repos/location_repository.dart';
+import 'package:flutter_base/core/location/location_repository.dart';
 import 'package:flutter_base/features/addresses/presentation/cubit/add_address_cubit.dart';
 import 'package:flutter_base/features/addresses/presentation/cubit/add_address_state.dart';
 import 'package:flutter_base/features/addresses/presentation/utils/address_messages.dart';

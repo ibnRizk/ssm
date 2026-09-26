@@ -15,7 +15,10 @@ import '../../../../core/utils/values/strings.dart';
 /// Parcels is a bottom-nav tab root, so — unlike a pushed screen — it must
 /// not show a back button.
 class ParcelsHeader extends StatelessWidget {
-  const ParcelsHeader({super.key});
+  /// Parcels waiting for the customer's location; the badge hides at 0.
+  final int newCount;
+
+  const ParcelsHeader({super.key, this.newCount = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -30,23 +33,24 @@ class ParcelsHeader extends StatelessWidget {
             Strings.parcelsTitle,
             style: AppTextStyles.h1(color: c.textPrimary),
           ),
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm.w,
-                vertical: AppSpacing.xxs.h,
-              ),
-              decoration: BoxDecoration(
-                color: c.secondaryLight,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-              ),
-              child: Text(
-                Strings.parcelsBadgeNew,
-                style: AppTextStyles.label(color: c.secondaryDark),
+          if (newCount > 0)
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm.w,
+                  vertical: AppSpacing.xxs.h,
+                ),
+                decoration: BoxDecoration(
+                  color: c.secondaryLight,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
+                child: Text(
+                  Strings.parcelsBadgeNew(newCount),
+                  style: AppTextStyles.label(color: c.secondaryDark),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

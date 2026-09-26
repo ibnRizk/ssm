@@ -204,19 +204,105 @@ abstract class Strings {
   static String get parcelsTitle => _parcelsTitle.tr;
 
   static const String _parcelsBadgeNew = 'parcels_badge_new';
-  static String get parcelsBadgeNew => _parcelsBadgeNew.tr;
+
+  /// `{count}` in the translation is replaced with the parcels waiting for
+  /// the customer's location.
+  static String parcelsBadgeNew(int count) =>
+      _parcelsBadgeNew.tr.replaceFirst('{count}', '$count');
 
   static const String _parcelsActionTitle = 'parcels_action_title';
   static String get parcelsActionTitle => _parcelsActionTitle.tr;
 
-  static const String _parcelsActionSubtitle = 'parcels_action_subtitle';
-  static String get parcelsActionSubtitle => _parcelsActionSubtitle.tr;
+  static const String _parcelsShipmentReference =
+      'parcels_shipment_reference';
+
+  /// `{reference}` in the translation is replaced with e.g. `SSM-P2048`.
+  static String parcelsShipmentReference(String reference) =>
+      _parcelsShipmentReference.tr.replaceFirst('{reference}', reference);
 
   static const String _parcelsActionBody = 'parcels_action_body';
   static String get parcelsActionBody => _parcelsActionBody.tr;
 
+  static const String _parcelsActionBodySent = 'parcels_action_body_sent';
+  static String get parcelsActionBodySent => _parcelsActionBodySent.tr;
+
   static const String _parcelsActionButton = 'parcels_action_button';
   static String get parcelsActionButton => _parcelsActionButton.tr;
+
+  static const String _parcelsActionButtonUpdate =
+      'parcels_action_button_update';
+  static String get parcelsActionButtonUpdate =>
+      _parcelsActionButtonUpdate.tr;
+
+  static const String _parcelsDropoffSheetSubtitle =
+      'parcels_dropoff_sheet_subtitle';
+  static String get parcelsDropoffSheetSubtitle =>
+      _parcelsDropoffSheetSubtitle.tr;
+
+  static const String _parcelsDropoffNotesLabel = 'parcels_dropoff_notes_label';
+  static String get parcelsDropoffNotesLabel => _parcelsDropoffNotesLabel.tr;
+
+  static const String _parcelsDropoffNotesHint = 'parcels_dropoff_notes_hint';
+  static String get parcelsDropoffNotesHint => _parcelsDropoffNotesHint.tr;
+
+  static const String _parcelsDropoffConfirm = 'parcels_dropoff_confirm';
+  static String get parcelsDropoffConfirm => _parcelsDropoffConfirm.tr;
+
+  static const String _parcelsDropoffSent = 'parcels_dropoff_sent';
+  static String get parcelsDropoffSent => _parcelsDropoffSent.tr;
+
+  static const String _parcelsEmpty = 'parcels_empty';
+  static String get parcelsEmpty => _parcelsEmpty.tr;
+
+  static const String _parcelsPaymentPrepaid = 'parcels_payment_prepaid';
+  static String get parcelsPaymentPrepaid => _parcelsPaymentPrepaid.tr;
+
+  static const String _parcelsPaymentCod = 'parcels_payment_cod';
+
+  /// `{amount}` and `{currency}` in the translation are replaced with the
+  /// cash-on-delivery amount due.
+  static String parcelsPaymentCod(String amount, String currency) =>
+      _parcelsPaymentCod.tr
+          .replaceFirst('{amount}', amount)
+          .replaceFirst('{currency}', currency);
+
+  static const String _parcelsFreeDelivery = 'parcels_free_delivery';
+  static String get parcelsFreeDelivery => _parcelsFreeDelivery.tr;
+
+  static const String _parcelsUpdatedJustNow = 'parcels_updated_just_now';
+  static String get parcelsUpdatedJustNow => _parcelsUpdatedJustNow.tr;
+
+  static const String _parcelsUpdatedMinutesAgo =
+      'parcels_updated_minutes_ago';
+
+  /// `{count}` in the translation is replaced with the minutes elapsed.
+  static String parcelsUpdatedMinutesAgo(int count) =>
+      _parcelsUpdatedMinutesAgo.tr.replaceFirst('{count}', '$count');
+
+  static const String _parcelsUpdatedHoursAgo = 'parcels_updated_hours_ago';
+
+  /// `{count}` in the translation is replaced with the hours elapsed.
+  static String parcelsUpdatedHoursAgo(int count) =>
+      _parcelsUpdatedHoursAgo.tr.replaceFirst('{count}', '$count');
+
+  static const String _parcelsUpdatedOn = 'parcels_updated_on';
+
+  /// `{date}` in the translation is replaced with the formatted date.
+  static String parcelsUpdatedOn(String date) =>
+      _parcelsUpdatedOn.tr.replaceFirst('{date}', date);
+
+  static const String _parcelsStepDeliveringLocationSent =
+      'parcels_step_delivering_location_sent';
+  static String get parcelsStepDeliveringLocationSent =>
+      _parcelsStepDeliveringLocationSent.tr;
+
+  static const String _parcelsStepDeliveringOnTheWay =
+      'parcels_step_delivering_on_the_way';
+  static String get parcelsStepDeliveringOnTheWay =>
+      _parcelsStepDeliveringOnTheWay.tr;
+
+  static const String _parcelsStepDeliveredDone = 'parcels_step_delivered_done';
+  static String get parcelsStepDeliveredDone => _parcelsStepDeliveredDone.tr;
 
   static const String _parcelsTrackingTitle = 'parcels_tracking_title';
   static String get parcelsTrackingTitle => _parcelsTrackingTitle.tr;

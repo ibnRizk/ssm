@@ -23,6 +23,7 @@ import '../../features/loyalty/presentation/cubit/loyalty_cubit.dart';
 import '../../features/loyalty/presentation/screens/loyalty_screen.dart';
 import '../../features/order_tracking/presentation/screens/order_tracking_screen.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
+import '../../features/parcels/presentation/cubit/parcels_cubit.dart';
 import '../../features/parcels/presentation/screens/parcels_screen.dart';
 import '../../features/pharmacy/presentation/screens/pharmacy_order_screen.dart';
 import '../../features/restaurants/presentation/cubit/store_cart_cubit.dart';
@@ -154,7 +155,11 @@ abstract class AppRoutes {
               GoRoute(
                 path: parcels,
                 name: parcelsName,
-                builder: (_, __) => const ParcelsScreen(),
+                builder: (_, __) => BlocProvider<ParcelsCubit>(
+                  create: (_) =>
+                      ServiceLocator.instance<ParcelsCubit>()..fetchParcels(),
+                  child: const ParcelsScreen(),
+                ),
               ),
             ],
           ),

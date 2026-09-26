@@ -8,6 +8,9 @@ import 'config/locale/locale_cubit.dart';
 import 'core/api/app_interceptors.dart';
 import 'core/api/auth_event_bus.dart';
 import 'core/api/dio_consumer.dart';
+import 'core/location/device_location_data_source.dart';
+import 'core/location/location_repository.dart';
+import 'core/location/location_repository_impl.dart';
 import 'core/services/local_storage/app_secure_storage.dart';
 import 'core/services/local_storage/app_shared_preferences.dart';
 import 'core/theme/app_colors.dart';
@@ -16,6 +19,7 @@ import 'features/account/account_injection.dart';
 import 'features/addresses/addresses_injection.dart';
 import 'features/auth/auth_injection.dart';
 import 'features/home/home_injection.dart';
+import 'features/parcels/parcels_injection.dart';
 import 'features/loyalty/loyalty_injection.dart';
 import 'features/restaurants/restaurants_injection.dart';
 import 'features/subscriptions/subscriptions_injection.dart';
@@ -40,6 +44,7 @@ abstract class ServiceLocator {
     _injectAppInterceptors();
     _injectLogInterceptor();
     _injectDioConsumer();
+    _injectLocation();
     injectAppColors(AppColors.light);
     injectRoutesStackSingleton(<String>[]);
     _injectLocaleCubit();
@@ -51,6 +56,7 @@ abstract class ServiceLocator {
     await initAddressesFeatureInjection();
     await initLoyaltyFeatureInjection();
     await initHomeFeatureInjection();
+    await initParcelsFeatureInjection();
     await initRestaurantsFeatureInjection();
     await initSubscriptionsFeatureInjection();
     // Register new features here.
@@ -86,6 +92,16 @@ abstract class ServiceLocator {
 
   static void _injectDioConsumer() => instance
       .registerLazySingleton<DioConsumer>(() => DioConsumerImpl(client: Dio()));
+
+  /// Device GPS — shared by Add Address and the parcels drop-off.
+  static void _injectLocation() {
+    instance.registerLazySingleton<DeviceLocationDataSource>(
+      () => DeviceLocationDataSourceImpl(),
+    );
+    instance.registerLazySingleton<LocationRepository>(
+      () => LocationRepositoryImpl(device: instance()),
+    );
+  }
 
   static void _injectEventBus() =>
       instance.registerLazySingleton<AuthEventBus>(() => AuthEventBus.instance);

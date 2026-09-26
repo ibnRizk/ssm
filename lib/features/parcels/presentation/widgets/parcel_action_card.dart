@@ -13,9 +13,23 @@ import '../../../../core/widgets/brand_wave.dart';
 /// button — with the brand wave washing in from the bottom-left, same
 /// physically-anchored treatment as the Home subscription banner.
 class ParcelActionCard extends StatelessWidget {
+  /// The parcel the button acts on, e.g. `SSM-P2048`.
+  final String reference;
+
+  /// A drop-off was already sent — the button then offers to update it.
+  final bool locationSent;
+
+  /// Spinner on the button while locating or sending.
+  final bool isBusy;
   final VoidCallback onSendLocation;
 
-  const ParcelActionCard({super.key, required this.onSendLocation});
+  const ParcelActionCard({
+    super.key,
+    required this.reference,
+    required this.locationSent,
+    required this.isBusy,
+    required this.onSendLocation,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +66,7 @@ class ParcelActionCard extends StatelessWidget {
                           ),
                           SizedBox(height: AppSpacing.xxs.h),
                           Text(
-                            Strings.parcelsActionSubtitle,
+                            Strings.parcelsShipmentReference(reference),
                             style: AppTextStyles.caption(
                               color: Colors.white.withValues(alpha: 0.8),
                             ),
@@ -78,14 +92,19 @@ class ParcelActionCard extends StatelessWidget {
                 ),
                 SizedBox(height: AppSpacing.lg.h),
                 Text(
-                  Strings.parcelsActionBody,
+                  locationSent
+                      ? Strings.parcelsActionBodySent
+                      : Strings.parcelsActionBody,
                   style: AppTextStyles.body(
                     color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
                 SizedBox(height: AppSpacing.lg.h),
                 AppButton(
-                  btnText: Strings.parcelsActionButton,
+                  btnText: locationSent
+                      ? Strings.parcelsActionButtonUpdate
+                      : Strings.parcelsActionButton,
+                  isLoading: isBusy,
                   onPressed: onSendLocation,
                 ),
                 // The wave is a Positioned overlay, not Column flow — this

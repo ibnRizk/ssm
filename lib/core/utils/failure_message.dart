@@ -10,6 +10,14 @@ extension FailureMessage on Failure {
   String get userMessage => switch (this) {
     NetworkFailure(:final String? message) =>
       message ?? Strings.noInternetConnection,
+    LocationFailure(:final reason) => switch (reason) {
+      LocationFailureReason.serviceDisabled => Strings.locationServiceDisabled,
+      LocationFailureReason.permissionDenied =>
+        Strings.locationPermissionDenied,
+      LocationFailureReason.deniedForever =>
+        Strings.locationPermissionDeniedForever,
+      LocationFailureReason.unavailable => Strings.locationUnavailable,
+    },
     _ => message ?? Strings.somethingWentWrong,
   };
 }

@@ -7,10 +7,13 @@ import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
 
+/// A parcel still being processed — not at the warehouse yet, so there's
+/// nothing to track or act on.
 class PendingShipmentCard extends StatelessWidget {
-  final VoidCallback onTap;
+  final String reference;
+  final VoidCallback? onTap;
 
-  const PendingShipmentCard({super.key, required this.onTap});
+  const PendingShipmentCard({super.key, required this.reference, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -47,15 +50,21 @@ class PendingShipmentCard extends StatelessWidget {
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    Strings.parcelsPendingSubtitle,
+                    '${Strings.parcelsShipmentReference(reference)} · '
+                    '${Strings.parcelsPendingSubtitle}',
                     style: AppTextStyles.caption(color: c.textSecondary),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_left, color: c.textHint),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left
+                  : Icons.chevron_right,
+              color: c.textHint,
+            ),
           ],
         ),
       ),

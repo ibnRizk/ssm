@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/error/failures.dart';
-import '../entities/address.dart';
+import '../error/failures.dart';
+import 'geo_point.dart';
 
 abstract class LocationRepository {
   /// Asks for permission if needed. Fails with a [LocationFailure] when

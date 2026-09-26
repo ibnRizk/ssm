@@ -33,6 +33,10 @@ abstract class ApiEndpoints {
   /// Takes the id as the `address_id` query parameter, not a path segment.
   static const String addressDelete = '$_v1/customer/address/delete';
 
+  // --- Parcels ---
+  static const String parcels = '$_v1/customer/parcels';
+  static String parcelLocation(int parcelId) => '$parcels/$parcelId/location';
+
   // --- Zones ---
   static const String zoneList = '$_v1/zone/list';
 

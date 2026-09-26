@@ -1,16 +1,11 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/location/geo_point.dart';
+
+// Part of [Address]'s API, so callers needn't import it separately.
+export '../../../../core/location/geo_point.dart';
+
 enum AddressType { home, office, other }
-
-class GeoPoint extends Equatable {
-  final double latitude;
-  final double longitude;
-
-  const GeoPoint({required this.latitude, required this.longitude});
-
-  @override
-  List<Object?> get props => [latitude, longitude];
-}
 
 /// A saved delivery address.
 class Address extends Equatable {
