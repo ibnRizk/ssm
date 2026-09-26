@@ -8,16 +8,15 @@ import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_button.dart';
 
 /// The dark navy "current order" card — status badge, item summary, and a
-/// full-width white "track order" button. There's only ever one of these on
-/// screen at a time, unlike [PastOrderCard], so its visual language (navy,
-/// not white; inline white button, not a tinted one) is deliberately its
-/// own widget rather than a variant flag on a shared card.
+/// full-width white "track order" button. Its visual language (navy, not
+/// white; inline white button, not a tinted one) is deliberately its own
+/// widget rather than a variant flag on a shared card with [PastOrderCard].
 class CurrentOrderCard extends StatelessWidget {
   final String storeName;
   final String timeAndOrderId;
   final String statusLabel;
   final String itemsDescription;
-  final int price;
+  final String priceLabel;
   final IconData icon;
   final VoidCallback? onTrack;
 
@@ -27,7 +26,7 @@ class CurrentOrderCard extends StatelessWidget {
     required this.timeAndOrderId,
     required this.statusLabel,
     required this.itemsDescription,
-    required this.price,
+    required this.priceLabel,
     required this.icon,
     this.onTrack,
   });
@@ -112,7 +111,7 @@ class CurrentOrderCard extends StatelessWidget {
               ),
               SizedBox(width: AppSpacing.sm.w),
               Text(
-                '$price ر.س',
+                priceLabel,
                 style: AppTextStyles.titleSmall(color: Colors.white),
               ),
             ],

@@ -15,7 +15,8 @@ import '../../../../core/utils/values/strings.dart';
 /// TODO: pull the user's real initial once auth is wired up — 'ع' is a
 /// static placeholder for now (see [HomeHeader]'s equivalent TODO).
 class OrdersHeader extends StatelessWidget {
-  final int totalOrders;
+  /// Null (count pill hidden) until it's known.
+  final int? totalOrders;
 
   const OrdersHeader({super.key, required this.totalOrders});
 
@@ -52,24 +53,25 @@ class OrdersHeader extends StatelessWidget {
               ),
             ),
           ),
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm.w,
-                vertical: AppSpacing.xxs.h,
-              ),
-              decoration: BoxDecoration(
-                color: c.surface,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                border: Border.all(color: c.border),
-              ),
-              child: Text(
-                Strings.ordersCountLabel(totalOrders),
-                style: AppTextStyles.label(color: c.textSecondary),
+          if (totalOrders case final int total)
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm.w,
+                  vertical: AppSpacing.xxs.h,
+                ),
+                decoration: BoxDecoration(
+                  color: c.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                  border: Border.all(color: c.border),
+                ),
+                child: Text(
+                  Strings.ordersCountLabel(total),
+                  style: AppTextStyles.label(color: c.textSecondary),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

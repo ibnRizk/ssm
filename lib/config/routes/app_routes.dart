@@ -27,6 +27,8 @@ import '../../features/loyalty/presentation/cubit/loyalty_cubit.dart';
 import '../../features/loyalty/presentation/screens/loyalty_screen.dart';
 import '../../features/order_tracking/presentation/cubit/order_tracking_cubit.dart';
 import '../../features/order_tracking/presentation/screens/order_tracking_screen.dart';
+import '../../features/orders/presentation/cubit/orders_cubit.dart';
+import '../../features/orders/presentation/cubit/reorder_cubit.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
 import '../../features/parcels/presentation/cubit/parcels_cubit.dart';
 import '../../features/parcels/presentation/screens/parcels_screen.dart';
@@ -167,7 +169,18 @@ abstract class AppRoutes {
               GoRoute(
                 path: orders,
                 name: ordersName,
-                builder: (_, __) => const OrdersScreen(),
+                builder: (_, __) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider<OrdersCubit>(
+                      create: (_) =>
+                          ServiceLocator.instance<OrdersCubit>()..load(),
+                    ),
+                    BlocProvider<ReorderCubit>(
+                      create: (_) => ServiceLocator.instance<ReorderCubit>(),
+                    ),
+                  ],
+                  child: const OrdersScreen(),
+                ),
               ),
             ],
           ),

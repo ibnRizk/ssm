@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../../core/error/failures.dart';
+import '../error/failures.dart';
 
 /// Progress of fetching the next page of a paginated list.
 sealed class LoadMoreStatus extends Equatable {

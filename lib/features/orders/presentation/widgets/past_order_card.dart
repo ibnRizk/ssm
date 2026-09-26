@@ -7,17 +7,26 @@ import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
 
-/// A completed-order card: white background, a green "delivered" badge, and
-/// a soft tinted-orange "reorder" button — the opposite palette from
-/// [CurrentOrderCard] by design (white, not navy; tinted button, not solid).
+/// A finished-order card: white background, a status badge (green once
+/// delivered), and a soft tinted-orange "reorder" button — the opposite
+/// palette from [CurrentOrderCard] by design (white, not navy; tinted
+/// button, not solid).
 class PastOrderCard extends StatelessWidget {
   final String storeName;
   final String dateAndOrderId;
   final String itemsDescription;
-  final int price;
+  final String priceLabel;
+  final String statusLabel;
+  final Color statusBackground;
+  final Color statusColor;
   final IconData icon;
   final Color iconBackground;
   final Color iconColor;
+
+  /// Shows a spinner in place of the button's label.
+  final bool reordering;
+
+  /// Null disables the button.
   final VoidCallback? onReorder;
 
   const PastOrderCard({
@@ -25,10 +34,14 @@ class PastOrderCard extends StatelessWidget {
     required this.storeName,
     required this.dateAndOrderId,
     required this.itemsDescription,
-    required this.price,
+    required this.priceLabel,
+    required this.statusLabel,
+    required this.statusBackground,
+    required this.statusColor,
     required this.icon,
     required this.iconBackground,
     required this.iconColor,
+    this.reordering = false,
     this.onReorder,
   });
 
@@ -82,12 +95,12 @@ class PastOrderCard extends StatelessWidget {
                   vertical: 4.h,
                 ),
                 decoration: BoxDecoration(
-                  color: c.successLight,
+                  color: statusBackground,
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
                 child: Text(
-                  Strings.ordersStatusDelivered,
-                  style: AppTextStyles.label(color: c.success),
+                  statusLabel,
+                  style: AppTextStyles.label(color: statusColor),
                 ),
               ),
             ],
@@ -105,14 +118,14 @@ class PastOrderCard extends StatelessWidget {
               ),
               SizedBox(width: AppSpacing.sm.w),
               Text(
-                '$price ر.س',
+                priceLabel,
                 style: AppTextStyles.titleSmall(color: c.textPrimary),
               ),
             ],
           ),
           SizedBox(height: AppSpacing.md.h),
           GestureDetector(
-            onTap: onReorder,
+            onTap: reordering ? null : onReorder,
             child: Container(
               width: double.infinity,
               height: AppSizes.buttonHeight.h,
@@ -121,10 +134,18 @@ class PastOrderCard extends StatelessWidget {
                 color: c.secondaryLight,
                 borderRadius: BorderRadius.circular(AppRadius.lg.r),
               ),
-              child: Text(
-                Strings.ordersReorderButton,
-                style: AppTextStyles.button(color: c.secondary),
-              ),
+              child: reordering
+                  ? SizedBox.square(
+                      dimension: 20.r,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: c.secondary,
+                      ),
+                    )
+                  : Text(
+                      Strings.ordersReorderButton,
+                      style: AppTextStyles.button(color: c.secondary),
+                    ),
             ),
           ),
         ],

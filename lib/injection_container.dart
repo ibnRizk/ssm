@@ -26,6 +26,7 @@ import 'features/catalog/catalog_injection.dart';
 import 'features/checkout/checkout_injection.dart';
 import 'features/home/home_injection.dart';
 import 'features/order_tracking/order_tracking_injection.dart';
+import 'features/orders/orders_injection.dart';
 import 'features/parcels/parcels_injection.dart';
 import 'features/pharmacy/pharmacy_injection.dart';
 import 'features/loyalty/loyalty_injection.dart';
@@ -68,6 +69,7 @@ abstract class ServiceLocator {
     await initCartFeatureInjection();
     await initCheckoutFeatureInjection();
     await initOrderTrackingFeatureInjection();
+    await initOrdersFeatureInjection();
     await initHomeFeatureInjection();
     await initParcelsFeatureInjection();
     await initPharmacyFeatureInjection();

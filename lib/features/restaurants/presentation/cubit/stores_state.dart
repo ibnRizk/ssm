@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/pagination/load_more_status.dart';
 import '../../../catalog/domain/entities/store.dart';
-import 'load_more_status.dart';
 
-export 'load_more_status.dart';
+export '../../../../core/pagination/load_more_status.dart';
 
 sealed class StoresState extends Equatable {
   /// The search the state is for; empty lists every store of the zone.

@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/pagination/load_more_status.dart';
 import '../../../catalog/domain/entities/store.dart';
 import '../../../catalog/domain/entities/store_item.dart';
-import 'load_more_status.dart';
 
-export 'load_more_status.dart';
+export '../../../../core/pagination/load_more_status.dart';
 
 sealed class StoreDetailsState extends Equatable {
   const StoreDetailsState();

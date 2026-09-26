@@ -5,38 +5,36 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../cubit/orders_state.dart';
 
-/// Which filter is active is pure UI state — no business logic — so it's
-/// `setState`, scoped to just this row, same treatment as
-/// [RestaurantCategoryTabs].
-///
-/// TODO: actually filter the current/past sections once there's more than
-/// one mock order per section to filter.
-class OrdersFilterTabs extends StatefulWidget {
-  const OrdersFilterTabs({super.key});
+/// All / Current / Past. The selection lives in `OrdersCubit`, since it
+/// decides which list the next page is fetched for.
+class OrdersFilterTabs extends StatelessWidget {
+  final OrdersFilter selected;
+  final ValueChanged<OrdersFilter> onSelected;
 
-  @override
-  State<OrdersFilterTabs> createState() => _OrdersFilterTabsState();
-}
+  const OrdersFilterTabs({
+    super.key,
+    required this.selected,
+    required this.onSelected,
+  });
 
-class _OrdersFilterTabsState extends State<OrdersFilterTabs> {
-  int _selectedIndex = 0;
+  static String _label(OrdersFilter filter) => switch (filter) {
+    OrdersFilter.all => Strings.ordersFilterAll,
+    OrdersFilter.current => Strings.ordersFilterCurrent,
+    OrdersFilter.past => Strings.ordersFilterPast,
+  };
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
-    final List<String> labels = <String>[
-      Strings.ordersFilterAll,
-      Strings.ordersFilterCurrent,
-      Strings.ordersFilterPast,
-    ];
     return Row(
       children: <Widget>[
-        for (int i = 0; i < labels.length; i++) ...<Widget>[
-          if (i > 0) SizedBox(width: AppSpacing.lg.w),
+        for (final OrdersFilter filter in OrdersFilter.values) ...<Widget>[
+          if (filter.index > 0) SizedBox(width: AppSpacing.lg.w),
           GestureDetector(
-            onTap: () => setState(() => _selectedIndex = i),
-            child: i == _selectedIndex
+            onTap: () => onSelected(filter),
+            child: filter == selected
                 ? Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: AppSpacing.md.w,
@@ -47,12 +45,12 @@ class _OrdersFilterTabsState extends State<OrdersFilterTabs> {
                       borderRadius: BorderRadius.circular(AppRadius.pill),
                     ),
                     child: Text(
-                      labels[i],
+                      _label(filter),
                       style: AppTextStyles.titleSmall(color: Colors.white),
                     ),
                   )
                 : Text(
-                    labels[i],
+                    _label(filter),
                     style: AppTextStyles.body(color: c.textHint),
                   ),
           ),

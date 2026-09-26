@@ -6,6 +6,7 @@ import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../cubit/cart_cubit.dart';
 import '../cubit/cart_state.dart';
+import 'cart_replace_dialog.dart';
 
 /// Shows the cart's one-shot notices — a failed change, a line that was
 /// already gone, a store conflict — wherever the cart can be changed.
@@ -60,24 +61,11 @@ class _CartNoticeListenerState extends State<CartNoticeListener> {
     if (_confirming) return;
     _confirming = true;
     final CartCubit cubit = context.read<CartCubit>();
-    final bool? replace = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(Strings.cartOtherStoreTitle),
-        content: Text(Strings.cartOtherStoreBody),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(Strings.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(Strings.cartOtherStoreConfirm),
-          ),
-        ],
-      ),
+    final bool replace = await confirmCartReplace(
+      context,
+      body: Strings.cartOtherStoreBody,
     );
     _confirming = false;
-    if (replace ?? false) await cubit.replaceCartWith(request);
+    if (replace) await cubit.replaceCartWith(request);
   }
 }

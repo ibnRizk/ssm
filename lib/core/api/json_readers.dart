@@ -4,6 +4,20 @@
 /// leaving the model to decide whether that's fatal.
 library;
 
+import 'dart:convert';
+
+/// A nested object the backend may send JSON-encoded as a string (e.g. an
+/// order line's `item_details`) — decoded; null when it's unparseable.
+/// Anything that isn't a string is returned as is.
+dynamic jsonDecodedIfString(dynamic value) {
+  if (value is! String) return value;
+  try {
+    return jsonDecode(value);
+  } on FormatException {
+    return null;
+  }
+}
+
 int? jsonInt(dynamic value) => switch (value) {
   final int v => v,
   final num v => v.toInt(),

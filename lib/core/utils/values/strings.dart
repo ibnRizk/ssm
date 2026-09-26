@@ -877,11 +877,63 @@ abstract class Strings {
       'orders_current_section_title';
   static String get ordersCurrentSectionTitle => _ordersCurrentSectionTitle.tr;
 
-  static const String _ordersViewTrackingLink = 'orders_view_tracking_link';
-  static String get ordersViewTrackingLink => _ordersViewTrackingLink.tr;
+  static const String _ordersStatusPending = 'orders_status_pending';
+  static String get ordersStatusPending => _ordersStatusPending.tr;
 
   static const String _ordersStatusPreparing = 'orders_status_preparing';
   static String get ordersStatusPreparing => _ordersStatusPreparing.tr;
+
+  static const String _ordersStatusAwaitingCourier =
+      'orders_status_awaiting_courier';
+  static String get ordersStatusAwaitingCourier =>
+      _ordersStatusAwaitingCourier.tr;
+
+  static const String _ordersStatusOnTheWay = 'orders_status_on_the_way';
+  static String get ordersStatusOnTheWay => _ordersStatusOnTheWay.tr;
+
+  static const String _ordersStatusCancelled = 'orders_status_cancelled';
+  static String get ordersStatusCancelled => _ordersStatusCancelled.tr;
+
+  static const String _ordersStatusRefunded = 'orders_status_refunded';
+  static String get ordersStatusRefunded => _ordersStatusRefunded.tr;
+
+  static const String _ordersItemsCount = 'orders_items_count';
+
+  /// `{count}` in the translation is replaced with the order's item count.
+  static String ordersItemsCount(int count) =>
+      _ordersItemsCount.tr.replaceFirst('{count}', '$count');
+
+  static const String _ordersTodayAt = 'orders_today_at';
+
+  /// `{time}` in the translation is replaced with the order's time.
+  static String ordersTodayAt(String time) =>
+      _ordersTodayAt.tr.replaceFirst('{time}', time);
+
+  static const String _ordersYesterdayAt = 'orders_yesterday_at';
+
+  /// `{time}` in the translation is replaced with the order's time.
+  static String ordersYesterdayAt(String time) =>
+      _ordersYesterdayAt.tr.replaceFirst('{time}', time);
+
+  static const String _ordersCurrentEmpty = 'orders_current_empty';
+  static String get ordersCurrentEmpty => _ordersCurrentEmpty.tr;
+
+  static const String _ordersPastEmpty = 'orders_past_empty';
+  static String get ordersPastEmpty => _ordersPastEmpty.tr;
+
+  static const String _ordersReorderOtherStoreBody =
+      'orders_reorder_other_store_body';
+  static String get ordersReorderOtherStoreBody =>
+      _ordersReorderOtherStoreBody.tr;
+
+  static const String _ordersReorderPartial = 'orders_reorder_partial';
+
+  /// `{count}` in the translation is replaced with the lines left out.
+  static String ordersReorderPartial(int count) =>
+      _ordersReorderPartial.tr.replaceFirst('{count}', '$count');
+
+  static const String _ordersReorderUnavailable = 'orders_reorder_unavailable';
+  static String get ordersReorderUnavailable => _ordersReorderUnavailable.tr;
 
   static const String _ordersTrackButton = 'orders_track_button';
   static String get ordersTrackButton => _ordersTrackButton.tr;

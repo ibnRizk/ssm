@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import '../../../../core/api/json_readers.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/location/geo_point.dart';
@@ -39,7 +37,7 @@ abstract final class OrderTrackingModels {
 
   static OrderLine? _lineFromJson(dynamic json) {
     if (json is! Map) return null;
-    final dynamic details = _decoded(json['item_details']);
+    final dynamic details = jsonDecodedIfString(json['item_details']);
     final String? name = details is Map ? jsonString(details['name']) : null;
     final int? quantity = jsonInt(json['quantity']);
     final double? price = jsonDouble(json['price']);
@@ -47,15 +45,6 @@ abstract final class OrderTrackingModels {
       return null;
     }
     return OrderLine(name: name, quantity: quantity, unitPrice: price);
-  }
-
-  static dynamic _decoded(dynamic value) {
-    if (value is! String) return value;
-    try {
-      return jsonDecode(value);
-    } on FormatException {
-      return null;
-    }
   }
 
   /// `orders/{id}/tracking`: `{ order_id, ssm_status, tracking_allowed,

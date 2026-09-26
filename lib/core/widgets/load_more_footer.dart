@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_dimens.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/values/strings.dart';
-import '../cubit/load_more_status.dart';
+import '../pagination/load_more_status.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_dimens.dart';
+import '../theme/app_text_styles.dart';
+import '../utils/values/strings.dart';
 
 /// The last row of a paginated list: a spinner while the next page loads,
 /// a tap-to-retry row when it failed, nothing otherwise.

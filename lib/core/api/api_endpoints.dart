@@ -62,6 +62,10 @@ abstract class ApiEndpoints {
   // --- Orders (need the zone headers) ---
   static const String orderPlace = '$_v1/customer/order/place';
 
+  /// Paginated like the store list: `offset` is a 1-based page number.
+  static const String runningOrders = '$_v1/customer/order/running-orders';
+  static const String orderHistory = '$_v1/customer/order/list';
+
   /// Legacy shapes; both take the id as the `order_id` query parameter.
   static const String orderDetails = '$_v1/customer/order/details';
   static const String orderTrack = '$_v1/customer/order/track';
