@@ -55,13 +55,15 @@ final class CartLoaded extends CartState {
 /// An item to add, as the store's menu shows it.
 class CartItemRequest extends Equatable {
   final int itemId;
-  final int? storeId;
+
+  /// Required, so every add goes through the single-store check.
+  final int storeId;
   final double unitPrice;
 
   const CartItemRequest({
     required this.itemId,
+    required this.storeId,
     required this.unitPrice,
-    this.storeId,
   });
 
   @override

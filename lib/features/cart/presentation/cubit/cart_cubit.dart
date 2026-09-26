@@ -35,15 +35,19 @@ class CartCubit extends Cubit<CartState> {
     return next;
   }
 
-  /// (Re)fetches the cart. A refresh keeps the cart visible, and through a
-  /// failure.
+  /// (Re)fetches the cart. A failed refresh keeps the cart visible and
+  /// reports the failure, so a stale cart never passes for a fresh one.
   Future<void> load() => _serial(() async {
     final bool refreshing = state is CartLoaded;
     if (!refreshing) emit(const CartLoading());
     final Either<Failure, Cart> result = await repository.getCart();
     if (isClosed) return;
     result.fold((Failure failure) {
-      if (!refreshing) emit(CartError(failure));
+      if (refreshing) {
+        _notify((int seq) => CartActionFailed(seq, failure));
+      } else {
+        emit(CartError(failure));
+      }
     }, _emitCart);
   });
 
@@ -80,14 +84,19 @@ class CartCubit extends Cubit<CartState> {
   }
 
   /// Empties the cart, then adds [request] — the customer's answer to a
-  /// [CartStoreConflict]. Stops at the first failed step.
+  /// [CartStoreConflict]. A line that's already gone counts as removed;
+  /// any other failure stops the replacement.
   Future<void> replaceCartWith(CartItemRequest request) async {
     if (!_addingItemIds.add(request.itemId)) return;
     _publish();
     try {
       await _serial(() async {
         for (final CartLine line in _cart.lines) {
-          if (!await _apply(repository.removeLine(line.id))) return;
+          final bool removed = await _apply(
+            repository.removeLine(line.id),
+            goneIsDone: true,
+          );
+          if (!removed) return;
         }
         await _apply(
           repository.addItem(
@@ -140,8 +149,13 @@ class CartCubit extends Cubit<CartState> {
 
   /// Applies a change's answer; returns whether it went through. A 404
   /// means the line was already gone, so the cart is re-fetched to stop
-  /// showing it.
-  Future<bool> _apply(Future<Either<Failure, Cart>> call) async {
+  /// showing it — and if that re-fetch fails, the failure is what's
+  /// reported. With [goneIsDone] (removing a line), a gone line is the
+  /// wanted outcome: re-synced silently and counted as success.
+  Future<bool> _apply(
+    Future<Either<Failure, Cart>> call, {
+    bool goneIsDone = false,
+  }) async {
     final Either<Failure, Cart> result = await call;
     if (isClosed) return false;
     final Failure? failure = result.fold((Failure f) => f, (Cart cart) {
@@ -150,15 +164,24 @@ class CartCubit extends Cubit<CartState> {
     });
     if (failure == null) return true;
 
-    if (failure is NotFoundFailure) {
-      final Either<Failure, Cart> fresh = await repository.getCart();
-      if (isClosed) return false;
-      fresh.fold((_) {}, _emitCart);
-      _notify(CartLineGone.new);
-    } else {
+    if (failure is! NotFoundFailure) {
       _notify((int seq) => CartActionFailed(seq, failure));
+      return false;
     }
-    return false;
+    final Either<Failure, Cart> fresh = await repository.getCart();
+    if (isClosed) return false;
+    return fresh.fold(
+      (Failure refetchFailure) {
+        _notify((int seq) => CartActionFailed(seq, refetchFailure));
+        return false;
+      },
+      (Cart cart) {
+        _emitCart(cart);
+        if (goneIsDone) return true;
+        _notify(CartLineGone.new);
+        return false;
+      },
+    );
   }
 
   Cart get _cart {

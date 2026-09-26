@@ -7,10 +7,8 @@ import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
 
-/// Who to contact about this order (the store, or the courier once one is
-/// assigned) and a one-tap call button.
-///
-/// TODO: launch an actual phone call once a real phone number exists.
+/// Who's handling the order (the store, or the courier once one is on it)
+/// and, when there's a number to dial, a one-tap call button.
 class OrderTrackingContactCard extends StatelessWidget {
   final String name;
   final String subtitle;
@@ -52,14 +50,16 @@ class OrderTrackingContactCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: AppSpacing.sm.w),
-          GestureDetector(
-            onTap: onCall,
-            child: Text(
-              Strings.orderTrackingCallButton,
-              style: AppTextStyles.titleSmall(color: c.secondary),
+          if (onCall != null) ...<Widget>[
+            SizedBox(width: AppSpacing.sm.w),
+            GestureDetector(
+              onTap: onCall,
+              child: Text(
+                Strings.orderTrackingCallButton,
+                style: AppTextStyles.titleSmall(color: c.secondary),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

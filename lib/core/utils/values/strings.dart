@@ -484,16 +484,6 @@ abstract class Strings {
   static String get orderConfirmationChangeButton =>
       _orderConfirmationChangeButton.tr;
 
-  static const String _orderConfirmationDeliveryFeeSectionTitle =
-      'order_confirmation_delivery_fee_section_title';
-  static String get orderConfirmationDeliveryFeeSectionTitle =>
-      _orderConfirmationDeliveryFeeSectionTitle.tr;
-
-  static const String _orderConfirmationAreaCardSubtitle =
-      'order_confirmation_area_card_subtitle';
-  static String get orderConfirmationAreaCardSubtitle =>
-      _orderConfirmationAreaCardSubtitle.tr;
-
   static const String _orderConfirmationPaymentSectionTitle =
       'order_confirmation_payment_section_title';
   static String get orderConfirmationPaymentSectionTitle =>
@@ -597,6 +587,108 @@ abstract class Strings {
       'order_tracking_step_delivered_subtitle';
   static String get orderTrackingStepDeliveredSubtitle =>
       _orderTrackingStepDeliveredSubtitle.tr;
+
+  static const String _checkoutAddAddress = 'checkout_add_address';
+  static String get checkoutAddAddress => _checkoutAddAddress.tr;
+
+  static const String _checkoutNoAddresses = 'checkout_no_addresses';
+  static String get checkoutNoAddresses => _checkoutNoAddresses.tr;
+
+  static const String _checkoutEmptyCart = 'checkout_empty_cart';
+  static String get checkoutEmptyCart => _checkoutEmptyCart.tr;
+
+  static const String _checkoutUnknownStore = 'checkout_unknown_store';
+  static String get checkoutUnknownStore => _checkoutUnknownStore.tr;
+
+  static const String _checkoutNoAddress = 'checkout_no_address';
+  static String get checkoutNoAddress => _checkoutNoAddress.tr;
+
+  static const String _checkoutAddressWithoutLocation =
+      'checkout_address_without_location';
+  static String get checkoutAddressWithoutLocation =>
+      _checkoutAddressWithoutLocation.tr;
+
+  static const String _checkoutOutOfCoverage = 'checkout_out_of_coverage';
+  static String get checkoutOutOfCoverage => _checkoutOutOfCoverage.tr;
+
+  static const String _checkoutCodLimit = 'checkout_cod_limit';
+  static String get checkoutCodLimit => _checkoutCodLimit.tr;
+
+  static const String _checkoutDeliveryFeeOnConfirm =
+      'checkout_delivery_fee_on_confirm';
+  static String get checkoutDeliveryFeeOnConfirm =>
+      _checkoutDeliveryFeeOnConfirm.tr;
+
+  static const String _checkoutOrderPlaced = 'checkout_order_placed';
+  static String get checkoutOrderPlaced => _checkoutOrderPlaced.tr;
+
+  static const String _orderTrackingRejectedTitle =
+      'order_tracking_rejected_title';
+  static String get orderTrackingRejectedTitle =>
+      _orderTrackingRejectedTitle.tr;
+
+  static const String _orderTrackingCancelledTitle =
+      'order_tracking_cancelled_title';
+  static String get orderTrackingCancelledTitle =>
+      _orderTrackingCancelledTitle.tr;
+
+  static const String _orderTrackingAssignmentFailedTitle =
+      'order_tracking_assignment_failed_title';
+  static String get orderTrackingAssignmentFailedTitle =>
+      _orderTrackingAssignmentFailedTitle.tr;
+
+  static const String _orderTrackingFailedDescription =
+      'order_tracking_failed_description';
+  static String get orderTrackingFailedDescription =>
+      _orderTrackingFailedDescription.tr;
+
+  static const String _orderTrackingStale = 'order_tracking_stale';
+  static String get orderTrackingStale => _orderTrackingStale.tr;
+
+  static const String _orderTrackingOtpTitle = 'order_tracking_otp_title';
+  static String get orderTrackingOtpTitle => _orderTrackingOtpTitle.tr;
+
+  static const String _orderTrackingOtpHint = 'order_tracking_otp_hint';
+  static String get orderTrackingOtpHint => _orderTrackingOtpHint.tr;
+
+  static const String _orderTrackingOtpExpires = 'order_tracking_otp_expires';
+
+  /// `{time}` is replaced with [time].
+  static String orderTrackingOtpExpires(String time) =>
+      _orderTrackingOtpExpires.tr.replaceFirst('{time}', time);
+
+  static const String _orderTrackingOtpUnavailable =
+      'order_tracking_otp_unavailable';
+  static String get orderTrackingOtpUnavailable =>
+      _orderTrackingOtpUnavailable.tr;
+
+  static const String _orderTrackingOtpFailed = 'order_tracking_otp_failed';
+  static String get orderTrackingOtpFailed => _orderTrackingOtpFailed.tr;
+
+  static const String _orderTrackingOtpRetry = 'order_tracking_otp_retry';
+  static String get orderTrackingOtpRetry => _orderTrackingOtpRetry.tr;
+
+  static const String _orderTrackingOtpNewCode = 'order_tracking_otp_new_code';
+  static String get orderTrackingOtpNewCode => _orderTrackingOtpNewCode.tr;
+
+  static const String _orderTrackingItemsTitle = 'order_tracking_items_title';
+  static String get orderTrackingItemsTitle => _orderTrackingItemsTitle.tr;
+
+  static const String _orderTrackingCourierLabel =
+      'order_tracking_courier_label';
+  static String get orderTrackingCourierLabel => _orderTrackingCourierLabel.tr;
+
+  static const String _orderTrackingStoreLabel = 'order_tracking_store_label';
+  static String get orderTrackingStoreLabel => _orderTrackingStoreLabel.tr;
+
+  static const String _orderTrackingLocationLive =
+      'order_tracking_location_live';
+  static String get orderTrackingLocationLive => _orderTrackingLocationLive.tr;
+
+  static const String _orderTrackingLocationUnavailable =
+      'order_tracking_location_unavailable';
+  static String get orderTrackingLocationUnavailable =>
+      _orderTrackingLocationUnavailable.tr;
 
   // --- Subscriptions ---
   static const String _subscriptionsTitle = 'subscriptions_title';

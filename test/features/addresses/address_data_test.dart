@@ -90,6 +90,19 @@ void main() {
       expect(addresses.single.location, isNull);
     });
 
+    test('reads the zone the server resolved for the address', () {
+      final List<AddressModel> addresses = AddressModel.listFromJson(
+        <String, dynamic>{
+          'addresses': <dynamic>[
+            <String, dynamic>{'id': 1, 'address': 'x', 'zone_id': '2'},
+            <String, dynamic>{'id': 2, 'address': 'y'},
+          ],
+        },
+      );
+
+      expect(addresses.map((Address a) => a.zoneId), <int?>[2, null]);
+    });
+
     test('reads unknown address types as other', () {
       expect(AddressModel.addressTypeFromWire('others'), AddressType.other);
       expect(AddressModel.addressTypeFromWire('OFFICE'), AddressType.office);

@@ -12,7 +12,10 @@ class AppInterceptors extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     // debugPrint('REQUEST[${options.method}] => PATH: ${options.path}');
-    options.headers['Content-Type'] = 'application/json';
+    // Multipart bodies need Dio's own `multipart/form-data; boundary=…`.
+    if (options.data is! FormData) {
+      options.headers['Content-Type'] = 'application/json';
+    }
     // The backend translates messages by this header. Read per request so it
     // always matches the language the UI is currently showing.
     options.headers['X-localization'] = _languageCode;

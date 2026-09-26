@@ -18,12 +18,14 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/cart/presentation/cubit/cart_cubit.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
-import '../../features/checkout/presentation/screens/order_confirmation_screen.dart';
 import '../../features/catalog/domain/entities/store.dart';
+import '../../features/checkout/presentation/cubit/checkout_cubit.dart';
+import '../../features/checkout/presentation/screens/order_confirmation_screen.dart';
 import '../../features/home/presentation/cubit/home_cubit.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/loyalty/presentation/cubit/loyalty_cubit.dart';
 import '../../features/loyalty/presentation/screens/loyalty_screen.dart';
+import '../../features/order_tracking/presentation/cubit/order_tracking_cubit.dart';
 import '../../features/order_tracking/presentation/screens/order_tracking_screen.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
 import '../../features/parcels/presentation/cubit/parcels_cubit.dart';
@@ -56,7 +58,8 @@ abstract class AppRoutes {
   static String storeDetailsPath(int storeId) => '/store-details/$storeId';
   static const String cart = '/cart';
   static const String orderConfirmation = '/order-confirmation';
-  static const String orderTracking = '/order-tracking';
+  static const String orderTracking = '/order-tracking/:orderId';
+  static String orderTrackingPath(int orderId) => '/order-tracking/$orderId';
   static const String loyalty = '/loyalty';
   static const String restaurants = '/home/restaurants';
   static const String pharmacyOrder = '/home/pharmacy';
@@ -287,8 +290,14 @@ abstract class AppRoutes {
       GoRoute(
         path: orderConfirmation,
         name: orderConfirmationName,
-        builder: (_, GoRouterState state) =>
-            _cartScope(state.extra, const OrderConfirmationScreen()),
+        builder: (_, GoRouterState state) => _cartScope(
+          state.extra,
+          BlocProvider<CheckoutCubit>(
+            create: (_) =>
+                ServiceLocator.instance<CheckoutCubit>()..loadAddresses(),
+            child: const OrderConfirmationScreen(),
+          ),
+        ),
       ),
 
       // Outside the shell for the same reason as `orderConfirmation` above:
@@ -298,13 +307,19 @@ abstract class AppRoutes {
         path: orderTracking,
         name: orderTrackingName,
         builder: (_, GoRouterState state) {
-          final Map<String, dynamic> args =
-              (state.extra as Map<String, dynamic>?) ?? <String, dynamic>{};
-          final String? storeName = args['storeName'] as String?;
-          final String? orderNumber = args['orderNumber'] as String?;
-          return OrderTrackingScreen(
-            storeName: storeName ?? OrderTrackingScreen.defaultStoreName,
-            orderNumber: orderNumber ?? OrderTrackingScreen.defaultOrderNumber,
+          final int? orderId = int.tryParse(
+            state.pathParameters['orderId'] ?? '',
+          );
+          if (orderId == null) {
+            return Scaffold(
+              body: Center(child: Text('No route found for ${state.uri}')),
+            );
+          }
+          return BlocProvider<OrderTrackingCubit>(
+            create: (_) =>
+                ServiceLocator.instance<OrderTrackingCubit>(param1: orderId)
+                  ..load(),
+            child: const OrderTrackingScreen(),
           );
         },
       ),

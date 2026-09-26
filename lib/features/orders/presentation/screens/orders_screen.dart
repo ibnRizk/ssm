@@ -37,6 +37,10 @@ class _PastOrderListItem {
 const int _placeholderTotalOrders = 12;
 const String _placeholderCurrentStoreName = 'مطاعم مذاق';
 const String _placeholderCurrentOrderNumber = 'SSM-1048';
+
+/// Until this tab lists real orders, tracking opens this id — which the
+/// backend answers with "not found" unless such an order exists.
+const int _placeholderCurrentOrderId = 1048;
 const String _placeholderCurrentTimeAndOrderId =
     'اليوم، ٨:٢٤ م · #$_placeholderCurrentOrderNumber';
 const String _placeholderCurrentItemsDescription = 'وجبة برجر 2 × SSM + بطاطس';
@@ -104,11 +108,7 @@ class OrdersScreen extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () => context.push(
-                    AppRoutes.orderTracking,
-                    extra: <String, String>{
-                      'storeName': _placeholderCurrentStoreName,
-                      'orderNumber': _placeholderCurrentOrderNumber,
-                    },
+                    AppRoutes.orderTrackingPath(_placeholderCurrentOrderId),
                   ),
                   child: Text(
                     Strings.ordersViewTrackingLink,
@@ -126,11 +126,7 @@ class OrdersScreen extends StatelessWidget {
               price: _placeholderCurrentPrice,
               icon: Icons.lunch_dining,
               onTrack: () => context.push(
-                AppRoutes.orderTracking,
-                extra: <String, String>{
-                  'storeName': _placeholderCurrentStoreName,
-                  'orderNumber': _placeholderCurrentOrderNumber,
-                },
+                AppRoutes.orderTrackingPath(_placeholderCurrentOrderId),
               ),
             ),
             SizedBox(height: AppSpacing.xl.h),

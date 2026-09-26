@@ -10,10 +10,19 @@ import '../cubit/cart_state.dart';
 /// Shows the cart's one-shot notices — a failed change, a line that was
 /// already gone, a store conflict — wherever the cart can be changed.
 /// Never rebuilds [child].
-class CartNoticeListener extends StatelessWidget {
+class CartNoticeListener extends StatefulWidget {
   final Widget child;
 
   const CartNoticeListener({super.key, required this.child});
+
+  @override
+  State<CartNoticeListener> createState() => _CartNoticeListenerState();
+}
+
+class _CartNoticeListenerState extends State<CartNoticeListener> {
+  /// One store-conflict dialog at a time; later conflicts are dropped
+  /// while it's open.
+  bool _confirming = false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +49,7 @@ class CartNoticeListener extends StatelessWidget {
             _confirmReplace(context, request);
         }
       },
-      child: child,
+      child: widget.child,
     );
   }
 
@@ -48,6 +57,8 @@ class CartNoticeListener extends StatelessWidget {
     BuildContext context,
     CartItemRequest request,
   ) async {
+    if (_confirming) return;
+    _confirming = true;
     final CartCubit cubit = context.read<CartCubit>();
     final bool? replace = await showDialog<bool>(
       context: context,
@@ -66,6 +77,7 @@ class CartNoticeListener extends StatelessWidget {
         ],
       ),
     );
+    _confirming = false;
     if (replace ?? false) await cubit.replaceCartWith(request);
   }
 }

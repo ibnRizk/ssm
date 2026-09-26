@@ -6,18 +6,21 @@ import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
 
-/// The dark navy "current status" hero card: status label, the active
-/// step's own title blown up large in orange (so it can never drift out of
-/// sync with the timeline below it), a short description, and the order
-/// number.
+/// The dark navy "current status" hero card: status label, the headline
+/// blown up large in orange, a short description, the order number, and
+/// — when the last refresh failed — a note that the status may be behind.
 class OrderTrackingStatusBanner extends StatelessWidget {
-  final String currentStepTitle;
-  final String orderNumber;
+  final String headline;
+  final String description;
+  final int orderId;
+  final bool stale;
 
   const OrderTrackingStatusBanner({
     super.key,
-    required this.currentStepTitle,
-    required this.orderNumber,
+    required this.headline,
+    required this.description,
+    required this.orderId,
+    this.stale = false,
   });
 
   @override
@@ -38,22 +41,26 @@ class OrderTrackingStatusBanner extends StatelessWidget {
             style: AppTextStyles.caption(color: Colors.white),
           ),
           SizedBox(height: AppSpacing.xxs.h),
-          Text(
-            currentStepTitle,
-            style: AppTextStyles.h1(color: c.secondary),
-          ),
+          Text(headline, style: AppTextStyles.h1(color: c.secondary)),
           SizedBox(height: AppSpacing.xs.h),
           Text(
-            Strings.orderTrackingStatusDescription,
+            description,
             style: AppTextStyles.caption(
               color: Colors.white.withValues(alpha: 0.85),
             ),
           ),
           SizedBox(height: AppSpacing.sm.h),
           Text(
-            '${Strings.orderTrackingOrderNumberLabel} #$orderNumber',
+            '${Strings.orderTrackingOrderNumberLabel} #$orderId',
             style: AppTextStyles.caption(color: Colors.white),
           ),
+          if (stale) ...<Widget>[
+            SizedBox(height: AppSpacing.xs.h),
+            Text(
+              Strings.orderTrackingStale,
+              style: AppTextStyles.caption(color: c.secondary),
+            ),
+          ],
         ],
       ),
     );

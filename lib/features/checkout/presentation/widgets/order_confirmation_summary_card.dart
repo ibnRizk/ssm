@@ -8,22 +8,26 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/money_format.dart';
 import '../../../../core/utils/values/strings.dart';
 
-/// Products value → delivery fee → bold total, in one white card. [total] is
-/// summed here rather than passed pre-added, so it can never drift out of
-/// sync with the two rows above it.
+/// Products value → delivery fee → bold total, in one white card. The total
+/// is summed here rather than passed pre-added, so it can never drift out
+/// of sync with the rows above it.
 class OrderConfirmationSummaryCard extends StatelessWidget {
   final double subtotal;
-  final double deliveryFee;
+
+  /// Null until the server computes it on placing the order — the total
+  /// is then labelled as excluding delivery.
+  final double? deliveryFee;
 
   const OrderConfirmationSummaryCard({
     super.key,
     required this.subtotal,
-    required this.deliveryFee,
+    this.deliveryFee,
   });
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
+    final double? deliveryFee = this.deliveryFee;
     return Container(
       width: double.infinity,
       decoration: AppDecorations.card(c),
@@ -32,13 +36,15 @@ class OrderConfirmationSummaryCard extends StatelessWidget {
         children: <Widget>[
           _SummaryRow(
             label: Strings.cartProductsValueLabel,
-            amount: subtotal,
+            value: formatSar(subtotal),
             c: c,
           ),
           SizedBox(height: AppSpacing.sm.h),
           _SummaryRow(
             label: Strings.orderConfirmationDeliveryFeeLabel,
-            amount: deliveryFee,
+            value: deliveryFee == null
+                ? Strings.checkoutDeliveryFeeOnConfirm
+                : formatSar(deliveryFee),
             c: c,
           ),
           SizedBox(height: AppSpacing.sm.h),
@@ -48,12 +54,14 @@ class OrderConfirmationSummaryCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  Strings.cartTotalLabel,
+                  deliveryFee == null
+                      ? Strings.cartTotalBeforeDelivery
+                      : Strings.cartTotalLabel,
                   style: AppTextStyles.title(color: c.textPrimary),
                 ),
               ),
               Text(
-                formatSar(subtotal + deliveryFee),
+                formatSar(subtotal + (deliveryFee ?? 0)),
                 style: AppTextStyles.h2(color: c.secondary),
               ),
             ],
@@ -66,12 +74,12 @@ class OrderConfirmationSummaryCard extends StatelessWidget {
 
 class _SummaryRow extends StatelessWidget {
   final String label;
-  final double amount;
+  final String value;
   final AppColors c;
 
   const _SummaryRow({
     required this.label,
-    required this.amount,
+    required this.value,
     required this.c,
   });
 
@@ -82,10 +90,7 @@ class _SummaryRow extends StatelessWidget {
         Expanded(
           child: Text(label, style: AppTextStyles.body(color: c.textSecondary)),
         ),
-        Text(
-          formatSar(amount),
-          style: AppTextStyles.titleSmall(color: c.textPrimary),
-        ),
+        Text(value, style: AppTextStyles.titleSmall(color: c.textPrimary)),
       ],
     );
   }

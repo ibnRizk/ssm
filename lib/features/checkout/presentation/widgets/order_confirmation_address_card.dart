@@ -5,27 +5,27 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/values/strings.dart';
 
-/// The saved-address card: pin badge, neighborhood/street, and a "change"
-/// link.
-///
-/// TODO: open the address picker once that flow exists.
+/// The delivery-address card: pin badge, two lines of text, and an action
+/// link ("Change", or "Add address" when there's none yet).
 class OrderConfirmationAddressCard extends StatelessWidget {
-  final String neighborhood;
-  final String streetDetails;
-  final VoidCallback? onChange;
+  final String title;
+  final String? subtitle;
+  final String actionLabel;
+  final VoidCallback? onAction;
 
   const OrderConfirmationAddressCard({
     super.key,
-    required this.neighborhood,
-    required this.streetDetails,
-    this.onChange,
+    required this.title,
+    required this.actionLabel,
+    this.subtitle,
+    this.onAction,
   });
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
+    final String? subtitle = this.subtitle;
     return Container(
       width: double.infinity,
       decoration: AppDecorations.card(c),
@@ -47,26 +47,28 @@ class OrderConfirmationAddressCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  neighborhood,
+                  title,
                   style: AppTextStyles.titleSmall(color: c.textPrimary),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  streetDetails,
-                  style: AppTextStyles.caption(color: c.textSecondary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                if (subtitle != null) ...<Widget>[
+                  SizedBox(height: 2.h),
+                  Text(
+                    subtitle,
+                    style: AppTextStyles.caption(color: c.textSecondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),
           SizedBox(width: AppSpacing.xs.w),
           GestureDetector(
-            onTap: onChange,
+            onTap: onAction,
             child: Text(
-              Strings.orderConfirmationChangeButton,
+              actionLabel,
               style: AppTextStyles.titleSmall(color: c.secondary),
             ),
           ),

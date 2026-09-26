@@ -6,7 +6,7 @@ import '../theme/app_dimens.dart';
 import '../theme/app_text_styles.dart';
 import 'modal_bottom_sheet_scaffold.dart';
 
-/// One choice in a [OptionPickerSheet].
+/// One choice in an [OptionPickerSheet].
 class PickerOption {
   final int id;
   final String title;

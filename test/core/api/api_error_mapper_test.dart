@@ -64,6 +64,27 @@ void main() {
       },
     );
 
+    test('409 maps to ConflictException carrying the error code', () {
+      final AppException result = mapDioException(
+        _badResponse(409, <String, dynamic>{
+          'errors': <Map<String, String>>[
+            <String, String>{
+              'code': 'otp-not-available',
+              'message': 'The order is not out for delivery.',
+            },
+          ],
+        }),
+      );
+
+      expect(
+        result,
+        const ConflictException(
+          message: 'The order is not out for delivery.',
+          code: 'otp-not-available',
+        ),
+      );
+    });
+
     test('429 maps to TooManyRequestsException', () {
       final AppException result = mapDioException(
         _badResponse(429, <String, dynamic>{'message': 'Too Many Attempts.'}),

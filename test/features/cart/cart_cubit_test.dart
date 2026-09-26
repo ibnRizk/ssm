@@ -282,6 +282,53 @@ void main() {
     expect(notices.single, isA<CartLineGone>());
   });
 
+  test('a gone line whose re-sync fails reports that failure', () async {
+    final CartLine line = _line(id: 5);
+    await loadWith(Cart(<CartLine>[line]));
+
+    final Future<void> increment = cubit.increment(line);
+    await _settle();
+    repository.calls.last.fail(const NotFoundFailure());
+    await _settle();
+    repository.calls.last.fail(const NetworkFailure());
+    await increment;
+    await _settle();
+
+    expect(notices, <CartNotice>[const CartActionFailed(1, NetworkFailure())]);
+  });
+
+  test('a failed refresh keeps the cart and says so', () async {
+    await loadWith(Cart(<CartLine>[_line()]));
+
+    final Future<void> refresh = cubit.load();
+    await _settle();
+    repository.calls.last.fail(const NetworkFailure());
+    await refresh;
+    await _settle();
+
+    expect((cubit.state as CartLoaded).cart.itemCount, 1);
+    expect(notices, <CartNotice>[const CartActionFailed(1, NetworkFailure())]);
+  });
+
+  test('replacing skips a line that is already gone', () async {
+    await loadWith(Cart(<CartLine>[_line(id: 1, itemId: 30, storeId: 8)]));
+
+    final Future<void> replace = cubit.replaceCartWith(_burger);
+    await _settle();
+    repository.calls.last.fail(const NotFoundFailure());
+    await _settle();
+    expect(repository.calls.last.method, 'getCart');
+    repository.calls.last.answer(Cart.empty);
+    await _settle();
+    expect(repository.calls.last.method, 'addItem');
+    repository.calls.last.answer(Cart(<CartLine>[_line()]));
+    await replace;
+    await _settle();
+
+    expect((cubit.state as CartLoaded).cart.lines.single.storeId, 7);
+    expect(notices, isEmpty);
+  });
+
   test('a failed change keeps the cart and reports the failure', () async {
     final CartLine line = _line(id: 5);
     await loadWith(Cart(<CartLine>[line]));

@@ -7,56 +7,37 @@ import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/failure_message.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../../core/widgets/error_text.dart';
+import '../../../../core/widgets/option_picker_sheet.dart';
 import '../../../../core/widgets/simple_app_bar.dart';
+import '../../../addresses/domain/entities/address.dart';
 import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../../../cart/presentation/cubit/cart_state.dart';
+import '../../domain/entities/order_request.dart';
+import '../cubit/checkout_cubit.dart';
+import '../cubit/checkout_state.dart';
+import '../utils/checkout_messages.dart';
 import '../widgets/order_confirmation_address_card.dart';
-import '../widgets/order_confirmation_delivery_fee_section.dart';
 import '../widgets/order_confirmation_payment_card.dart';
 import '../widgets/order_confirmation_summary_card.dart';
 
-/// Placeholder saved address — swap for the resolved address once that flow
-/// exists.
-const String _placeholderNeighborhood = 'حي الملك فهد';
-const String _placeholderStreetDetails = 'شارع الأمير سلطان · تربة';
-
-/// Placeholder area/fee tiers, in reading order (right-to-left) — matches
-/// the "تربة / العلاوة / الحايرة / الحشرج" tiers referenced elsewhere
-/// (Cart, Pharmacy Order) for the same delivery zone.
-const List<DeliveryArea> _placeholderAreas = <DeliveryArea>[
-  DeliveryArea(name: 'تربة', fee: 10),
-  DeliveryArea(name: 'العلاوة', fee: 15),
-  DeliveryArea(name: 'الحايرة', fee: 20),
-  DeliveryArea(name: 'الحشرج', fee: 25),
-];
-
-/// Order confirmation / checkout screen — pushed as a top-level route
-/// outside [MainScaffold]'s shell, same treatment as Cart and Store Details,
-/// so no bottom navigation bar here even though the design mock included one.
+/// Checkout — pushed as a top-level route outside [MainScaffold]'s shell,
+/// same treatment as Cart and Store Details, so no bottom navigation bar.
 ///
-/// [CartCubit] is handed in via the route (the same instance Cart was
-/// using — see `AppRoutes.orderConfirmation`), so the products-value row
-/// stays in sync with the cart. Which delivery area is picked, though, is
-/// local UI state owned right here: it only feeds this screen's own total,
-/// so lifting it into the cart cubit (or further, a new cubit) would be
-/// state management for state nothing outside this screen needs.
-class OrderConfirmationScreen extends StatefulWidget {
+/// Reads the [CartCubit] the Cart screen handed over (see
+/// `AppRoutes.orderConfirmation`) and its own [CheckoutCubit] for the
+/// address and the placing. Once the order is placed, the flow restarts
+/// from Home with tracking on top, so Back never returns to a spent cart.
+class OrderConfirmationScreen extends StatelessWidget {
   const OrderConfirmationScreen({super.key});
-
-  @override
-  State<OrderConfirmationScreen> createState() =>
-      _OrderConfirmationScreenState();
-}
-
-class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
-  int _selectedAreaIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
-    final int deliveryFee = _placeholderAreas[_selectedAreaIndex].fee;
     return Scaffold(
       backgroundColor: c.background,
       appBar: SimpleAppBar(
@@ -64,72 +45,197 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         onBack: () => context.pop(),
       ),
       body: SafeArea(
-        child: BlocBuilder<CartCubit, CartState>(
-          builder: (BuildContext context, CartState state) {
-            final double subtotal = state is CartLoaded
-                ? state.cart.subtotal
-                : 0;
-            return SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(
-                AppSpacing.screen.w,
-                AppSpacing.md.h,
-                AppSpacing.screen.w,
-                AppSpacing.xxl.h,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Text(
-                    Strings.orderConfirmationAddressSectionTitle,
-                    style: AppTextStyles.body(color: c.textSecondary),
-                  ),
-                  SizedBox(height: AppSpacing.sm.h),
-                  const OrderConfirmationAddressCard(
-                    neighborhood: _placeholderNeighborhood,
-                    streetDetails: _placeholderStreetDetails,
-                  ),
-                  SizedBox(height: AppSpacing.lg.h),
-                  Text(
-                    Strings.orderConfirmationDeliveryFeeSectionTitle,
-                    style: AppTextStyles.body(color: c.textSecondary),
-                  ),
-                  SizedBox(height: AppSpacing.sm.h),
-                  OrderConfirmationDeliveryFeeSection(
-                    areas: _placeholderAreas,
-                    selectedIndex: _selectedAreaIndex,
-                    onSelected: (int index) =>
-                        setState(() => _selectedAreaIndex = index),
-                  ),
-                  SizedBox(height: AppSpacing.lg.h),
-                  Text(
-                    Strings.orderConfirmationPaymentSectionTitle,
-                    style: AppTextStyles.body(color: c.textSecondary),
-                  ),
-                  SizedBox(height: AppSpacing.sm.h),
-                  const OrderConfirmationPaymentCard(),
-                  SizedBox(height: AppSpacing.lg.h),
-                  Text(
-                    Strings.orderConfirmationSummarySectionTitle,
-                    style: AppTextStyles.body(color: c.textSecondary),
-                  ),
-                  SizedBox(height: AppSpacing.sm.h),
-                  OrderConfirmationSummaryCard(
-                    subtotal: subtotal,
-                    deliveryFee: deliveryFee.toDouble(),
-                  ),
-                  SizedBox(height: AppSpacing.lg.h),
-                  AppButton(
-                    btnText: Strings.orderConfirmationConfirmButton,
-                    // TODO: actually submit the order once the ordering API
-                    // exists — this just proves the flow through to tracking.
-                    onPressed: () => context.push(AppRoutes.orderTracking),
-                  ),
-                ],
-              ),
-            );
-          },
+        child: _CheckoutFeedbackListener(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.screen.w,
+              AppSpacing.md.h,
+              AppSpacing.screen.w,
+              AppSpacing.xxl.h,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                _SectionTitle(Strings.orderConfirmationAddressSectionTitle),
+                const _AddressSection(),
+                SizedBox(height: AppSpacing.lg.h),
+                _SectionTitle(Strings.orderConfirmationPaymentSectionTitle),
+                const OrderConfirmationPaymentCard(),
+                SizedBox(height: AppSpacing.lg.h),
+                _SectionTitle(Strings.orderConfirmationSummarySectionTitle),
+                BlocSelector<CartCubit, CartState, double>(
+                  selector: (CartState state) =>
+                      state is CartLoaded ? state.cart.subtotal : 0,
+                  builder: (_, double subtotal) =>
+                      OrderConfirmationSummaryCard(subtotal: subtotal),
+                ),
+                SizedBox(height: AppSpacing.lg.h),
+                const _PlaceOrderButton(),
+              ],
+            ),
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: AppSpacing.sm.h),
+      child: Text(
+        text,
+        style: AppTextStyles.body(color: context.colors.textSecondary),
+      ),
+    );
+  }
+}
+
+class _AddressSection extends StatelessWidget {
+  const _AddressSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CheckoutCubit, CheckoutState>(
+      buildWhen: (CheckoutState previous, CheckoutState current) =>
+          previous.addresses != current.addresses ||
+          previous.addressId != current.addressId,
+      builder: (BuildContext context, CheckoutState state) =>
+          switch (state.addresses) {
+            CheckoutAddressesLoading() => Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.md.h),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+            CheckoutAddressesError(:final failure) => ErrorText(
+              message: failure.userMessage,
+              onRetry: () => context.read<CheckoutCubit>().loadAddresses(),
+            ),
+            CheckoutAddressesLoaded(:final List<Address> items) =>
+              switch (state.selectedAddress) {
+                null => OrderConfirmationAddressCard(
+                  title: Strings.checkoutNoAddresses,
+                  actionLabel: Strings.checkoutAddAddress,
+                  onAction: () => _addAddress(context),
+                ),
+                final Address address => OrderConfirmationAddressCard(
+                  title: address.address,
+                  subtitle:
+                      '${address.contactPersonName} · '
+                      '${address.contactPersonNumber}',
+                  actionLabel: Strings.orderConfirmationChangeButton,
+                  onAction: () => _pickAddress(context, items, address.id),
+                ),
+              },
+          },
+    );
+  }
+
+  Future<void> _pickAddress(
+    BuildContext context,
+    List<Address> addresses,
+    int selectedId,
+  ) async {
+    final CheckoutCubit cubit = context.read<CheckoutCubit>();
+    final int? picked = await OptionPickerSheet.show(
+      context,
+      title: Strings.orderConfirmationAddressSectionTitle,
+      selectedId: selectedId,
+      emptyText: Strings.checkoutNoAddresses,
+      options: <PickerOption>[
+        for (final Address address in addresses)
+          PickerOption(
+            id: address.id,
+            title: address.address,
+            subtitle: address.contactPersonName,
+          ),
+      ],
+    );
+    if (picked != null) cubit.selectAddress(picked);
+  }
+
+  /// Add Address pops `true` on save — then the new address is offered.
+  Future<void> _addAddress(BuildContext context) async {
+    final CheckoutCubit cubit = context.read<CheckoutCubit>();
+    final bool? added = await context.push<bool>(AppRoutes.addAddress);
+    if (added ?? false) await cubit.loadAddresses();
+  }
+}
+
+class _PlaceOrderButton extends StatelessWidget {
+  const _PlaceOrderButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final bool placing = context.select<CheckoutCubit, bool>(
+      (CheckoutCubit cubit) => cubit.state.placing,
+    );
+    // Only a settled cart can be ordered: none still loading, no line
+    // mid-change.
+    final bool cartReady = context.select<CartCubit, bool>(
+      (CartCubit cubit) => switch (cubit.state) {
+        CartLoaded(:final busyLineIds, :final addingItemIds) =>
+          busyLineIds.isEmpty && addingItemIds.isEmpty,
+        _ => false,
+      },
+    );
+    return AppButton(
+      btnText: Strings.orderConfirmationConfirmButton,
+      isLoading: placing,
+      onPressed: cartReady
+          ? () {
+              final CartState cart = context.read<CartCubit>().state;
+              if (cart is CartLoaded) {
+                context.read<CheckoutCubit>().placeOrder(cart.cart);
+              }
+            }
+          : null,
+    );
+  }
+}
+
+/// Snackbars for notices; on a placed order, Home with tracking on top.
+class _CheckoutFeedbackListener extends StatelessWidget {
+  final Widget child;
+
+  const _CheckoutFeedbackListener({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CheckoutCubit, CheckoutState>(
+          listenWhen: (CheckoutState previous, CheckoutState current) =>
+              current.notice != null && previous.notice != current.notice,
+          listener: (BuildContext context, CheckoutState state) =>
+              showAppSnackBar(
+                context: context,
+                message: state.notice!.message,
+                type: ToastType.error,
+              ),
+        ),
+        BlocListener<CheckoutCubit, CheckoutState>(
+          listenWhen: (CheckoutState previous, CheckoutState current) =>
+              previous.placedOrder == null && current.placedOrder != null,
+          listener: (BuildContext context, CheckoutState state) {
+            final PlacedOrder order = state.placedOrder!;
+            showAppSnackBar(
+              context: context,
+              message: Strings.checkoutOrderPlaced,
+              type: ToastType.success,
+            );
+            GoRouter.of(context)
+              ..go(AppRoutes.home)
+              ..push(AppRoutes.orderTrackingPath(order.id));
+          },
+        ),
+      ],
+      child: child,
     );
   }
 }
