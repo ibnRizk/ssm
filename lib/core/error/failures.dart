@@ -64,3 +64,26 @@ class FetchDataFailure extends Failure {
 
   const FetchDataFailure({this.message});
 }
+
+/// Why the device couldn't produce a position — each needs a different
+/// prompt (turn on GPS vs. grant access vs. open settings vs. try again).
+enum LocationFailureReason {
+  serviceDisabled,
+  permissionDenied,
+  deniedForever,
+
+  /// No fix in time (indoors, weak signal).
+  unavailable,
+}
+
+class LocationFailure extends Failure {
+  @override
+  final String? message;
+
+  final LocationFailureReason reason;
+
+  const LocationFailure({required this.reason, this.message});
+
+  @override
+  List<Object?> get props => [message, reason];
+}

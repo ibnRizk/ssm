@@ -20,5 +20,16 @@ abstract class ApiEndpoints {
 
   // --- Customer ---
   static const String customerInfo = '$_v1/customer/info';
+  static const String updateProfile = '$_v1/customer/update-profile';
+
+  // --- Loyalty ---
   static const String loyalty = '$_v1/customer/loyalty';
+  static const String loyaltyHistory = '$_v1/customer/loyalty/history';
+
+  // --- Addresses ---
+  static const String addressList = '$_v1/customer/address/list';
+  static const String addressAdd = '$_v1/customer/address/add';
+
+  /// Takes the id as the `address_id` query parameter, not a path segment.
+  static const String addressDelete = '$_v1/customer/address/delete';
 }

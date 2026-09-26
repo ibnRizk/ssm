@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/utils/saudi_phone.dart';
+import '../../../../core/utils/string_extension.dart';
 import '../../domain/entities/login_credentials.dart';
 import '../../domain/entities/registration_details.dart';
 import '../../domain/repos/auth_repository.dart';
@@ -12,8 +13,6 @@ import 'auth_state.dart';
 /// input and normalises it into domain values before calling the repository.
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository repository;
-
-  static final RegExp _whitespace = RegExp(r'\s+');
 
   AuthCubit({required this.repository}) : super(const AuthInitial());
 
@@ -32,7 +31,7 @@ class AuthCubit extends Cubit<AuthState> {
   }) => _submit(
     () => repository.register(
       RegistrationDetails(
-        name: name.trim().replaceAll(_whitespace, ' '),
+        name: name.collapseWhitespace(),
         phone: SaudiPhone.toE164(phone),
         email: email.trim(),
         password: password,

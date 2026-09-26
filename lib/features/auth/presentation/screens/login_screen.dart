@@ -10,9 +10,9 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/validator.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../cubit/auth_cubit.dart';
-import '../widgets/auth_labeled_field.dart';
+import '../../../../core/widgets/labeled_field.dart';
 import '../widgets/auth_password_field.dart';
-import '../widgets/auth_phone_field.dart';
+import '../../../../core/widgets/phone_field.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/auth_state_listener.dart';
 import '../widgets/auth_submit_button.dart';
@@ -77,12 +77,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 SizedBox(height: AppSpacing.xxl.h),
-                AuthLabeledField(
+                LabeledField(
                   label: Strings.authPhoneLabel,
-                  child: AuthPhoneField(controller: _phoneController),
+                  child: PhoneField(controller: _phoneController),
                 ),
                 SizedBox(height: AppSpacing.lg.h),
-                AuthLabeledField(
+                LabeledField(
                   label: Strings.authPasswordLabel,
                   child: AuthPasswordField(
                     controller: _passwordController,

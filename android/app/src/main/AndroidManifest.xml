@@ -3,6 +3,9 @@
          so without it every release-build request fails at the socket and
          surfaces as "No internet connection". -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Add Address: "use my current location". Foreground only. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:label="flutter_base"
         android:name="${applicationName}"

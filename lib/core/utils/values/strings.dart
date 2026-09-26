@@ -298,8 +298,7 @@ abstract class Strings {
   static const String _storeDetailsTabAddons = 'store_details_tab_addons';
   static String get storeDetailsTabAddons => _storeDetailsTabAddons.tr;
 
-  static const String _storeDetailsSectionTitle =
-      'store_details_section_title';
+  static const String _storeDetailsSectionTitle = 'store_details_section_title';
   static String get storeDetailsSectionTitle => _storeDetailsSectionTitle.tr;
 
   static const String _storeDetailsAddonsTitle = 'store_details_addons_title';
@@ -473,8 +472,7 @@ abstract class Strings {
   static String get subscriptionsAreaSelectorTitle =>
       _subscriptionsAreaSelectorTitle.tr;
 
-  static const String _subscriptionsAreaFeeNote =
-      'subscriptions_area_fee_note';
+  static const String _subscriptionsAreaFeeNote = 'subscriptions_area_fee_note';
 
   /// `{area}` and `{fee}` in the translation are replaced with the
   /// currently-selected area's name and delivery fee.
@@ -526,15 +524,30 @@ abstract class Strings {
 
   static const String _loyaltyNoSubscriptionNote =
       'loyalty_no_subscription_note';
-  static String get loyaltyNoSubscriptionNote => _loyaltyNoSubscriptionNote.tr;
+
+  /// `{target}` in the translation is replaced with the orders needed per
+  /// reward.
+  static String loyaltyNoSubscriptionNote(int target) =>
+      _loyaltyNoSubscriptionNote.tr.replaceFirst('{target}', '$target');
 
   static const String _loyaltyFreeDeliveryTitle = 'loyalty_free_delivery_title';
   static String get loyaltyFreeDeliveryTitle => _loyaltyFreeDeliveryTitle.tr;
 
   static const String _loyaltyFreeDeliverySubtitle =
       'loyalty_free_delivery_subtitle';
-  static String get loyaltyFreeDeliverySubtitle =>
-      _loyaltyFreeDeliverySubtitle.tr;
+
+  /// `{target}` in the translation is replaced with the orders needed per
+  /// reward. Shown while no free delivery is available.
+  static String loyaltyFreeDeliverySubtitle(int target) =>
+      _loyaltyFreeDeliverySubtitle.tr.replaceFirst('{target}', '$target');
+
+  static const String _loyaltyFreeDeliveriesAvailable =
+      'loyalty_free_deliveries_available';
+
+  /// `{count}` in the translation is replaced with the unused free
+  /// deliveries.
+  static String loyaltyFreeDeliveriesAvailable(int count) =>
+      _loyaltyFreeDeliveriesAvailable.tr.replaceFirst('{count}', '$count');
 
   static const String _loyaltyRecentOrdersTitle = 'loyalty_recent_orders_title';
   static String get loyaltyRecentOrdersTitle => _loyaltyRecentOrdersTitle.tr;
@@ -571,8 +584,7 @@ abstract class Strings {
 
   static const String _ordersCurrentSectionTitle =
       'orders_current_section_title';
-  static String get ordersCurrentSectionTitle =>
-      _ordersCurrentSectionTitle.tr;
+  static String get ordersCurrentSectionTitle => _ordersCurrentSectionTitle.tr;
 
   static const String _ordersViewTrackingLink = 'orders_view_tracking_link';
   static String get ordersViewTrackingLink => _ordersViewTrackingLink.tr;
@@ -650,14 +662,12 @@ abstract class Strings {
   static const String _accountAddressesTitle = 'account_addresses_title';
   static String get accountAddressesTitle => _accountAddressesTitle.tr;
 
-  static const String _accountAddressesSubtitle =
-      'account_addresses_subtitle';
+  static const String _accountAddressesSubtitle = 'account_addresses_subtitle';
   static String get accountAddressesSubtitle => _accountAddressesSubtitle.tr;
 
   static const String _accountSubscriptionsTitle =
       'account_subscriptions_title';
-  static String get accountSubscriptionsTitle =>
-      _accountSubscriptionsTitle.tr;
+  static String get accountSubscriptionsTitle => _accountSubscriptionsTitle.tr;
 
   static const String _accountSubscriptionsSubtitleNone =
       'account_subscriptions_subtitle_none';
@@ -683,6 +693,100 @@ abstract class Strings {
   static String get accountLoyaltySubtitleFallback =>
       _accountLoyaltySubtitleFallback.tr;
 
+  // --- Edit profile ---
+  static const String _editProfileTitle = 'edit_profile_title';
+  static String get editProfileTitle => _editProfileTitle.tr;
+
+  static const String _editProfileSuccess = 'edit_profile_success';
+  static String get editProfileSuccess => _editProfileSuccess.tr;
+
+  // --- Addresses ---
+  static const String _addressesEmpty = 'addresses_empty';
+  static String get addressesEmpty => _addressesEmpty.tr;
+
+  static const String _addressesAddButton = 'addresses_add_button';
+  static String get addressesAddButton => _addressesAddButton.tr;
+
+  static const String _addressDeleteConfirmTitle =
+      'address_delete_confirm_title';
+  static String get addressDeleteConfirmTitle => _addressDeleteConfirmTitle.tr;
+
+  static const String _addressDeleteConfirmMessage =
+      'address_delete_confirm_message';
+  static String get addressDeleteConfirmMessage =>
+      _addressDeleteConfirmMessage.tr;
+
+  static const String _addressTypeHome = 'address_type_home';
+  static String get addressTypeHome => _addressTypeHome.tr;
+
+  static const String _addressTypeOffice = 'address_type_office';
+  static String get addressTypeOffice => _addressTypeOffice.tr;
+
+  static const String _addressTypeOther = 'address_type_other';
+  static String get addressTypeOther => _addressTypeOther.tr;
+
+  static const String _addAddressTitle = 'add_address_title';
+  static String get addAddressTitle => _addAddressTitle.tr;
+
+  static const String _addressTypeLabel = 'address_type_label';
+  static String get addressTypeLabel => _addressTypeLabel.tr;
+
+  static const String _addressLocationLabel = 'address_location_label';
+  static String get addressLocationLabel => _addressLocationLabel.tr;
+
+  static const String _addressUseCurrentLocation =
+      'address_use_current_location';
+  static String get addressUseCurrentLocation => _addressUseCurrentLocation.tr;
+
+  static const String _addressLocateButton = 'address_locate_button';
+  static String get addressLocateButton => _addressLocateButton.tr;
+
+  static const String _addressUpdateLocation = 'address_update_location';
+  static String get addressUpdateLocation => _addressUpdateLocation.tr;
+
+  static const String _addressLocationPicked = 'address_location_picked';
+  static String get addressLocationPicked => _addressLocationPicked.tr;
+
+  static const String _addressLocationRequired = 'address_location_required';
+  static String get addressLocationRequired => _addressLocationRequired.tr;
+
+  static const String _addressDetailsLabel = 'address_details_label';
+  static String get addressDetailsLabel => _addressDetailsLabel.tr;
+
+  static const String _addressDetailsHint = 'address_details_hint';
+  static String get addressDetailsHint => _addressDetailsHint.tr;
+
+  static const String _addressContactNameLabel = 'address_contact_name_label';
+  static String get addressContactNameLabel => _addressContactNameLabel.tr;
+
+  static const String _addressContactNameHint = 'address_contact_name_hint';
+  static String get addressContactNameHint => _addressContactNameHint.tr;
+
+  static const String _addressContactPhoneLabel = 'address_contact_phone_label';
+  static String get addressContactPhoneLabel => _addressContactPhoneLabel.tr;
+
+  static const String _addressAdded = 'address_added';
+  static String get addressAdded => _addressAdded.tr;
+
+  /// 403 `coordinates` — the point is outside every delivery zone.
+  static const String _addressOutOfCoverage = 'address_out_of_coverage';
+  static String get addressOutOfCoverage => _addressOutOfCoverage.tr;
+
+  // --- Device location ---
+  static const String _locationServiceDisabled = 'location_service_disabled';
+  static String get locationServiceDisabled => _locationServiceDisabled.tr;
+
+  static const String _locationPermissionDenied = 'location_permission_denied';
+  static String get locationPermissionDenied => _locationPermissionDenied.tr;
+
+  static const String _locationPermissionDeniedForever =
+      'location_permission_denied_forever';
+  static String get locationPermissionDeniedForever =>
+      _locationPermissionDeniedForever.tr;
+
+  static const String _locationUnavailable = 'location_unavailable';
+  static String get locationUnavailable => _locationUnavailable.tr;
+
   static const String _comingSoon = 'coming_soon';
   static String get comingSoon => _comingSoon.tr;
 
@@ -698,7 +802,8 @@ abstract class Strings {
   static const String _accountAppearanceTitle = 'account_appearance_title';
   static String get accountAppearanceTitle => _accountAppearanceTitle.tr;
 
-  static const String _accountAppearanceSubtitle = 'account_appearance_subtitle';
+  static const String _accountAppearanceSubtitle =
+      'account_appearance_subtitle';
   static String get accountAppearanceSubtitle => _accountAppearanceSubtitle.tr;
 
   static const String _accountFooterTagline = 'account_footer_tagline';

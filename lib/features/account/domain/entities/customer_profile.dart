@@ -6,12 +6,16 @@ class CustomerProfile extends Equatable {
   /// As stored server-side (E.164, e.g. `+966512345678`).
   final String phone;
 
+  /// Null for legacy accounts created without one.
+  final String? email;
+
   /// Null when the backend omits or garbles `created_at`.
   final DateTime? createdAt;
 
   const CustomerProfile({
     required this.name,
     required this.phone,
+    this.email,
     this.createdAt,
   });
 
@@ -26,6 +30,35 @@ class CustomerProfile extends Equatable {
 
   int? get memberSinceYear => createdAt?.year;
 
+  /// This profile with the editable fields replaced by [update]; the
+  /// server-owned fields (join date) are kept.
+  CustomerProfile applying(ProfileUpdate update) => CustomerProfile(
+    name: update.name,
+    phone: update.phone,
+    email: update.email,
+    createdAt: createdAt,
+  );
+
   @override
-  List<Object?> get props => [name, phone, createdAt];
+  List<Object?> get props => [name, phone, email, createdAt];
+}
+
+/// The fields a customer can change from Edit Profile. All three are sent
+/// on every update — the backend expects the full set.
+class ProfileUpdate extends Equatable {
+  /// First and last name in one field ("First Last").
+  final String name;
+
+  /// E.164, e.g. `+966512345678` — see `SaudiPhone.toE164`.
+  final String phone;
+  final String email;
+
+  const ProfileUpdate({
+    required this.name,
+    required this.phone,
+    required this.email,
+  });
+
+  @override
+  List<Object?> get props => [name, phone, email];
 }

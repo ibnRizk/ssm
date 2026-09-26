@@ -35,7 +35,11 @@ class AccountProfileSection extends StatelessWidget {
           avatarLetter: profile.initial,
           phone: SaudiPhone.toLocal(profile.phone),
           memberSinceYear: profile.memberSinceYear,
-          onEdit: () => context.push(AppRoutes.editProfile),
+          // Hand over this tab's cubit so a save updates this card.
+          onEdit: () => context.push(
+            AppRoutes.editProfile,
+            extra: context.read<ProfileCubit>(),
+          ),
         ),
         ProfileError(:final failure) => _ProfileErrorCard(failure: failure),
         ProfileInitial() || ProfileLoading() => const _ProfilePlaceholder(),

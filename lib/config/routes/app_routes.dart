@@ -5,14 +5,21 @@ import 'package:go_router/go_router.dart';
 import '../../core/utils/values/strings.dart';
 import '../../core/widgets/coming_soon_screen.dart';
 import '../../core/widgets/slider_photo.dart';
+import '../../features/account/presentation/cubit/edit_profile_cubit.dart';
 import '../../features/account/presentation/cubit/profile_cubit.dart';
 import '../../features/account/presentation/screens/account_screen.dart';
+import '../../features/account/presentation/screens/edit_profile_screen.dart';
+import '../../features/addresses/presentation/cubit/add_address_cubit.dart';
+import '../../features/addresses/presentation/cubit/addresses_cubit.dart';
+import '../../features/addresses/presentation/screens/add_address_screen.dart';
+import '../../features/addresses/presentation/screens/addresses_screen.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/checkout/presentation/screens/order_confirmation_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/loyalty/presentation/cubit/loyalty_cubit.dart';
 import '../../features/loyalty/presentation/screens/loyalty_screen.dart';
 import '../../features/order_tracking/presentation/screens/order_tracking_screen.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
@@ -47,6 +54,7 @@ abstract class AppRoutes {
   static const String pharmacyOrder = '/home/pharmacy';
   static const String editProfile = '/edit-profile';
   static const String addresses = '/addresses';
+  static const String addAddress = '/addresses/add';
   static const String helpSupport = '/help-support';
 
   // --- Names (for context.goNamed / context.pushNamed) ---
@@ -68,6 +76,7 @@ abstract class AppRoutes {
   static const String pharmacyOrderName = 'pharmacyOrder';
   static const String editProfileName = 'editProfile';
   static const String addressesName = 'addresses';
+  static const String addAddressName = 'addAddress';
   static const String helpSupportName = 'helpSupport';
 
   static final GoRouter router = GoRouter(
@@ -187,8 +196,7 @@ abstract class AppRoutes {
         name: photoViewerName,
         builder: (_, GoRouterState state) {
           final Map<String, dynamic> args =
-              (state.extra as Map<String, dynamic>?) ??
-              <String, dynamic>{};
+              (state.extra as Map<String, dynamic>?) ?? <String, dynamic>{};
           return SliderPhotoScreen(
             imagesFiles: args['imagesFiles'],
             images: args['images'],
@@ -206,8 +214,7 @@ abstract class AppRoutes {
         name: storeDetailsName,
         builder: (_, GoRouterState state) {
           final Map<String, dynamic> args =
-              (state.extra as Map<String, dynamic>?) ??
-              <String, dynamic>{};
+              (state.extra as Map<String, dynamic>?) ?? <String, dynamic>{};
           final String? storeName = args['storeName'] as String?;
           final String? storeSubtitle = args['storeSubtitle'] as String?;
           return BlocProvider<StoreCartCubit>(
@@ -268,14 +275,12 @@ abstract class AppRoutes {
         name: orderTrackingName,
         builder: (_, GoRouterState state) {
           final Map<String, dynamic> args =
-              (state.extra as Map<String, dynamic>?) ??
-              <String, dynamic>{};
+              (state.extra as Map<String, dynamic>?) ?? <String, dynamic>{};
           final String? storeName = args['storeName'] as String?;
           final String? orderNumber = args['orderNumber'] as String?;
           return OrderTrackingScreen(
             storeName: storeName ?? OrderTrackingScreen.defaultStoreName,
-            orderNumber:
-                orderNumber ?? OrderTrackingScreen.defaultOrderNumber,
+            orderNumber: orderNumber ?? OrderTrackingScreen.defaultOrderNumber,
           );
         },
       ),
@@ -288,40 +293,72 @@ abstract class AppRoutes {
       GoRoute(
         path: loyalty,
         name: loyaltyName,
-        builder: (_, __) => const LoyaltyScreen(),
+        builder: (_, __) => BlocProvider<LoyaltyCubit>(
+          create: (_) => ServiceLocator.instance<LoyaltyCubit>()..load(),
+          child: const LoyaltyScreen(),
+        ),
       ),
 
       // Pushed from the Account tab, outside the shell like `loyalty`.
-      // Placeholders until their real screens exist.
       GoRoute(
         path: editProfile,
         name: editProfileName,
-        builder: (_, __) => ComingSoonScreen(title: Strings.accountMyInfoTitle),
+        builder: (_, GoRouterState state) {
+          // The Account tab hands over its own ProfileCubit (see
+          // `AccountProfileSection`) so a save updates the card behind this
+          // screen. Reached any other way, it loads a fresh one.
+          final ProfileCubit? profileCubit = state.extra as ProfileCubit?;
+          return MultiBlocProvider(
+            providers: [
+              if (profileCubit != null)
+                BlocProvider<ProfileCubit>.value(value: profileCubit)
+              else
+                BlocProvider<ProfileCubit>(
+                  create: (_) =>
+                      ServiceLocator.instance<ProfileCubit>()..load(),
+                ),
+              BlocProvider<EditProfileCubit>(
+                create: (_) => ServiceLocator.instance<EditProfileCubit>(),
+              ),
+            ],
+            child: const EditProfileScreen(),
+          );
+        },
       ),
       GoRoute(
         path: addresses,
         name: addressesName,
-        builder: (_, __) =>
-            ComingSoonScreen(title: Strings.accountAddressesTitle),
+        builder: (_, __) => BlocProvider<AddressesCubit>(
+          create: (_) => ServiceLocator.instance<AddressesCubit>()..load(),
+          child: const AddressesScreen(),
+        ),
+        routes: <RouteBase>[
+          // Pops `true` on save — see `AddressesScreen._openAddAddress`.
+          GoRoute(
+            path: 'add',
+            name: addAddressName,
+            builder: (_, __) => BlocProvider<AddAddressCubit>(
+              create: (_) => ServiceLocator.instance<AddAddressCubit>(),
+              child: const AddAddressScreen(),
+            ),
+          ),
+        ],
       ),
+      // Placeholder until its real screen exists.
       GoRoute(
         path: helpSupport,
         name: helpSupportName,
         builder: (_, __) => ComingSoonScreen(title: Strings.accountHelpTitle),
       ),
     ],
-    errorBuilder: (_, GoRouterState state) => Scaffold(
-      body: Center(
-        child: Text('No route found for ${state.uri}'),
-      ),
-    ),
+    errorBuilder: (_, GoRouterState state) =>
+        Scaffold(body: Center(child: Text('No route found for ${state.uri}'))),
   );
 
   static String get currentRoute =>
       routesStack.isEmpty ? splash : routesStack.last;
 
-  static void pushRouteToRoutesStack(String route) =>
-      routesStack.add(route);
+  static void pushRouteToRoutesStack(String route) => routesStack.add(route);
 
   static void popRouteFromRoutesStack() {
     if (routesStack.isNotEmpty) routesStack.removeLast();

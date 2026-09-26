@@ -8,7 +8,7 @@ import '../../../../core/utils/values/strings.dart';
 
 /// The tall multiline "what do you need" field. Takes an externally-owned
 /// [controller] — the screen creates and disposes it, this widget only
-/// renders it, matching [AuthPhoneField]'s split of ownership.
+/// renders it, matching [PhoneField]'s split of ownership.
 class PharmacyRequestField extends StatelessWidget {
   final TextEditingController controller;
 

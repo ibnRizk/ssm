@@ -110,3 +110,21 @@ class CacheException extends AppException {
     return CacheFailure(message: message);
   }
 }
+
+/// The device location is unavailable — see [LocationFailureReason].
+class LocationException extends AppException {
+  @override
+  final String? message;
+
+  final LocationFailureReason reason;
+
+  const LocationException({required this.reason, this.message});
+
+  @override
+  Failure toFailure() {
+    return LocationFailure(reason: reason, message: message);
+  }
+
+  @override
+  List<Object?> get props => [message, reason];
+}

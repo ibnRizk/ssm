@@ -47,4 +47,18 @@ class ProfileCubit extends Cubit<ProfileState> {
       ),
     );
   }
+
+  /// Applies a profile the customer just saved on Edit Profile, without a
+  /// refetch; the loyalty progress on screen is kept.
+  void profileUpdated(CustomerProfile profile) {
+    // Edit Profile may outlive the Account tab that handed this cubit over.
+    if (isClosed) return;
+    final ProfileState current = state;
+    emit(
+      ProfileLoaded(
+        profile: profile,
+        loyalty: current is ProfileLoaded ? current.loyalty : null,
+      ),
+    );
+  }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_base/features/account/domain/entities/customer_profile.d
 import 'package:flutter_base/features/account/domain/repos/account_repository.dart';
 import 'package:flutter_base/features/account/presentation/cubit/profile_cubit.dart';
 import 'package:flutter_base/features/account/presentation/cubit/profile_state.dart';
+import 'package:flutter_base/features/loyalty/domain/entities/loyalty_history.dart';
 import 'package:flutter_base/features/loyalty/domain/entities/loyalty_progress.dart';
 import 'package:flutter_base/features/loyalty/domain/repos/loyalty_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +19,8 @@ const CustomerProfile _profile = CustomerProfile(
 const LoyaltyProgress _loyalty = LoyaltyProgress(
   currentProgress: 7,
   eligibleOrdersRequired: 10,
+  ordersRemainingForNextReward: 3,
+  availableFreeDeliveries: 0,
 );
 
 /// Each fake answers through a [Completer] the test controls, so ordering
@@ -32,6 +35,10 @@ class _FakeAccountRepository implements AccountRepository {
     calls++;
     return pending.future;
   }
+
+  @override
+  Future<Either<Failure, Unit>> updateProfile(ProfileUpdate update) =>
+      throw UnimplementedError();
 }
 
 class _FakeLoyaltyRepository implements LoyaltyRepository {
@@ -44,6 +51,10 @@ class _FakeLoyaltyRepository implements LoyaltyRepository {
     calls++;
     return pending.future;
   }
+
+  @override
+  Future<Either<Failure, LoyaltyHistory>> getHistory() =>
+      throw UnimplementedError();
 }
 
 void main() {
@@ -140,5 +151,39 @@ void main() {
 
     expect(account.calls, 1);
     expect(loyalty.calls, 1);
+  });
+
+  group('profileUpdated', () {
+    const CustomerProfile edited = CustomerProfile(
+      name: 'Sara Edited',
+      phone: '+966598765432',
+      email: 'sara@example.com',
+    );
+
+    test('replaces the profile and keeps the loyalty progress', () async {
+      final Future<void> load = cubit.load();
+      account.pending.complete(const Right<Failure, CustomerProfile>(_profile));
+      loyalty.pending.complete(const Right<Failure, LoyaltyProgress>(_loyalty));
+      await load;
+
+      cubit.profileUpdated(edited);
+
+      expect(
+        cubit.state,
+        const ProfileLoaded(profile: edited, loyalty: _loyalty),
+      );
+    });
+
+    test('shows the profile even before the first load finished', () {
+      cubit.profileUpdated(edited);
+
+      expect(cubit.state, const ProfileLoaded(profile: edited));
+    });
+
+    test('is ignored once the cubit is closed', () async {
+      await cubit.close();
+
+      expect(() => cubit.profileUpdated(edited), returnsNormally);
+    });
   });
 }

@@ -2,12 +2,13 @@ import '../../injection_container.dart';
 import 'data/datasources/account_remote_data_source.dart';
 import 'data/repos/account_repository_impl.dart';
 import 'domain/repos/account_repository.dart';
+import 'presentation/cubit/edit_profile_cubit.dart';
 import 'presentation/cubit/profile_cubit.dart';
 
 /// Per-feature registration. See `home_injection.dart` for the convention.
 ///
 /// [ProfileCubit] is screen-scoped — provided at the profile route in
-/// `AppRoutes`.
+/// `AppRoutes`, and handed to Edit Profile through `extra`.
 Future<void> initAccountFeatureInjection() async {
   /// Cubits
   ServiceLocator.instance.registerFactory<ProfileCubit>(
@@ -15,6 +16,9 @@ Future<void> initAccountFeatureInjection() async {
       accountRepository: ServiceLocator.instance(),
       loyaltyRepository: ServiceLocator.instance(),
     ),
+  );
+  ServiceLocator.instance.registerFactory<EditProfileCubit>(
+    () => EditProfileCubit(repository: ServiceLocator.instance()),
   );
 
   /// Repository

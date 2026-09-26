@@ -31,7 +31,6 @@ class AccountSettingsSection extends StatelessWidget {
       AccountSettingsTile(
         icon: Icons.location_on_outlined,
         title: Strings.accountAddressesTitle,
-        // Placeholder until the addresses list is integrated.
         subtitle: Strings.accountAddressesSubtitle,
         onTap: () => context.push(AppRoutes.addresses),
       ),

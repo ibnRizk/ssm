@@ -5,31 +5,27 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../../domain/entities/loyalty_progress.dart';
 
 /// The dark navy hero card: heading, a thick circular progress ring with the
 /// count inside it, and a "N orders left" line with the count highlighted
 /// orange. The two faint decorative circles echo [AuthScaffold]'s same
 /// subtle-curves-on-navy treatment.
 class LoyaltyProgressCard extends StatelessWidget {
-  final int completed;
-  final int target;
+  final LoyaltyProgress progress;
 
-  const LoyaltyProgressCard({
-    super.key,
-    required this.completed,
-    required this.target,
-  });
+  const LoyaltyProgressCard({super.key, required this.progress});
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
-    final double progress = (completed / target).clamp(0.0, 1.0);
-    final int remaining = (target - completed).clamp(0, target);
+    final int completed = progress.currentProgress;
+    final int target = progress.eligibleOrdersRequired;
+    final int remaining = progress.ordersRemainingForNextReward;
 
     final List<String> templateParts = Strings.loyaltyRemainingOrdersTemplate
         .split('{count}');
-    final String remainingFragment =
-        '$remaining ${Strings.loyaltyOrdersUnit}';
+    final String remainingFragment = '$remaining ${Strings.loyaltyOrdersUnit}';
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.xl.r),
@@ -66,7 +62,7 @@ class LoyaltyProgressCard extends StatelessWidget {
                     children: <Widget>[
                       SizedBox.expand(
                         child: CircularProgressIndicator(
-                          value: progress,
+                          value: progress.percent / 100,
                           strokeWidth: 12.r,
                           backgroundColor: c.primaryDark,
                           valueColor: AlwaysStoppedAnimation<Color>(

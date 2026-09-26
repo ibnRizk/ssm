@@ -7,12 +7,22 @@ import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
 
+/// Free-delivery balance: how many are ready to use, or — when none are —
+/// how they're earned.
 class LoyaltyFreeDeliveryCard extends StatelessWidget {
-  const LoyaltyFreeDeliveryCard({super.key});
+  final int availableFreeDeliveries;
+  final int eligibleOrdersRequired;
+
+  const LoyaltyFreeDeliveryCard({
+    super.key,
+    required this.availableFreeDeliveries,
+    required this.eligibleOrdersRequired,
+  });
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
+    final bool hasAvailable = availableFreeDeliveries > 0;
     return Container(
       width: double.infinity,
       decoration: AppDecorations.card(c),
@@ -23,10 +33,14 @@ class LoyaltyFreeDeliveryCard extends StatelessWidget {
             width: 40.r,
             height: 40.r,
             decoration: BoxDecoration(
-              color: c.secondaryLight,
+              color: hasAvailable ? c.successLight : c.secondaryLight,
               borderRadius: BorderRadius.circular(AppRadius.md.r),
             ),
-            child: Icon(Icons.eco, color: c.secondary, size: 20.r),
+            child: Icon(
+              Icons.eco,
+              color: hasAvailable ? c.success : c.secondary,
+              size: 20.r,
+            ),
           ),
           SizedBox(width: AppSpacing.sm.w),
           Expanded(
@@ -39,14 +53,27 @@ class LoyaltyFreeDeliveryCard extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  Strings.loyaltyFreeDeliverySubtitle,
-                  style: AppTextStyles.caption(color: c.textSecondary),
-                  maxLines: 1,
+                  hasAvailable
+                      ? Strings.loyaltyFreeDeliveriesAvailable(
+                          availableFreeDeliveries,
+                        )
+                      : Strings.loyaltyFreeDeliverySubtitle(
+                          eligibleOrdersRequired,
+                        ),
+                  style: AppTextStyles.caption(
+                    color: hasAvailable ? c.success : c.textSecondary,
+                  ),
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
+          if (hasAvailable)
+            Text(
+              '$availableFreeDeliveries',
+              style: AppTextStyles.h2(color: c.success),
+            ),
         ],
       ),
     );

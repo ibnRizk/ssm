@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_dimens.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/saudi_phone.dart';
-import '../../../../core/utils/values/strings.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_dimens.dart';
+import '../theme/app_text_styles.dart';
+import '../utils/saudi_phone.dart';
+import '../utils/values/strings.dart';
 
 /// Phone number entry with the Saudi country code fixed at the start of the
 /// field — matches every phone input in the design (login, register,
@@ -17,11 +17,11 @@ import '../../../../core/utils/values/strings.dart';
 /// reads as one control instead of two. It still takes part in the enclosing
 /// [Form]: the box turns red and the error sits below it, like any
 /// `TextFormField`.
-class AuthPhoneField extends StatelessWidget {
+class PhoneField extends StatelessWidget {
   final TextEditingController controller;
   final TextInputAction textInputAction;
 
-  const AuthPhoneField({
+  const PhoneField({
     super.key,
     required this.controller,
     this.textInputAction = TextInputAction.next,
