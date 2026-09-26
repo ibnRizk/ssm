@@ -11,6 +11,7 @@ class AddressModel extends Address {
     required super.contactPersonNumber,
     required super.address,
     super.location,
+    super.zoneId,
   });
 
   /// Null for an entry without an id or address text — it can't be shown
@@ -31,6 +32,7 @@ class AddressModel extends Address {
       location: latitude == null || longitude == null
           ? null
           : GeoPoint(latitude: latitude, longitude: longitude),
+      zoneId: jsonInt(json['zone_id']),
     );
   }
 

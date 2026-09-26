@@ -12,6 +12,7 @@ import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/error_text.dart';
+import '../../../../core/widgets/option_picker_sheet.dart';
 import '../../../addresses/domain/entities/address.dart';
 import '../../../catalog/domain/entities/store.dart';
 import '../../domain/entities/pharmacy_request.dart';
@@ -23,7 +24,6 @@ import '../utils/pharmacy_messages.dart';
 import '../widgets/pharmacy_attachment_box.dart';
 import '../widgets/pharmacy_dropdown_field.dart';
 import '../widgets/pharmacy_header.dart';
-import '../widgets/pharmacy_option_sheet.dart';
 import '../widgets/pharmacy_request_field.dart';
 import '../widgets/pharmacy_selection_banner.dart';
 import '../widgets/pharmacy_warning_note.dart';
@@ -164,14 +164,14 @@ class _PharmacyChoices extends StatelessWidget {
     PharmacyOrderState state,
   ) async {
     final PharmacyOrderCubit cubit = context.read<PharmacyOrderCubit>();
-    final int? picked = await PharmacyOptionSheet.show(
+    final int? picked = await OptionPickerSheet.show(
       context,
       title: Strings.pharmacySelectTitle,
       emptyText: Strings.pharmacyNoPharmacies,
       selectedId: state.pharmacyId,
-      options: <PharmacyOption>[
+      options: <PickerOption>[
         for (final Store store in pharmacies)
-          PharmacyOption(
+          PickerOption(
             id: store.id,
             title: store.name,
             subtitle: store.address,
@@ -187,14 +187,14 @@ class _PharmacyChoices extends StatelessWidget {
     PharmacyOrderState state,
   ) async {
     final PharmacyOrderCubit cubit = context.read<PharmacyOrderCubit>();
-    final int? picked = await PharmacyOptionSheet.show(
+    final int? picked = await OptionPickerSheet.show(
       context,
       title: Strings.pharmacyAddressLabel,
       emptyText: Strings.pharmacyAddAddress,
       selectedId: state.addressId,
-      options: <PharmacyOption>[
+      options: <PickerOption>[
         for (final Address address in addresses)
-          PharmacyOption(
+          PickerOption(
             id: address.id,
             title: address.address,
             subtitle: address.contactPersonName,

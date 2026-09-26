@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_dimens.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/widgets/modal_bottom_sheet_scaffold.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_dimens.dart';
+import '../theme/app_text_styles.dart';
+import 'modal_bottom_sheet_scaffold.dart';
 
-/// One choice in a [PharmacyOptionSheet].
-class PharmacyOption {
+/// One choice in a [OptionPickerSheet].
+class PickerOption {
   final int id;
   final String title;
   final String? subtitle;
 
-  const PharmacyOption({required this.id, required this.title, this.subtitle});
+  const PickerOption({required this.id, required this.title, this.subtitle});
 }
 
 /// A list of [options], the current one checked. Pops the picked id.
-class PharmacyOptionSheet extends StatelessWidget {
+class OptionPickerSheet extends StatelessWidget {
   final String title;
-  final List<PharmacyOption> options;
+  final List<PickerOption> options;
   final int? selectedId;
 
   /// Shown instead of the list when there's nothing to pick.
   final String emptyText;
 
-  const PharmacyOptionSheet({
+  const OptionPickerSheet({
     super.key,
     required this.title,
     required this.options,
@@ -35,7 +35,7 @@ class PharmacyOptionSheet extends StatelessWidget {
   static Future<int?> show(
     BuildContext context, {
     required String title,
-    required List<PharmacyOption> options,
+    required List<PickerOption> options,
     required int? selectedId,
     required String emptyText,
   }) => showModalBottomSheet<int>(
@@ -44,7 +44,7 @@ class PharmacyOptionSheet extends StatelessWidget {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
     ),
-    builder: (_) => PharmacyOptionSheet(
+    builder: (_) => OptionPickerSheet(
       title: title,
       options: options,
       selectedId: selectedId,
@@ -87,7 +87,7 @@ class PharmacyOptionSheet extends StatelessWidget {
 }
 
 class _OptionTile extends StatelessWidget {
-  final PharmacyOption option;
+  final PickerOption option;
   final bool selected;
 
   const _OptionTile({required this.option, required this.selected});

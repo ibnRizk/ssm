@@ -23,6 +23,10 @@ class Address extends Equatable {
   /// still listable and deletable.
   final GeoPoint? location;
 
+  /// The delivery zone the server resolved for this address; orders to it
+  /// are scoped to this zone. Null when the backend doesn't say.
+  final int? zoneId;
+
   const Address({
     required this.id,
     required this.type,
@@ -30,6 +34,7 @@ class Address extends Equatable {
     required this.contactPersonNumber,
     required this.address,
     this.location,
+    this.zoneId,
   });
 
   @override
@@ -40,6 +45,7 @@ class Address extends Equatable {
     contactPersonNumber,
     address,
     location,
+    zoneId,
   ];
 }
 
