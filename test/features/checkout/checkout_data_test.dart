@@ -26,6 +26,12 @@ class _FakeZoneRepository implements ZoneRepository {
     selected.add(zoneIds);
     return selectAnswer;
   }
+
+  @override
+  List<int> get currentZoneIds => throw UnimplementedError();
+
+  @override
+  Stream<List<int>> get zoneChanges => throw UnimplementedError();
 }
 
 const OrderRequest _request = OrderRequest(

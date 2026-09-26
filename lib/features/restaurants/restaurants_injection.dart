@@ -16,6 +16,7 @@ Future<void> initRestaurantsFeatureInjection() async {
   ServiceLocator.instance.registerFactoryParam<StoresCubit, int?, void>(
     (int? categoryId, _) => StoresCubit(
       repository: ServiceLocator.instance(),
+      zoneRepository: ServiceLocator.instance(),
       categoryId: categoryId,
     ),
   );

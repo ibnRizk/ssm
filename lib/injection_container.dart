@@ -126,7 +126,11 @@ abstract class ServiceLocator {
       () => ZoneRemoteDataSourceImpl(consumer: instance()),
     );
     instance.registerLazySingleton<ZoneRepository>(
-      () => ZoneRepositoryImpl(remote: instance(), preferences: instance()),
+      () => ZoneRepositoryImpl(
+        remote: instance(),
+        location: instance(),
+        preferences: instance(),
+      ),
     );
   }
 

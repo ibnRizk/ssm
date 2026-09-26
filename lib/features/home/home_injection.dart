@@ -9,13 +9,15 @@ import 'presentation/cubit/home_cubit.dart';
 /// shared).
 ///
 /// [HomeCubit] is screen-scoped — provided at the home route in `AppRoutes`.
-/// Its repositories are registered by the account and catalog features.
+/// Its repositories are registered by the account and catalog features, and
+/// the zone by the service locator.
 Future<void> initHomeFeatureInjection() async {
   /// Cubits
   ServiceLocator.instance.registerFactory<HomeCubit>(
     () => HomeCubit(
       accountRepository: ServiceLocator.instance(),
       catalogRepository: ServiceLocator.instance(),
+      zoneRepository: ServiceLocator.instance(),
     ),
   );
 }

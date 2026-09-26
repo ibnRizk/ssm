@@ -7,17 +7,20 @@ import 'package:ssm/features/restaurants/presentation/cubit/stores_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_catalog_repository.dart';
+import '../../helpers/fake_zone_repository.dart';
 
 List<int> _ids(StoresState state) =>
     (state as StoresLoaded).stores.map((Store s) => s.id).toList();
 
 void main() {
   late FakeCatalogRepository catalog;
+  late FakeZoneRepository zone;
   late StoresCubit cubit;
 
   setUp(() {
     catalog = FakeCatalogRepository();
-    cubit = StoresCubit(repository: catalog);
+    zone = FakeZoneRepository();
+    cubit = StoresCubit(repository: catalog, zoneRepository: zone);
   });
 
   tearDown(() => cubit.close());
@@ -164,7 +167,13 @@ void main() {
   group('scoped to a category', () {
     late StoresCubit scoped;
 
-    setUp(() => scoped = StoresCubit(repository: catalog, categoryId: 3));
+    setUp(
+      () => scoped = StoresCubit(
+        repository: catalog,
+        zoneRepository: zone,
+        categoryId: 3,
+      ),
+    );
 
     tearDown(() => scoped.close());
 
@@ -234,5 +243,17 @@ void main() {
     unawaited(cubit.loadMore());
 
     expect(catalog.storeCalls.last.page, 2);
+  });
+
+  test('a new zone reloads the list for it', () async {
+    await loadFirstPage();
+
+    zone.change(<int>[7]);
+    expect(catalog.storeCalls, hasLength(2), reason: 'reloaded');
+    expect(catalog.storeCalls.last.page, 1);
+    catalog.storeCalls.last.succeed(storesPage(<int>[5], total: 1));
+    await pumpEventQueue();
+
+    expect(_ids(cubit.state), <int>[5]);
   });
 }

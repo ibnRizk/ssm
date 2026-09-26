@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/zone/zone_repository.dart';
 import '../../../account/domain/entities/customer_profile.dart';
 import '../../../account/domain/repos/account_repository.dart';
 import '../../../catalog/domain/entities/catalog_category.dart';
@@ -14,9 +17,18 @@ import 'home_state.dart';
 class HomeCubit extends Cubit<HomeState> {
   final AccountRepository accountRepository;
   final CatalogRepository catalogRepository;
+  final ZoneRepository zoneRepository;
 
-  HomeCubit({required this.accountRepository, required this.catalogRepository})
-    : super(const HomeInitial());
+  /// The catalog shown belongs to one zone — a new zone reloads it.
+  late final StreamSubscription<List<int>> _zoneChanges;
+
+  HomeCubit({
+    required this.accountRepository,
+    required this.catalogRepository,
+    required this.zoneRepository,
+  }) : super(const HomeInitial()) {
+    _zoneChanges = zoneRepository.zoneChanges.listen((_) => load());
+  }
 
   /// How many stores the Home preview shows; "view all" opens the rest.
   static const int storesPreviewCount = 5;
@@ -66,7 +78,14 @@ class HomeCubit extends Cubit<HomeState> {
           (_) => const <Store>[],
           (CatalogPage<Store> page) => page.items,
         ),
+        zoneIds: zoneRepository.currentZoneIds,
       ),
     );
+  }
+
+  @override
+  Future<void> close() async {
+    await _zoneChanges.cancel();
+    return super.close();
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -43,6 +44,7 @@ class HomeHeader extends StatelessWidget {
                 Strings.homeQuestion,
                 style: AppTextStyles.h1(color: c.textPrimary),
               ),
+              if (kDebugMode) const _ZoneDebugLabel(),
             ],
           ),
         ),
@@ -59,4 +61,23 @@ class HomeHeader extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Debug builds only: the zone the catalog below was loaded for, so a
+/// wrong `zoneId` header is visible at a glance. Not localized on purpose.
+class _ZoneDebugLabel extends StatelessWidget {
+  const _ZoneDebugLabel();
+
+  @override
+  Widget build(BuildContext context) =>
+      BlocSelector<HomeCubit, HomeState, List<int>>(
+        selector: (HomeState state) =>
+            state is HomeLoaded ? state.zoneIds : const <int>[],
+        builder: (BuildContext context, List<int> zoneIds) => zoneIds.isEmpty
+            ? const SizedBox.shrink()
+            : Text(
+                'Zone: ${zoneIds.join(', ')}',
+                style: AppTextStyles.caption(color: context.colors.textHint),
+              ),
+      );
 }

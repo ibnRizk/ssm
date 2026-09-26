@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/zone/zone_repository.dart';
 import '../../../catalog/domain/entities/catalog_page.dart';
 import '../../../catalog/domain/entities/store.dart';
 import '../../../catalog/domain/repos/catalog_repository.dart';
@@ -17,8 +20,16 @@ class StoresCubit extends Cubit<StoresState> {
   /// (the API can't filter it by category), so a scoped screen hides it.
   final int? categoryId;
 
-  StoresCubit({required this.repository, this.categoryId})
-    : super(const StoresInitial());
+  /// The stores listed belong to one zone — a new zone reloads them.
+  late final StreamSubscription<List<int>> _zoneChanges;
+
+  StoresCubit({
+    required this.repository,
+    required ZoneRepository zoneRepository,
+    this.categoryId,
+  }) : super(const StoresInitial()) {
+    _zoneChanges = zoneRepository.zoneChanges.listen((_) => load());
+  }
 
   /// Bumped by every first-page load. An answer for an older generation —
   /// a search the customer has since changed, or a page of the previous
@@ -128,4 +139,10 @@ class StoresCubit extends Cubit<StoresState> {
         ('', null) => repository.getStores(page: page),
         _ => repository.searchStores(query: query, page: page),
       };
+
+  @override
+  Future<void> close() async {
+    await _zoneChanges.cancel();
+    return super.close();
+  }
 }

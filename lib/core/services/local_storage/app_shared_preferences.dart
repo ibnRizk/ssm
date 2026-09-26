@@ -44,7 +44,7 @@ abstract class AppSharedPreferences {
   LanguageCode getLanguageCode();
 
   /// Null when the user has never explicitly picked a language — unlike
-  /// [getLanguageCode], which always falls back to `en`. Lets callers keep
+  /// [getLanguageCode], which always falls back to `ar`. Lets callers keep
   /// following the device locale until an explicit choice is made.
   LanguageCode? getSavedLanguageCode();
 
@@ -112,7 +112,7 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
   // --- Language ---
   @override
   LanguageCode getLanguageCode() => LanguageCodeExtension.fromString(
-    instance.getString(_Keys.languageCode) ?? LanguageCode.en.name,
+    instance.getString(_Keys.languageCode) ?? LanguageCode.ar.name,
   );
 
   @override

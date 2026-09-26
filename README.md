@@ -16,7 +16,7 @@ Rename the package for a new project:
 dart pub global activate rename
 rename setAppName --targets ios,android --value "My App"
 rename setBundleId --targets ios,android --value com.mycompany.myapp
-# then find/replace `package:flutter_base/` and `name: flutter_base` in pubspec.yaml
+# then find/replace `package:ssm/` and `name: ssm` in pubspec.yaml
 ```
 
 ## Layers

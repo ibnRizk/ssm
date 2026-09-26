@@ -40,6 +40,9 @@ abstract class ApiEndpoints {
   // --- Zones ---
   static const String zoneList = '$_v1/zone/list';
 
+  /// The zones covering the `lat` / `lng` query parameters.
+  static const String zoneAt = '$_v1/config/get-zone-id';
+
   // --- Catalog (need the `zoneId` / `moduleId` headers) ---
   static const String categories = '$_v1/categories';
 

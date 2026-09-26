@@ -15,7 +15,7 @@ class LocaleCubit extends Cubit<Locale?> {
   final AppSharedPreferences sharedPreferences;
 
   LocaleCubit({required this.sharedPreferences})
-    : super(_localeFrom(sharedPreferences.getSavedLanguageCode()));
+    : super(_localeFrom(sharedPreferences.getSavedLanguageCode() ?? LanguageCode.ar));
 
   Future<void> changeLocale(LanguageCode code) async {
     if (state?.languageCode == code.name) return;

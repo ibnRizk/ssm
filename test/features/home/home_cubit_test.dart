@@ -10,6 +10,7 @@ import 'package:ssm/features/home/presentation/cubit/home_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_catalog_repository.dart';
+import '../../helpers/fake_zone_repository.dart';
 
 class _FakeAccountRepository implements AccountRepository {
   final List<Completer<Either<Failure, CustomerProfile>>> calls = [];
@@ -38,12 +39,18 @@ const List<CatalogCategory> _categories = <CatalogCategory>[
 void main() {
   late _FakeAccountRepository account;
   late FakeCatalogRepository catalog;
+  late FakeZoneRepository zone;
   late HomeCubit cubit;
 
   setUp(() {
     account = _FakeAccountRepository();
     catalog = FakeCatalogRepository();
-    cubit = HomeCubit(accountRepository: account, catalogRepository: catalog);
+    zone = FakeZoneRepository();
+    cubit = HomeCubit(
+      accountRepository: account,
+      catalogRepository: catalog,
+      zoneRepository: zone,
+    );
   });
 
   tearDown(() => cubit.close());
@@ -77,6 +84,7 @@ void main() {
         customerName: 'Sara',
         categories: _categories,
         stores: <int>[1, 2].map(fakeStore).toList(),
+        zoneIds: const <int>[8],
       ),
     );
   });
@@ -120,5 +128,26 @@ void main() {
     expect(account.calls, hasLength(1));
     await answer();
     await first;
+  });
+
+  test('a new zone reloads the catalog for it', () async {
+    final Future<void> first = cubit.load();
+    await answer();
+    await first;
+
+    zone.change(<int>[7]);
+    expect(account.calls, hasLength(2), reason: 'reloaded');
+    await answer();
+    await pumpEventQueue();
+
+    expect((cubit.state as HomeLoaded).zoneIds, <int>[7]);
+  });
+
+  test('stops following zone changes once closed', () async {
+    await cubit.close();
+
+    zone.change(<int>[7]);
+
+    expect(account.calls, isEmpty);
   });
 }

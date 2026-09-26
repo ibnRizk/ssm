@@ -27,14 +27,18 @@ final class HomeLoaded extends HomeState {
   /// The first stores of the zone — a preview, not the full list.
   final List<Store> stores;
 
+  /// The zone the catalog was loaded for.
+  final List<int> zoneIds;
+
   const HomeLoaded({
     required this.categories,
     required this.stores,
     this.customerName,
+    this.zoneIds = const <int>[],
   });
 
   @override
-  List<Object?> get props => [customerName, categories, stores];
+  List<Object?> get props => [customerName, categories, stores, zoneIds];
 }
 
 /// The catalog couldn't be fetched — the screen has nothing to browse.

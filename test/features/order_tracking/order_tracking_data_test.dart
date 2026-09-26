@@ -21,6 +21,12 @@ class _FakeZoneRepository implements ZoneRepository {
   @override
   Future<Either<Failure, Unit>> selectZoneIds(List<int> zoneIds) =>
       throw UnimplementedError();
+
+  @override
+  List<int> get currentZoneIds => throw UnimplementedError();
+
+  @override
+  Stream<List<int>> get zoneChanges => throw UnimplementedError();
 }
 
 void main() {
