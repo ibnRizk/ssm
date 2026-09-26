@@ -1,17 +1,17 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/api/api_endpoints.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/core/zone/zone_repository.dart';
-import 'package:flutter_base/features/catalog/data/datasources/catalog_remote_data_source.dart';
-import 'package:flutter_base/features/catalog/data/models/catalog_category_model.dart';
-import 'package:flutter_base/features/catalog/data/models/store_item_model.dart';
-import 'package:flutter_base/features/catalog/data/models/store_model.dart';
-import 'package:flutter_base/features/catalog/data/repos/catalog_repository_impl.dart';
-import 'package:flutter_base/features/catalog/domain/entities/catalog_category.dart';
-import 'package:flutter_base/features/catalog/domain/entities/catalog_page.dart';
-import 'package:flutter_base/features/catalog/domain/entities/store.dart';
-import 'package:flutter_base/features/catalog/domain/entities/store_item.dart';
+import 'package:ssm/core/api/api_endpoints.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/zone/zone_repository.dart';
+import 'package:ssm/features/catalog/data/datasources/catalog_remote_data_source.dart';
+import 'package:ssm/features/catalog/data/models/catalog_category_model.dart';
+import 'package:ssm/features/catalog/data/models/store_item_model.dart';
+import 'package:ssm/features/catalog/data/models/store_model.dart';
+import 'package:ssm/features/catalog/data/repos/catalog_repository_impl.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_category.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_page.dart';
+import 'package:ssm/features/catalog/domain/entities/store.dart';
+import 'package:ssm/features/catalog/domain/entities/store_item.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio_consumer.dart';
@@ -212,6 +212,78 @@ void main() {
 
       expect(page.items.map((Store s) => s.id), <int>[1]);
       expect(page.totalSize, 12);
+    });
+
+    test('pageFromJson reads a live get-stores/all store as sent', () {
+      // Trimmed from a real response: a double distance, string
+      // coordinates and nested storage/schedules must not drop the store.
+      final CatalogPage<Store> page = StoreModel.pageFromJson(<String, dynamic>{
+        'total_size': 8,
+        'limit': '50',
+        'offset': '1',
+        'stores': <dynamic>[
+          <String, dynamic>{
+            'id': 5,
+            'name': 'test feature',
+            'logo': '2026-09-24-6ab53fb555e79.png',
+            'latitude': '30.046341336599',
+            'longitude': '31.378952968024',
+            'address': 'test location',
+            'minimum_order': 0,
+            'comission': null,
+            'status': 1,
+            'free_delivery': false,
+            'cover_photo': '2026-09-24-6ab53fb55a491.png',
+            'active': true,
+            'off_day': ' ',
+            'minimum_shipping_charge': 0,
+            'delivery_time': '15-30 min',
+            'ssm_store_category_id': 2,
+            'open': 1,
+            'distance': 4709346.614683684,
+            'min_delivery_time': '15',
+            'category_ids': <int>[2, 1, 10],
+            'ratings': <int>[0, 0, 0, 0, 0],
+            'avg_rating': 0,
+            'rating_count': 0,
+            'logo_full_url':
+                'https://ssm.husseintech.com/storage/app/public/store/2026-09-24-6ab53fb555e79.png',
+            'cover_photo_full_url':
+                'https://ssm.husseintech.com/storage/app/public/store/cover/2026-09-24-6ab53fb55a491.png',
+            'meta_image_full_url': null,
+            'discount': null,
+            'translations': <dynamic>[],
+            'storage': <dynamic>[
+              <String, dynamic>{'id': 97, 'key': 'logo', 'value': 'public'},
+            ],
+            'schedules': <dynamic>[
+              <String, dynamic>{
+                'id': 18,
+                'store_id': 5,
+                'day': 0,
+                'opening_time': '10:00:00',
+                'closing_time': '22:00:00',
+              },
+            ],
+          },
+        ],
+      });
+
+      final Store store = page.items.single;
+      expect(page.totalSize, 8);
+      expect(store.id, 5);
+      expect(store.storeCategoryId, 2);
+      expect(store.distance, 4709346.614683684);
+      expect(store.minDeliveryTime, 15);
+      expect(store.isOpen, isTrue);
+      expect(
+        store.logoUrl,
+        'https://ssm.husseintech.com/storage/app/public/store/2026-09-24-6ab53fb555e79.png',
+      );
+      expect(
+        store.coverUrl,
+        'https://ssm.husseintech.com/storage/app/public/store/cover/2026-09-24-6ab53fb55a491.png',
+      );
     });
 
     test('pageFromJson throws ServerException without a stores list', () {

@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/catalog/domain/entities/catalog_page.dart';
-import 'package:flutter_base/features/orders/domain/entities/order_list_entry.dart';
-import 'package:flutter_base/features/orders/domain/repos/orders_repository.dart';
-import 'package:flutter_base/features/orders/presentation/cubit/orders_cubit.dart';
-import 'package:flutter_base/features/orders/presentation/cubit/orders_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_page.dart';
+import 'package:ssm/features/orders/domain/entities/order_list_entry.dart';
+import 'package:ssm/features/orders/domain/repos/orders_repository.dart';
+import 'package:ssm/features/orders/presentation/cubit/orders_cubit.dart';
+import 'package:ssm/features/orders/presentation/cubit/orders_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 typedef _Result = Either<Failure, CatalogPage<OrderListEntry>>;

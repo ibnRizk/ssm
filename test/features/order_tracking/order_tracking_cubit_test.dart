@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/order_tracking/domain/entities/order_status.dart';
-import 'package:flutter_base/features/order_tracking/domain/entities/order_tracking.dart';
-import 'package:flutter_base/features/order_tracking/domain/repos/order_tracking_repository.dart';
-import 'package:flutter_base/features/order_tracking/presentation/cubit/order_tracking_cubit.dart';
-import 'package:flutter_base/features/order_tracking/presentation/cubit/order_tracking_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/order_tracking/domain/entities/order_status.dart';
+import 'package:ssm/features/order_tracking/domain/entities/order_tracking.dart';
+import 'package:ssm/features/order_tracking/domain/repos/order_tracking_repository.dart';
+import 'package:ssm/features/order_tracking/presentation/cubit/order_tracking_cubit.dart';
+import 'package:ssm/features/order_tracking/presentation/cubit/order_tracking_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeRepository implements OrderTrackingRepository {

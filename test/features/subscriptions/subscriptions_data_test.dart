@@ -1,14 +1,14 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/api/api_endpoints.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/subscriptions/data/datasources/subscriptions_remote_data_source.dart';
-import 'package:flutter_base/features/subscriptions/data/models/active_subscription_model.dart';
-import 'package:flutter_base/features/subscriptions/data/models/delivery_zone_model.dart';
-import 'package:flutter_base/features/subscriptions/data/models/subscription_plan_model.dart';
-import 'package:flutter_base/features/subscriptions/data/repos/subscriptions_repository_impl.dart';
-import 'package:flutter_base/features/subscriptions/domain/entities/active_subscription.dart';
-import 'package:flutter_base/features/subscriptions/domain/entities/subscription_plan.dart';
+import 'package:ssm/core/api/api_endpoints.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/subscriptions/data/datasources/subscriptions_remote_data_source.dart';
+import 'package:ssm/features/subscriptions/data/models/active_subscription_model.dart';
+import 'package:ssm/features/subscriptions/data/models/delivery_zone_model.dart';
+import 'package:ssm/features/subscriptions/data/models/subscription_plan_model.dart';
+import 'package:ssm/features/subscriptions/data/repos/subscriptions_repository_impl.dart';
+import 'package:ssm/features/subscriptions/domain/entities/active_subscription.dart';
+import 'package:ssm/features/subscriptions/domain/entities/subscription_plan.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio_consumer.dart';

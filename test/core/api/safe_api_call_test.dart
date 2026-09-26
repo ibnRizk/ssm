@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/api/safe_api_call.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/core/error/failures.dart';
+import 'package:ssm/core/api/safe_api_call.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/core/error/failures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

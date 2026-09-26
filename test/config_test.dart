@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_base/config/env/app_env.dart';
+import 'package:ssm/config/env/app_env.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Guards the two contracts that break silently at runtime rather than at

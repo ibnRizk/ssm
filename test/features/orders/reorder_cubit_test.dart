@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/cart/domain/entities/cart.dart';
-import 'package:flutter_base/features/cart/domain/repos/cart_repository.dart';
-import 'package:flutter_base/features/catalog/domain/entities/catalog_page.dart';
-import 'package:flutter_base/features/orders/domain/entities/order_list_entry.dart';
-import 'package:flutter_base/features/orders/domain/repos/orders_repository.dart';
-import 'package:flutter_base/features/orders/presentation/cubit/reorder_cubit.dart';
-import 'package:flutter_base/features/orders/presentation/cubit/reorder_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/cart/domain/entities/cart.dart';
+import 'package:ssm/features/cart/domain/repos/cart_repository.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_page.dart';
+import 'package:ssm/features/orders/domain/entities/order_list_entry.dart';
+import 'package:ssm/features/orders/domain/repos/orders_repository.dart';
+import 'package:ssm/features/orders/presentation/cubit/reorder_cubit.dart';
+import 'package:ssm/features/orders/presentation/cubit/reorder_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeOrdersRepository implements OrdersRepository {

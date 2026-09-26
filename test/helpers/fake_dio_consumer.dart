@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_base/core/api/dio_consumer.dart';
+import 'package:ssm/core/api/dio_consumer.dart';
 
 /// Records the last request and answers with [response] (or throws
 /// [error]), so data sources can be tested without a network.

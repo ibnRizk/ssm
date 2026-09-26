@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/auth/domain/entities/login_credentials.dart';
-import 'package:flutter_base/features/auth/domain/entities/registration_details.dart';
-import 'package:flutter_base/features/auth/domain/repos/auth_repository.dart';
-import 'package:flutter_base/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:flutter_base/features/auth/presentation/cubit/auth_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/auth/domain/entities/login_credentials.dart';
+import 'package:ssm/features/auth/domain/entities/registration_details.dart';
+import 'package:ssm/features/auth/domain/repos/auth_repository.dart';
+import 'package:ssm/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:ssm/features/auth/presentation/cubit/auth_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeRepository implements AuthRepository {

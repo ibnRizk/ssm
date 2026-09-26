@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/account/domain/entities/customer_profile.dart';
-import 'package:flutter_base/features/account/domain/repos/account_repository.dart';
-import 'package:flutter_base/features/catalog/domain/entities/catalog_category.dart';
-import 'package:flutter_base/features/home/presentation/cubit/home_cubit.dart';
-import 'package:flutter_base/features/home/presentation/cubit/home_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/account/domain/entities/customer_profile.dart';
+import 'package:ssm/features/account/domain/repos/account_repository.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_category.dart';
+import 'package:ssm/features/home/presentation/cubit/home_cubit.dart';
+import 'package:ssm/features/home/presentation/cubit/home_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_catalog_repository.dart';

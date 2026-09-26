@@ -1,5 +1,5 @@
-import 'package:flutter_base/features/orders/domain/entities/order_list_entry.dart';
-import 'package:flutter_base/features/orders/presentation/utils/order_list_labels.dart';
+import 'package:ssm/features/orders/domain/entities/order_list_entry.dart';
+import 'package:ssm/features/orders/presentation/utils/order_list_labels.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 

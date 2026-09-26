@@ -1,4 +1,4 @@
-import 'package:flutter_base/core/api/json_readers.dart';
+import 'package:ssm/core/api/json_readers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

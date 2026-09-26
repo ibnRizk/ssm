@@ -1,14 +1,14 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/api/api_endpoints.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/addresses/data/datasources/address_remote_data_source.dart';
-import 'package:flutter_base/core/location/device_location_data_source.dart';
-import 'package:flutter_base/features/addresses/data/models/address_model.dart';
-import 'package:flutter_base/features/addresses/data/repos/address_repository_impl.dart';
-import 'package:flutter_base/core/location/location_repository_impl.dart';
-import 'package:flutter_base/features/addresses/domain/entities/address.dart';
-import 'package:flutter_base/features/addresses/domain/repos/address_repository.dart';
+import 'package:ssm/core/api/api_endpoints.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/addresses/data/datasources/address_remote_data_source.dart';
+import 'package:ssm/core/location/device_location_data_source.dart';
+import 'package:ssm/features/addresses/data/models/address_model.dart';
+import 'package:ssm/features/addresses/data/repos/address_repository_impl.dart';
+import 'package:ssm/core/location/location_repository_impl.dart';
+import 'package:ssm/features/addresses/domain/entities/address.dart';
+import 'package:ssm/features/addresses/domain/repos/address_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio_consumer.dart';

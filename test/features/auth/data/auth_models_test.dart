@@ -1,9 +1,9 @@
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/features/auth/data/models/requests/login_request.dart';
-import 'package:flutter_base/features/auth/data/models/requests/register_request.dart';
-import 'package:flutter_base/features/auth/data/models/responses/auth_token_response.dart';
-import 'package:flutter_base/features/auth/domain/entities/login_credentials.dart';
-import 'package:flutter_base/features/auth/domain/entities/registration_details.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/features/auth/data/models/requests/login_request.dart';
+import 'package:ssm/features/auth/data/models/requests/register_request.dart';
+import 'package:ssm/features/auth/data/models/responses/auth_token_response.dart';
+import 'package:ssm/features/auth/domain/entities/login_credentials.dart';
+import 'package:ssm/features/auth/domain/entities/registration_details.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

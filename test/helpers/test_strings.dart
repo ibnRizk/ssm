@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_base/config/locale/app_localizations.dart';
-import 'package:flutter_base/injection_container.dart';
+import 'package:ssm/config/locale/app_localizations.dart';
+import 'package:ssm/injection_container.dart';
 
 /// `Strings.*` resolve through the [AppLocalizations] registered in get_it,
 /// which the app loads from assets at startup. This registers one backed by

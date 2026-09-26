@@ -1,6 +1,6 @@
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/features/account/data/models/customer_profile_model.dart';
-import 'package:flutter_base/features/account/domain/entities/customer_profile.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/features/account/data/models/customer_profile_model.dart';
+import 'package:ssm/features/account/domain/entities/customer_profile.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

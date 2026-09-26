@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/catalog/domain/entities/catalog_category.dart';
-import 'package:flutter_base/features/catalog/domain/entities/catalog_page.dart';
-import 'package:flutter_base/features/catalog/domain/entities/store.dart';
-import 'package:flutter_base/features/catalog/domain/entities/store_item.dart';
-import 'package:flutter_base/features/catalog/domain/repos/catalog_repository.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_category.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_page.dart';
+import 'package:ssm/features/catalog/domain/entities/store.dart';
+import 'package:ssm/features/catalog/domain/entities/store_item.dart';
+import 'package:ssm/features/catalog/domain/repos/catalog_repository.dart';
 
 /// One request the fake received; the test answers it through [completer],
 /// so ordering and concurrency are explicit rather than timing-dependent.

@@ -1,12 +1,12 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/api/api_endpoints.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/core/zone/zone_repository.dart';
-import 'package:flutter_base/features/cart/data/datasources/cart_remote_data_source.dart';
-import 'package:flutter_base/features/cart/data/models/cart_line_model.dart';
-import 'package:flutter_base/features/cart/data/repos/cart_repository_impl.dart';
-import 'package:flutter_base/features/cart/domain/entities/cart.dart';
+import 'package:ssm/core/api/api_endpoints.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/zone/zone_repository.dart';
+import 'package:ssm/features/cart/data/datasources/cart_remote_data_source.dart';
+import 'package:ssm/features/cart/data/models/cart_line_model.dart';
+import 'package:ssm/features/cart/data/repos/cart_repository_impl.dart';
+import 'package:ssm/features/cart/domain/entities/cart.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio_consumer.dart';

@@ -1,8 +1,8 @@
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/catalog/domain/entities/store.dart';
-import 'package:flutter_base/features/catalog/domain/entities/store_item.dart';
-import 'package:flutter_base/features/restaurants/presentation/cubit/store_details_cubit.dart';
-import 'package:flutter_base/features/restaurants/presentation/cubit/store_details_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/catalog/domain/entities/store.dart';
+import 'package:ssm/features/catalog/domain/entities/store_item.dart';
+import 'package:ssm/features/restaurants/presentation/cubit/store_details_cubit.dart';
+import 'package:ssm/features/restaurants/presentation/cubit/store_details_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_catalog_repository.dart';

@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/api/api_endpoints.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/loyalty/data/datasources/loyalty_remote_data_source.dart';
-import 'package:flutter_base/features/loyalty/domain/entities/loyalty_history.dart';
-import 'package:flutter_base/features/loyalty/domain/entities/loyalty_progress.dart';
-import 'package:flutter_base/features/loyalty/domain/repos/loyalty_repository.dart';
-import 'package:flutter_base/features/loyalty/presentation/cubit/loyalty_cubit.dart';
-import 'package:flutter_base/features/loyalty/presentation/cubit/loyalty_state.dart';
+import 'package:ssm/core/api/api_endpoints.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/loyalty/data/datasources/loyalty_remote_data_source.dart';
+import 'package:ssm/features/loyalty/domain/entities/loyalty_history.dart';
+import 'package:ssm/features/loyalty/domain/entities/loyalty_progress.dart';
+import 'package:ssm/features/loyalty/domain/repos/loyalty_repository.dart';
+import 'package:ssm/features/loyalty/presentation/cubit/loyalty_cubit.dart';
+import 'package:ssm/features/loyalty/presentation/cubit/loyalty_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio_consumer.dart';

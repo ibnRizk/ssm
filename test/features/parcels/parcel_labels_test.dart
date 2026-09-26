@@ -1,7 +1,7 @@
-import 'package:flutter_base/core/location/geo_point.dart';
-import 'package:flutter_base/core/widgets/vertical_timeline.dart';
-import 'package:flutter_base/features/parcels/domain/entities/parcel.dart';
-import 'package:flutter_base/features/parcels/presentation/utils/parcel_labels.dart';
+import 'package:ssm/core/location/geo_point.dart';
+import 'package:ssm/core/widgets/vertical_timeline.dart';
+import 'package:ssm/features/parcels/domain/entities/parcel.dart';
+import 'package:ssm/features/parcels/presentation/utils/parcel_labels.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 

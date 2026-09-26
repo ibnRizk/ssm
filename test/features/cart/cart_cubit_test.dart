@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/cart/domain/entities/cart.dart';
-import 'package:flutter_base/features/cart/domain/repos/cart_repository.dart';
-import 'package:flutter_base/features/cart/presentation/cubit/cart_cubit.dart';
-import 'package:flutter_base/features/cart/presentation/cubit/cart_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/cart/domain/entities/cart.dart';
+import 'package:ssm/features/cart/domain/repos/cart_repository.dart';
+import 'package:ssm/features/cart/presentation/cubit/cart_cubit.dart';
+import 'package:ssm/features/cart/presentation/cubit/cart_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// One call the fake received; the test answers it, so ordering is explicit.

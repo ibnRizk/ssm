@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/catalog/domain/entities/store.dart';
-import 'package:flutter_base/features/restaurants/presentation/cubit/stores_cubit.dart';
-import 'package:flutter_base/features/restaurants/presentation/cubit/stores_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/catalog/domain/entities/store.dart';
+import 'package:ssm/features/restaurants/presentation/cubit/stores_cubit.dart';
+import 'package:ssm/features/restaurants/presentation/cubit/stores_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_catalog_repository.dart';

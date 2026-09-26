@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/core/location/geo_point.dart';
-import 'package:flutter_base/core/location/location_repository.dart';
-import 'package:flutter_base/features/parcels/domain/entities/parcel.dart';
-import 'package:flutter_base/features/parcels/domain/repos/parcels_repository.dart';
-import 'package:flutter_base/features/parcels/presentation/cubit/parcels_cubit.dart';
-import 'package:flutter_base/features/parcels/presentation/cubit/parcels_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/location/geo_point.dart';
+import 'package:ssm/core/location/location_repository.dart';
+import 'package:ssm/features/parcels/domain/entities/parcel.dart';
+import 'package:ssm/features/parcels/domain/repos/parcels_repository.dart';
+import 'package:ssm/features/parcels/presentation/cubit/parcels_cubit.dart';
+import 'package:ssm/features/parcels/presentation/cubit/parcels_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const Parcel _atWarehouse = Parcel(

@@ -1,4 +1,4 @@
-name: flutter_base
+name: ssm
 description: "Team base architecture boilerplate — Clean Architecture + Cubit + GetIt + Dio."
 publish_to: 'none'
 version: 1.0.0+1

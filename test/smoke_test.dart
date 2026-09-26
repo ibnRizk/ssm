@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_base/core/theme/app_colors.dart';
-import 'package:flutter_base/core/theme/app_decorations.dart';
-import 'package:flutter_base/core/theme/app_text_styles.dart';
-import 'package:flutter_base/core/theme/app_theme.dart';
+import 'package:ssm/core/theme/app_colors.dart';
+import 'package:ssm/core/theme/app_decorations.dart';
+import 'package:ssm/core/theme/app_text_styles.dart';
+import 'package:ssm/core/theme/app_theme.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 

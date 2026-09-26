@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/addresses/domain/entities/address.dart';
-import 'package:flutter_base/features/addresses/domain/repos/address_repository.dart';
-import 'package:flutter_base/features/addresses/presentation/cubit/addresses_cubit.dart';
-import 'package:flutter_base/features/addresses/presentation/cubit/addresses_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/addresses/domain/entities/address.dart';
+import 'package:ssm/features/addresses/domain/repos/address_repository.dart';
+import 'package:ssm/features/addresses/presentation/cubit/addresses_cubit.dart';
+import 'package:ssm/features/addresses/presentation/cubit/addresses_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const Address _home = Address(

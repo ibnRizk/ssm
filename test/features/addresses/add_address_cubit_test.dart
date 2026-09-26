@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/addresses/domain/entities/address.dart';
-import 'package:flutter_base/features/addresses/domain/repos/address_repository.dart';
-import 'package:flutter_base/core/location/location_repository.dart';
-import 'package:flutter_base/features/addresses/presentation/cubit/add_address_cubit.dart';
-import 'package:flutter_base/features/addresses/presentation/cubit/add_address_state.dart';
-import 'package:flutter_base/features/addresses/presentation/utils/address_messages.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/addresses/domain/entities/address.dart';
+import 'package:ssm/features/addresses/domain/repos/address_repository.dart';
+import 'package:ssm/core/location/location_repository.dart';
+import 'package:ssm/features/addresses/presentation/cubit/add_address_cubit.dart';
+import 'package:ssm/features/addresses/presentation/cubit/add_address_state.dart';
+import 'package:ssm/features/addresses/presentation/utils/address_messages.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const GeoPoint _riyadh = GeoPoint(latitude: 24.71, longitude: 46.68);

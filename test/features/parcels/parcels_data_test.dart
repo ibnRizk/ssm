@@ -1,12 +1,12 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/api/api_endpoints.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/core/location/geo_point.dart';
-import 'package:flutter_base/features/parcels/data/datasources/parcels_remote_data_source.dart';
-import 'package:flutter_base/features/parcels/data/models/parcel_model.dart';
-import 'package:flutter_base/features/parcels/data/repos/parcels_repository_impl.dart';
-import 'package:flutter_base/features/parcels/domain/entities/parcel.dart';
+import 'package:ssm/core/api/api_endpoints.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/location/geo_point.dart';
+import 'package:ssm/features/parcels/data/datasources/parcels_remote_data_source.dart';
+import 'package:ssm/features/parcels/data/models/parcel_model.dart';
+import 'package:ssm/features/parcels/data/repos/parcels_repository_impl.dart';
+import 'package:ssm/features/parcels/domain/entities/parcel.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio_consumer.dart';

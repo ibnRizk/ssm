@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/subscriptions/domain/entities/active_subscription.dart';
-import 'package:flutter_base/features/subscriptions/domain/entities/delivery_zone.dart';
-import 'package:flutter_base/features/subscriptions/domain/entities/subscription_plan.dart';
-import 'package:flutter_base/features/subscriptions/domain/repos/subscriptions_repository.dart';
-import 'package:flutter_base/features/subscriptions/presentation/cubit/subscriptions_cubit.dart';
-import 'package:flutter_base/features/subscriptions/presentation/cubit/subscriptions_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/subscriptions/domain/entities/active_subscription.dart';
+import 'package:ssm/features/subscriptions/domain/entities/delivery_zone.dart';
+import 'package:ssm/features/subscriptions/domain/entities/subscription_plan.dart';
+import 'package:ssm/features/subscriptions/domain/repos/subscriptions_repository.dart';
+import 'package:ssm/features/subscriptions/presentation/cubit/subscriptions_cubit.dart';
+import 'package:ssm/features/subscriptions/presentation/cubit/subscriptions_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const DeliveryZone _turbah = DeliveryZone(id: 1, name: 'تربة');

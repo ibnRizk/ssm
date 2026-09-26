@@ -1,8 +1,8 @@
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/features/loyalty/data/models/loyalty_history_model.dart';
-import 'package:flutter_base/features/loyalty/data/models/loyalty_progress_model.dart';
-import 'package:flutter_base/features/loyalty/domain/entities/loyalty_history.dart';
-import 'package:flutter_base/features/loyalty/domain/entities/loyalty_progress.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/features/loyalty/data/models/loyalty_history_model.dart';
+import 'package:ssm/features/loyalty/data/models/loyalty_progress_model.dart';
+import 'package:ssm/features/loyalty/domain/entities/loyalty_history.dart';
+import 'package:ssm/features/loyalty/domain/entities/loyalty_progress.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 LoyaltyProgress _progress(int current, int target) => LoyaltyProgress(

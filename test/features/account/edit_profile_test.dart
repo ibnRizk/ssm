@@ -1,17 +1,17 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/api/api_endpoints.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/account/data/datasources/account_remote_data_source.dart';
-import 'package:flutter_base/features/account/data/models/customer_profile_model.dart';
-import 'package:flutter_base/features/account/data/models/requests/update_profile_request.dart';
-import 'package:flutter_base/features/account/data/repos/account_repository_impl.dart';
-import 'package:flutter_base/features/account/domain/entities/customer_profile.dart';
-import 'package:flutter_base/features/account/domain/repos/account_repository.dart';
-import 'package:flutter_base/features/account/presentation/cubit/edit_profile_cubit.dart';
-import 'package:flutter_base/features/account/presentation/cubit/edit_profile_state.dart';
+import 'package:ssm/core/api/api_endpoints.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/account/data/datasources/account_remote_data_source.dart';
+import 'package:ssm/features/account/data/models/customer_profile_model.dart';
+import 'package:ssm/features/account/data/models/requests/update_profile_request.dart';
+import 'package:ssm/features/account/data/repos/account_repository_impl.dart';
+import 'package:ssm/features/account/domain/entities/customer_profile.dart';
+import 'package:ssm/features/account/domain/repos/account_repository.dart';
+import 'package:ssm/features/account/presentation/cubit/edit_profile_cubit.dart';
+import 'package:ssm/features/account/presentation/cubit/edit_profile_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio_consumer.dart';

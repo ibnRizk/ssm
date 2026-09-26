@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/addresses/domain/entities/address.dart';
-import 'package:flutter_base/features/addresses/domain/repos/address_repository.dart';
-import 'package:flutter_base/features/pharmacy/domain/entities/pharmacy_request.dart';
-import 'package:flutter_base/features/pharmacy/domain/entities/prescription_image.dart';
-import 'package:flutter_base/features/pharmacy/domain/repos/pharmacy_repository.dart';
-import 'package:flutter_base/features/pharmacy/presentation/cubit/pharmacy_order_cubit.dart';
-import 'package:flutter_base/features/pharmacy/presentation/cubit/pharmacy_order_state.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/addresses/domain/entities/address.dart';
+import 'package:ssm/features/addresses/domain/repos/address_repository.dart';
+import 'package:ssm/features/pharmacy/domain/entities/pharmacy_request.dart';
+import 'package:ssm/features/pharmacy/domain/entities/prescription_image.dart';
+import 'package:ssm/features/pharmacy/domain/repos/pharmacy_repository.dart';
+import 'package:ssm/features/pharmacy/presentation/cubit/pharmacy_order_cubit.dart';
+import 'package:ssm/features/pharmacy/presentation/cubit/pharmacy_order_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_catalog_repository.dart';

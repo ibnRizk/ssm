@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_base/core/api/api_error_mapper.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
+import 'package:ssm/core/api/api_error_mapper.dart';
+import 'package:ssm/core/error/exceptions.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 DioException _badResponse(int status, dynamic data) {

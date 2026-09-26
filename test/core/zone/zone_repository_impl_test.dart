@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/core/services/local_storage/app_shared_preferences.dart';
-import 'package:flutter_base/core/zone/zone_remote_data_source.dart';
-import 'package:flutter_base/core/zone/zone_repository_impl.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/services/local_storage/app_shared_preferences.dart';
+import 'package:ssm/core/zone/zone_remote_data_source.dart';
+import 'package:ssm/core/zone/zone_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

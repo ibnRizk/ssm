@@ -1,7 +1,7 @@
-import 'package:flutter_base/features/catalog/domain/entities/catalog_category.dart';
-import 'package:flutter_base/features/catalog/domain/entities/catalog_page.dart';
-import 'package:flutter_base/features/catalog/domain/entities/store.dart';
-import 'package:flutter_base/features/catalog/domain/entities/store_item.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_category.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_page.dart';
+import 'package:ssm/features/catalog/domain/entities/store.dart';
+import 'package:ssm/features/catalog/domain/entities/store_item.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 StoreItem _item({

@@ -1,5 +1,5 @@
-import 'package:flutter_base/features/catalog/domain/entities/store.dart';
-import 'package:flutter_base/features/catalog/presentation/utils/store_labels.dart';
+import 'package:ssm/features/catalog/domain/entities/store.dart';
+import 'package:ssm/features/catalog/presentation/utils/store_labels.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_strings.dart';

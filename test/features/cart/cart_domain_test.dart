@@ -1,4 +1,4 @@
-import 'package:flutter_base/features/cart/domain/entities/cart.dart';
+import 'package:ssm/features/cart/domain/entities/cart.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 CartLine _line(int id, {int quantity = 1, double price = 10, int? storeId}) =>

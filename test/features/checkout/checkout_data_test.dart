@@ -1,14 +1,14 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/api/api_endpoints.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/core/location/geo_point.dart';
-import 'package:flutter_base/core/zone/zone_repository.dart';
-import 'package:flutter_base/features/checkout/data/datasources/checkout_remote_data_source.dart';
-import 'package:flutter_base/features/checkout/data/models/placed_order_model.dart';
-import 'package:flutter_base/features/checkout/data/models/requests/place_order_body.dart';
-import 'package:flutter_base/features/checkout/data/repos/checkout_repository_impl.dart';
-import 'package:flutter_base/features/checkout/domain/entities/order_request.dart';
+import 'package:ssm/core/api/api_endpoints.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/location/geo_point.dart';
+import 'package:ssm/core/zone/zone_repository.dart';
+import 'package:ssm/features/checkout/data/datasources/checkout_remote_data_source.dart';
+import 'package:ssm/features/checkout/data/models/placed_order_model.dart';
+import 'package:ssm/features/checkout/data/models/requests/place_order_body.dart';
+import 'package:ssm/features/checkout/data/repos/checkout_repository_impl.dart';
+import 'package:ssm/features/checkout/domain/entities/order_request.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio_consumer.dart';

@@ -1,13 +1,13 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/api/api_endpoints.dart';
-import 'package:flutter_base/core/error/exceptions.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/core/zone/zone_repository.dart';
-import 'package:flutter_base/features/catalog/domain/entities/catalog_page.dart';
-import 'package:flutter_base/features/orders/data/datasources/orders_remote_data_source.dart';
-import 'package:flutter_base/features/orders/data/models/orders_models.dart';
-import 'package:flutter_base/features/orders/data/repos/orders_repository_impl.dart';
-import 'package:flutter_base/features/orders/domain/entities/order_list_entry.dart';
+import 'package:ssm/core/api/api_endpoints.dart';
+import 'package:ssm/core/error/exceptions.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/zone/zone_repository.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_page.dart';
+import 'package:ssm/features/orders/data/datasources/orders_remote_data_source.dart';
+import 'package:ssm/features/orders/data/models/orders_models.dart';
+import 'package:ssm/features/orders/data/repos/orders_repository_impl.dart';
+import 'package:ssm/features/orders/domain/entities/order_list_entry.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio_consumer.dart';

@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_base/core/error/failures.dart';
-import 'package:flutter_base/features/addresses/domain/entities/address.dart';
-import 'package:flutter_base/features/addresses/domain/repos/address_repository.dart';
-import 'package:flutter_base/features/cart/domain/entities/cart.dart';
-import 'package:flutter_base/features/checkout/domain/entities/order_request.dart';
-import 'package:flutter_base/features/checkout/domain/repos/checkout_repository.dart';
-import 'package:flutter_base/features/checkout/presentation/cubit/checkout_cubit.dart';
-import 'package:flutter_base/features/checkout/presentation/cubit/checkout_state.dart';
-import 'package:flutter_base/features/checkout/presentation/utils/checkout_messages.dart';
+import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/features/addresses/domain/entities/address.dart';
+import 'package:ssm/features/addresses/domain/repos/address_repository.dart';
+import 'package:ssm/features/cart/domain/entities/cart.dart';
+import 'package:ssm/features/checkout/domain/entities/order_request.dart';
+import 'package:ssm/features/checkout/domain/repos/checkout_repository.dart';
+import 'package:ssm/features/checkout/presentation/cubit/checkout_cubit.dart';
+import 'package:ssm/features/checkout/presentation/cubit/checkout_state.dart';
+import 'package:ssm/features/checkout/presentation/utils/checkout_messages.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_strings.dart';
