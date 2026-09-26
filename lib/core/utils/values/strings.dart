@@ -676,6 +676,16 @@ abstract class Strings {
           .replaceFirst('{completed}', '$completed')
           .replaceFirst('{target}', '$target');
 
+  static const String _accountLoyaltySubtitleFallback =
+      'account_loyalty_subtitle_fallback';
+
+  /// Shown while progress is loading or couldn't be fetched.
+  static String get accountLoyaltySubtitleFallback =>
+      _accountLoyaltySubtitleFallback.tr;
+
+  static const String _comingSoon = 'coming_soon';
+  static String get comingSoon => _comingSoon.tr;
+
   static const String _accountHelpTitle = 'account_help_title';
   static String get accountHelpTitle => _accountHelpTitle.tr;
 

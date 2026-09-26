@@ -12,8 +12,10 @@ import 'core/services/local_storage/app_secure_storage.dart';
 import 'core/services/local_storage/app_shared_preferences.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/theme_cubit.dart';
+import 'features/account/account_injection.dart';
 import 'features/auth/auth_injection.dart';
 import 'features/home/home_injection.dart';
+import 'features/loyalty/loyalty_injection.dart';
 import 'features/restaurants/restaurants_injection.dart';
 
 /// Composition root.
@@ -43,6 +45,8 @@ abstract class ServiceLocator {
 
     // --- Features ---
     await initAuthFeatureInjection();
+    await initAccountFeatureInjection();
+    await initLoyaltyFeatureInjection();
     await initHomeFeatureInjection();
     await initRestaurantsFeatureInjection();
     // Register new features here.

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/utils/values/strings.dart';
+import '../../core/widgets/coming_soon_screen.dart';
 import '../../core/widgets/slider_photo.dart';
+import '../../features/account/presentation/cubit/profile_cubit.dart';
 import '../../features/account/presentation/screens/account_screen.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -42,6 +45,9 @@ abstract class AppRoutes {
   static const String loyalty = '/loyalty';
   static const String restaurants = '/home/restaurants';
   static const String pharmacyOrder = '/home/pharmacy';
+  static const String editProfile = '/edit-profile';
+  static const String addresses = '/addresses';
+  static const String helpSupport = '/help-support';
 
   // --- Names (for context.goNamed / context.pushNamed) ---
   static const String splashName = 'splash';
@@ -60,6 +66,9 @@ abstract class AppRoutes {
   static const String loyaltyName = 'loyalty';
   static const String restaurantsName = 'restaurants';
   static const String pharmacyOrderName = 'pharmacyOrder';
+  static const String editProfileName = 'editProfile';
+  static const String addressesName = 'addresses';
+  static const String helpSupportName = 'helpSupport';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -153,9 +162,18 @@ abstract class AppRoutes {
               GoRoute(
                 path: profile,
                 name: profileName,
-                // Hosts the logout action — see `AccountLogoutButton`.
-                builder: (_, __) => BlocProvider<AuthCubit>(
-                  create: (_) => ServiceLocator.instance<AuthCubit>(),
+                // ProfileCubit feeds the card and loyalty row; AuthCubit hosts
+                // the logout action — see `AccountLogoutButton`.
+                builder: (_, __) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider<ProfileCubit>(
+                      create: (_) =>
+                          ServiceLocator.instance<ProfileCubit>()..load(),
+                    ),
+                    BlocProvider<AuthCubit>(
+                      create: (_) => ServiceLocator.instance<AuthCubit>(),
+                    ),
+                  ],
                   child: const AccountScreen(),
                 ),
               ),
@@ -271,6 +289,25 @@ abstract class AppRoutes {
         path: loyalty,
         name: loyaltyName,
         builder: (_, __) => const LoyaltyScreen(),
+      ),
+
+      // Pushed from the Account tab, outside the shell like `loyalty`.
+      // Placeholders until their real screens exist.
+      GoRoute(
+        path: editProfile,
+        name: editProfileName,
+        builder: (_, __) => ComingSoonScreen(title: Strings.accountMyInfoTitle),
+      ),
+      GoRoute(
+        path: addresses,
+        name: addressesName,
+        builder: (_, __) =>
+            ComingSoonScreen(title: Strings.accountAddressesTitle),
+      ),
+      GoRoute(
+        path: helpSupport,
+        name: helpSupportName,
+        builder: (_, __) => ComingSoonScreen(title: Strings.accountHelpTitle),
       ),
     ],
     errorBuilder: (_, GoRouterState state) => Scaffold(

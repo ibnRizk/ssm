@@ -17,4 +17,8 @@ abstract class ApiEndpoints {
   // --- Auth ---
   static const String login = '$_v1/auth/login';
   static const String signUp = '$_v1/auth/sign-up';
+
+  // --- Customer ---
+  static const String customerInfo = '$_v1/customer/info';
+  static const String loyalty = '$_v1/customer/loyalty';
 }

@@ -176,6 +176,8 @@
   "account_subscriptions_subtitle_none": "لا يوجد اشتراك نشط حالياً",
   "account_loyalty_title": "نقاط الولاء",
   "account_loyalty_subtitle": "{completed} من {target} نحو توصيل مجاني",
+  "account_loyalty_subtitle_fallback": "تقدمك نحو توصيل مجاني",
+  "coming_soon": "قريباً",
   "account_help_title": "المساعدة والدعم",
   "account_help_subtitle": "نحن هنا لخدمتك",
   "account_logout_button": "تسجيل الخروج",

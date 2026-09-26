@@ -23,4 +23,9 @@ abstract class SaudiPhone {
       _nationalMobile.hasMatch(national(input));
 
   static String toE164(String input) => '$countryCode${national(input)}';
+
+  /// The form customers recognise (`05XXXXXXXX`). Anything that isn't a
+  /// valid Saudi mobile is returned unchanged rather than mangled.
+  static String toLocal(String input) =>
+      isValid(input) ? '0${national(input)}' : input;
 }

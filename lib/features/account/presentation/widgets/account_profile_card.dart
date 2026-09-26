@@ -12,7 +12,9 @@ class AccountProfileCard extends StatelessWidget {
   final String name;
   final String avatarLetter;
   final String phone;
-  final int memberSinceYear;
+
+  /// Hidden when null — the backend's `created_at` is optional.
+  final int? memberSinceYear;
   final VoidCallback onEdit;
 
   const AccountProfileCard({
@@ -23,6 +25,10 @@ class AccountProfileCard extends StatelessWidget {
     required this.memberSinceYear,
     required this.onEdit,
   });
+
+  /// The pill is the card's only action, so it's sized well above a plain
+  /// badge: larger text, roomier padding and a minimum height.
+  static const double _editMinHeight = 36;
 
   @override
   Widget build(BuildContext context) {
@@ -71,10 +77,13 @@ class AccountProfileCard extends StatelessWidget {
                   alignment: AlignmentDirectional.centerEnd,
                   child: GestureDetector(
                     onTap: onEdit,
+                    behavior: HitTestBehavior.opaque,
                     child: Container(
+                      constraints: BoxConstraints(minHeight: _editMinHeight.h),
+                      alignment: Alignment.center,
                       padding: EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm.w,
-                        vertical: AppSpacing.xxs.h,
+                        horizontal: AppSpacing.md.w,
+                        vertical: AppSpacing.xs.h,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -82,7 +91,7 @@ class AccountProfileCard extends StatelessWidget {
                       ),
                       child: Text(
                         Strings.accountEditButton,
-                        style: AppTextStyles.label(color: c.textPrimary),
+                        style: AppTextStyles.body(color: c.textPrimary),
                       ),
                     ),
                   ),
@@ -122,13 +131,15 @@ class AccountProfileCard extends StatelessWidget {
                               color: Colors.white.withValues(alpha: 0.75),
                             ),
                           ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            Strings.accountMemberSince(memberSinceYear),
-                            style: AppTextStyles.caption(
-                              color: Colors.white.withValues(alpha: 0.6),
+                          if (memberSinceYear case final int year) ...<Widget>[
+                            SizedBox(height: 2.h),
+                            Text(
+                              Strings.accountMemberSince(year),
+                              style: AppTextStyles.caption(
+                                color: Colors.white.withValues(alpha: 0.6),
+                              ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ),

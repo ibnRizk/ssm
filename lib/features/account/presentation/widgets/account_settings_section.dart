@@ -12,13 +12,11 @@ import '../../../../core/theme/theme_cubit.dart';
 import '../../../../core/utils/enum_extensions.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/show_modal_bottom_sheet.dart';
+import '../../../loyalty/domain/entities/loyalty_progress.dart';
+import '../cubit/profile_cubit.dart';
+import '../cubit/profile_state.dart';
 import 'account_settings_tile.dart';
 import 'language_selector_sheet.dart';
-
-/// Placeholder progress, mirroring `LoyaltyScreen`'s own placeholder numbers
-/// so the "70%" badge here matches what Loyalty shows once opened.
-const int _placeholderLoyaltyCompleted = 7;
-const int _placeholderLoyaltyTarget = 10;
 
 /// "إعدادات الحساب" section: title + a white card listing the account's
 /// settings rows, separated by hairline dividers.
@@ -28,47 +26,21 @@ class AccountSettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
-    final int loyaltyPercent =
-        (_placeholderLoyaltyCompleted / _placeholderLoyaltyTarget * 100)
-            .round();
 
     final List<Widget> tiles = <Widget>[
       AccountSettingsTile(
         icon: Icons.location_on_outlined,
         title: Strings.accountAddressesTitle,
+        // Placeholder until the addresses list is integrated.
         subtitle: Strings.accountAddressesSubtitle,
-        // TODO: open the addresses list screen once it exists.
-        onTap: () {},
+        onTap: () => context.push(AppRoutes.addresses),
       ),
-      AccountSettingsTile(
-        icon: Icons.card_giftcard_outlined,
-        title: Strings.accountLoyaltyTitle,
-        subtitle: Strings.accountLoyaltySubtitle(
-          _placeholderLoyaltyCompleted,
-          _placeholderLoyaltyTarget,
-        ),
-        badge: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.xs.w,
-            vertical: 3.h,
-          ),
-          decoration: BoxDecoration(
-            color: c.successLight,
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-          ),
-          child: Text(
-            '$loyaltyPercent%',
-            style: AppTextStyles.label(color: c.success),
-          ),
-        ),
-        onTap: () => context.push(AppRoutes.loyalty),
-      ),
+      const _LoyaltyTile(),
       AccountSettingsTile(
         icon: Icons.help_outline,
         title: Strings.accountHelpTitle,
         subtitle: Strings.accountHelpSubtitle,
-        // TODO: open help & support once it exists.
-        onTap: () {},
+        onTap: () => context.push(AppRoutes.helpSupport),
       ),
       AccountSettingsTile(
         icon: Icons.dark_mode_outlined,
@@ -124,6 +96,50 @@ class AccountSettingsSection extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Bound to `GET /customer/loyalty` through [ProfileCubit]. Rebuilds only
+/// when the progress itself changes; shows a neutral subtitle and no badge
+/// while it's loading or if it couldn't be fetched.
+class _LoyaltyTile extends StatelessWidget {
+  const _LoyaltyTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors c = context.colors;
+    return BlocSelector<ProfileCubit, ProfileState, LoyaltyProgress?>(
+      selector: (ProfileState state) =>
+          state is ProfileLoaded ? state.loyalty : null,
+      builder: (BuildContext context, LoyaltyProgress? loyalty) =>
+          AccountSettingsTile(
+            icon: Icons.card_giftcard_outlined,
+            title: Strings.accountLoyaltyTitle,
+            subtitle: loyalty == null
+                ? Strings.accountLoyaltySubtitleFallback
+                : Strings.accountLoyaltySubtitle(
+                    loyalty.currentProgress,
+                    loyalty.eligibleOrdersRequired,
+                  ),
+            badge: loyalty == null
+                ? null
+                : Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs.w,
+                      vertical: 3.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: c.successLight,
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                    child: Text(
+                      '${loyalty.percent}%',
+                      style: AppTextStyles.label(color: c.success),
+                    ),
+                  ),
+            onTap: () => context.push(AppRoutes.loyalty),
+          ),
     );
   }
 }

@@ -2,10 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/utils/saudi_phone.dart';
 import '../../domain/entities/login_credentials.dart';
 import '../../domain/entities/registration_details.dart';
 import '../../domain/repos/auth_repository.dart';
-import '../../domain/utils/saudi_phone.dart';
 import 'auth_state.dart';
 
 /// Screen-scoped (one instance per Login/Register route). Takes raw form

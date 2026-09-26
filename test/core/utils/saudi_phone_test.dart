@@ -1,4 +1,4 @@
-import 'package:flutter_base/features/auth/domain/utils/saudi_phone.dart';
+import 'package:flutter_base/core/utils/saudi_phone.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -21,6 +21,16 @@ void main() {
 
     test('international with 00 prefix', () {
       expect(SaudiPhone.toE164('00966512345678'), '+966512345678');
+    });
+  });
+
+  group('SaudiPhone.toLocal', () {
+    test('formats an E.164 number as 05…', () {
+      expect(SaudiPhone.toLocal('+966512345678'), '0512345678');
+    });
+
+    test('returns a non-Saudi number unchanged', () {
+      expect(SaudiPhone.toLocal('+201001234567'), '+201001234567');
     });
   });
 

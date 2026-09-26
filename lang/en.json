@@ -176,6 +176,8 @@
   "account_subscriptions_subtitle_none": "No active subscription right now",
   "account_loyalty_title": "Loyalty points",
   "account_loyalty_subtitle": "{completed} of {target} towards free delivery",
+  "account_loyalty_subtitle_fallback": "Your progress towards a free delivery",
+  "coming_soon": "Coming soon",
   "account_help_title": "Help & support",
   "account_help_subtitle": "We're here to help",
   "account_logout_button": "Log out",
