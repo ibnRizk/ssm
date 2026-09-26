@@ -12,11 +12,21 @@ import '../../../../core/utils/values/strings.dart';
 /// overlapping badge, and an orange price — rather than layering optional
 /// params onto one shared look, since the two variants share almost nothing
 /// visually beyond the row layout.
+///
+/// Name and summary sit on the reading-start side, the price on the end
+/// side (left in Arabic).
 class SubscriptionPackageCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final int price;
+  final String price;
+  final String currency;
   final bool featured;
+
+  /// Shows a spinner in place of the price while this plan's purchase
+  /// request runs.
+  final bool isLoading;
+
+  /// Null disables the card (e.g. while another purchase runs).
   final VoidCallback? onTap;
 
   const SubscriptionPackageCard({
@@ -24,7 +34,9 @@ class SubscriptionPackageCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.price,
+    required this.currency,
     this.featured = false,
+    this.isLoading = false,
     this.onTap,
   });
 
@@ -60,7 +72,13 @@ class SubscriptionPackageCard extends StatelessWidget {
               ),
             ),
             SizedBox(width: AppSpacing.sm.w),
-            _PriceText(price: price, priceColor: c.primary, currencyColor: c.textSecondary),
+            _PriceText(
+              price: price,
+              currency: currency,
+              isLoading: isLoading,
+              priceColor: c.primary,
+              currencyColor: c.textSecondary,
+            ),
           ],
         ),
       ),
@@ -105,6 +123,8 @@ class SubscriptionPackageCard extends StatelessWidget {
                 SizedBox(width: AppSpacing.sm.w),
                 _PriceText(
                   price: price,
+                  currency: currency,
+                  isLoading: isLoading,
                   priceColor: c.secondary,
                   currencyColor: c.secondary,
                 ),
@@ -136,23 +156,40 @@ class SubscriptionPackageCard extends StatelessWidget {
 }
 
 class _PriceText extends StatelessWidget {
-  final int price;
+  final String price;
+  final String currency;
+  final bool isLoading;
   final Color priceColor;
   final Color currencyColor;
 
   const _PriceText({
     required this.price,
+    required this.currency,
+    required this.isLoading,
     required this.priceColor,
     required this.currencyColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return SizedBox(
+        width: 24.r,
+        height: 24.r,
+        child: CircularProgressIndicator(strokeWidth: 2, color: priceColor),
+      );
+    }
     return Text.rich(
       TextSpan(
         children: <InlineSpan>[
-          TextSpan(text: '$price', style: AppTextStyles.h1(color: priceColor)),
-          TextSpan(text: ' ر.س', style: AppTextStyles.caption(color: currencyColor)),
+          TextSpan(
+            text: price,
+            style: AppTextStyles.h1(color: priceColor),
+          ),
+          TextSpan(
+            text: ' $currency',
+            style: AppTextStyles.caption(color: currencyColor),
+          ),
         ],
       ),
     );

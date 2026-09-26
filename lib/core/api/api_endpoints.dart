@@ -32,4 +32,15 @@ abstract class ApiEndpoints {
 
   /// Takes the id as the `address_id` query parameter, not a path segment.
   static const String addressDelete = '$_v1/customer/address/delete';
+
+  // --- Zones ---
+  static const String zoneList = '$_v1/zone/list';
+
+  // --- Delivery subscriptions ---
+  /// Takes the zone as the `zone_id` query parameter.
+  static const String subscriptionPlans = '$_v1/customer/subscription-plans';
+  static const String currentSubscription =
+      '$_v1/customer/subscriptions/current';
+  static const String subscriptionPurchaseIntent =
+      '$_v1/customer/subscriptions/purchase-intent';
 }

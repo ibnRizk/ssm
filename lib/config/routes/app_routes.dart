@@ -29,6 +29,7 @@ import '../../features/restaurants/presentation/cubit/store_cart_cubit.dart';
 import '../../features/restaurants/presentation/screens/restaurant_details_screen.dart';
 import '../../features/restaurants/presentation/screens/restaurants_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
+import '../../features/subscriptions/presentation/cubit/subscriptions_cubit.dart';
 import '../../features/subscriptions/presentation/screens/subscriptions_screen.dart';
 import '../../injection_container.dart';
 import 'main_scaffold.dart';
@@ -162,7 +163,11 @@ abstract class AppRoutes {
               GoRoute(
                 path: subscriptions,
                 name: subscriptionsName,
-                builder: (_, __) => const SubscriptionsScreen(),
+                builder: (_, __) => BlocProvider<SubscriptionsCubit>(
+                  create: (_) =>
+                      ServiceLocator.instance<SubscriptionsCubit>()..load(),
+                  child: const SubscriptionsScreen(),
+                ),
               ),
             ],
           ),

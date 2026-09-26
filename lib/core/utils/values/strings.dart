@@ -472,22 +472,83 @@ abstract class Strings {
   static String get subscriptionsAreaSelectorTitle =>
       _subscriptionsAreaSelectorTitle.tr;
 
-  static const String _subscriptionsAreaFeeNote = 'subscriptions_area_fee_note';
+  static const String _subscriptionsNoZones = 'subscriptions_no_zones';
+  static String get subscriptionsNoZones => _subscriptionsNoZones.tr;
 
-  /// `{area}` and `{fee}` in the translation are replaced with the
-  /// currently-selected area's name and delivery fee.
-  static String subscriptionsAreaFeeNote(String area, int fee) =>
-      _subscriptionsAreaFeeNote.tr
-          .replaceFirst('{area}', area)
-          .replaceFirst('{fee}', '$fee');
+  static const String _subscriptionsNoPlans = 'subscriptions_no_plans';
+  static String get subscriptionsNoPlans => _subscriptionsNoPlans.tr;
+
+  static const String _subscriptionsPlanSummary = 'subscriptions_plan_summary';
+
+  /// `{deliveries}` and `{days}` in the translation are replaced with the
+  /// plan's delivery count and validity.
+  static String subscriptionsPlanSummary(int deliveries, int days) =>
+      _subscriptionsPlanSummary.tr
+          .replaceFirst('{deliveries}', '$deliveries')
+          .replaceFirst('{days}', '$days');
 
   static const String _subscriptionsBestValueBadge =
       'subscriptions_best_value_badge';
   static String get subscriptionsBestValueBadge =>
       _subscriptionsBestValueBadge.tr;
 
+  static const String _subscriptionsConfirmTitle =
+      'subscriptions_confirm_title';
+
+  /// `{plan}` in the translation is replaced with the plan name.
+  static String subscriptionsConfirmTitle(String plan) =>
+      _subscriptionsConfirmTitle.tr.replaceFirst('{plan}', plan);
+
+  static const String _subscriptionsConfirmMessage =
+      'subscriptions_confirm_message';
+
+  /// `{deliveries}`, `{price}` and `{currency}` in the translation are
+  /// replaced with the plan's values.
+  static String subscriptionsConfirmMessage(
+    int deliveries,
+    String price,
+    String currency,
+  ) => _subscriptionsConfirmMessage.tr
+      .replaceFirst('{deliveries}', '$deliveries')
+      .replaceFirst('{price}', price)
+      .replaceFirst('{currency}', currency);
+
+  static const String _subscriptionsSubscribeButton =
+      'subscriptions_subscribe_button';
+  static String get subscriptionsSubscribeButton =>
+      _subscriptionsSubscribeButton.tr;
+
+  /// HTTP 201 from purchase-intent: created, unpaid, awaiting an admin.
+  static const String _subscriptionsPendingApproval =
+      'subscriptions_pending_approval';
+  static String get subscriptionsPendingApproval =>
+      _subscriptionsPendingApproval.tr;
+
+  static const String _subscriptionsActiveTitle = 'subscriptions_active_title';
+  static String get subscriptionsActiveTitle => _subscriptionsActiveTitle.tr;
+
+  static const String _subscriptionsActiveRemaining =
+      'subscriptions_active_remaining';
+
+  /// `{remaining}` and `{total}` in the translation are replaced with the
+  /// active subscription's delivery counts.
+  static String subscriptionsActiveRemaining(int remaining, int total) =>
+      _subscriptionsActiveRemaining.tr
+          .replaceFirst('{remaining}', '$remaining')
+          .replaceFirst('{total}', '$total');
+
+  static const String _subscriptionsActiveExpires =
+      'subscriptions_active_expires';
+
+  /// `{date}` in the translation is replaced with the formatted expiry date.
+  static String subscriptionsActiveExpires(String date) =>
+      _subscriptionsActiveExpires.tr.replaceFirst('{date}', date);
+
   static const String _subscriptionsFooterNote = 'subscriptions_footer_note';
   static String get subscriptionsFooterNote => _subscriptionsFooterNote.tr;
+
+  static const String _currencySar = 'currency_sar';
+  static String get currencySar => _currencySar.tr;
 
   // --- Loyalty ---
   static const String _loyaltyTitle = 'loyalty_title';

@@ -18,6 +18,7 @@ import 'features/auth/auth_injection.dart';
 import 'features/home/home_injection.dart';
 import 'features/loyalty/loyalty_injection.dart';
 import 'features/restaurants/restaurants_injection.dart';
+import 'features/subscriptions/subscriptions_injection.dart';
 
 /// Composition root.
 ///
@@ -51,6 +52,7 @@ abstract class ServiceLocator {
     await initLoyaltyFeatureInjection();
     await initHomeFeatureInjection();
     await initRestaurantsFeatureInjection();
+    await initSubscriptionsFeatureInjection();
     // Register new features here.
   }
 

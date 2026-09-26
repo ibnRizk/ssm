@@ -1,55 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/app_dimens.dart';
-import '../widgets/subscription_package_card.dart';
+import '../../../../core/utils/failure_message.dart';
+import '../../../../core/utils/values/strings.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../../core/widgets/error_text.dart';
+import '../../domain/entities/active_subscription.dart';
+import '../../domain/entities/delivery_zone.dart';
+import '../cubit/subscriptions_cubit.dart';
+import '../cubit/subscriptions_state.dart';
+import '../widgets/active_subscription_banner.dart';
+import '../widgets/subscription_plans_section.dart';
 import '../widgets/subscriptions_area_card.dart';
 import '../widgets/subscriptions_footer_note.dart';
 import '../widgets/subscriptions_header.dart';
 
-class _PackageListItem {
-  final String title;
-  final String subtitle;
-  final int price;
-  final bool featured;
-
-  const _PackageListItem({
-    required this.title,
-    required this.subtitle,
-    required this.price,
-    this.featured = false,
-  });
-}
-
-/// Placeholder plans — swap for real data from the subscriptions feature's
-/// data layer once it exists.
-const List<_PackageListItem> _placeholderPackages = <_PackageListItem>[
-  _PackageListItem(
-    title: 'باقة شهر',
-    subtitle: '11 توصيلة · صلاحية 30 يوم',
-    price: 100,
-  ),
-  _PackageListItem(
-    title: 'باقة شهرين',
-    subtitle: '22 توصيلة · صلاحية 60 يوم',
-    price: 200,
-  ),
-  _PackageListItem(
-    title: 'باقة 3 شهور',
-    subtitle: '33 توصيلة · صلاحية 90 يوم',
-    price: 300,
-  ),
-  _PackageListItem(
-    title: 'الباقة الذهبية',
-    subtitle: '44 توصيلة · صلاحية 120 يوم · الأوفر للعائلات',
-    price: 400,
-    featured: true,
-  ),
-];
-
 /// Subscriptions tab body. The bottom navigation bar and its Scaffold live
 /// in [MainScaffold] — this widget is only the scrollable content for that
-/// tab.
+/// tab. Expects a [SubscriptionsCubit] above it (provided at the route).
 class SubscriptionsScreen extends StatelessWidget {
   const SubscriptionsScreen({super.key});
 
@@ -57,36 +27,149 @@ class SubscriptionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       bottom: false,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.screen.w,
-          AppSpacing.lg.h,
-          AppSpacing.screen.w,
-          AppSpacing.xxl.h,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            const SubscriptionsHeader(),
-            SizedBox(height: AppSpacing.lg.h),
-            const SubscriptionsAreaCard(),
-            SizedBox(height: AppSpacing.lg.h),
-            for (int i = 0; i < _placeholderPackages.length; i++) ...<Widget>[
-              if (i > 0) SizedBox(height: AppSpacing.md.h),
-              SubscriptionPackageCard(
-                title: _placeholderPackages[i].title,
-                subtitle: _placeholderPackages[i].subtitle,
-                price: _placeholderPackages[i].price,
-                featured: _placeholderPackages[i].featured,
-                // TODO: open the subscribe/checkout flow once it exists.
-                onTap: () {},
-              ),
-            ],
-            SizedBox(height: AppSpacing.lg.h),
-            const SubscriptionsFooterNote(),
-          ],
+      child: _PurchaseResultListener(
+        child: RefreshIndicator(
+          onRefresh: () => context.read<SubscriptionsCubit>().load(),
+          child: SingleChildScrollView(
+            // Pull-to-refresh must work even on a short page.
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.screen.w,
+              AppSpacing.lg.h,
+              AppSpacing.screen.w,
+              AppSpacing.xxl.h,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const SubscriptionsHeader(),
+                SizedBox(height: AppSpacing.lg.h),
+                const _SubscriptionsBody(),
+              ],
+            ),
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Switches between loading / error / content. Rebuilds only when that
+/// top-level phase changes; each loaded section selects its own slice.
+class _SubscriptionsBody extends StatelessWidget {
+  const _SubscriptionsBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SubscriptionsCubit, SubscriptionsState>(
+      buildWhen: (SubscriptionsState previous, SubscriptionsState current) =>
+          previous.runtimeType != current.runtimeType,
+      builder: (BuildContext context, SubscriptionsState state) =>
+          switch (state) {
+            SubscriptionsLoaded() => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const _ActiveBanner(),
+                const _AreaCard(),
+                SizedBox(height: AppSpacing.lg.h),
+                const SubscriptionPlansSection(),
+                SizedBox(height: AppSpacing.lg.h),
+                const SubscriptionsFooterNote(),
+              ],
+            ),
+            SubscriptionsError(:final failure) => ErrorText(
+              message: failure.userMessage,
+              onRetry: () => context.read<SubscriptionsCubit>().load(),
+            ),
+            SubscriptionsInitial() || SubscriptionsLoading() => Padding(
+              padding: EdgeInsets.only(top: AppSpacing.xxl.h),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          },
+    );
+  }
+}
+
+class _ActiveBanner extends StatelessWidget {
+  const _ActiveBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      SubscriptionsCubit,
+      SubscriptionsState,
+      ActiveSubscription?
+    >(
+      selector: (SubscriptionsState state) =>
+          state is SubscriptionsLoaded ? state.current : null,
+      builder: (BuildContext context, ActiveSubscription? current) =>
+          current == null
+          ? const SizedBox.shrink()
+          : Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.md.h),
+              child: ActiveSubscriptionBanner(subscription: current),
+            ),
+    );
+  }
+}
+
+class _AreaCard extends StatelessWidget {
+  const _AreaCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      SubscriptionsCubit,
+      SubscriptionsState,
+      (List<DeliveryZone>, int?)
+    >(
+      selector: (SubscriptionsState state) => state is SubscriptionsLoaded
+          ? (state.zones, state.selectedZoneId)
+          : (const <DeliveryZone>[], null),
+      builder: (BuildContext context, (List<DeliveryZone>, int?) slice) =>
+          SubscriptionsAreaCard(
+            zones: slice.$1,
+            selectedZoneId: slice.$2,
+            onSelected: (int zoneId) =>
+                context.read<SubscriptionsCubit>().selectZone(zoneId),
+          ),
+    );
+  }
+}
+
+/// One-shot feedback for a purchase intent. Never rebuilds [child].
+class _PurchaseResultListener extends StatelessWidget {
+  final Widget child;
+
+  const _PurchaseResultListener({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<SubscriptionsCubit, SubscriptionsState>(
+      listenWhen: (SubscriptionsState previous, SubscriptionsState current) =>
+          current is SubscriptionsLoaded &&
+          (previous is! SubscriptionsLoaded ||
+              previous.purchase != current.purchase),
+      listener: (BuildContext context, SubscriptionsState state) {
+        switch ((state as SubscriptionsLoaded).purchase) {
+          case PurchasePendingApproval():
+            showAppSnackBar(
+              context: context,
+              message: Strings.subscriptionsPendingApproval,
+              type: ToastType.success,
+              duration: const Duration(seconds: 5),
+            );
+          case PurchaseFailed(:final failure):
+            showAppSnackBar(
+              context: context,
+              message: failure.userMessage,
+              type: ToastType.error,
+            );
+          case PurchaseIdle() || PurchaseInProgress():
+            break;
+        }
+      },
+      child: child,
     );
   }
 }
