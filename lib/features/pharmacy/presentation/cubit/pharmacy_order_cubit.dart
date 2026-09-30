@@ -25,14 +25,16 @@ class PharmacyOrderCubit extends Cubit<PharmacyOrderState> {
     required this.addressRepository,
   }) : super(const PharmacyOrderState());
 
-  /// The API can't list pharmacies alone, so the zone's stores are offered
-  /// (sending to a non-pharmacy answers 422 with the backend's message).
+  /// The backend's store category for pharmacies; only its stores are
+  /// offered, so a restaurant or bakery can't be picked.
+  static const int pharmacyCategoryId = 3;
+
   /// One generous page covers a zone; there's no paging in a picker sheet.
   static const int pharmaciesPageSize = 50;
 
   int _noticeSeq = 0;
 
-  /// Fetches the stores and the customer's addresses concurrently. Keeps
+  /// Fetches the pharmacies and the customer's addresses concurrently. Keeps
   /// the current choices when they still exist; otherwise the first
   /// address is chosen, while the pharmacy is left for the customer.
   Future<void> loadOptions() async {
@@ -41,7 +43,11 @@ class PharmacyOrderCubit extends Cubit<PharmacyOrderState> {
       Either<Failure, CatalogPage<Store>> stores,
       Either<Failure, List<Address>> addresses,
     ) = await (
-      catalogRepository.getStores(page: 1, pageSize: pharmaciesPageSize),
+      catalogRepository.getCategoryStores(
+        categoryId: pharmacyCategoryId,
+        page: 1,
+        pageSize: pharmaciesPageSize,
+      ),
       addressRepository.getAddresses(),
     ).wait;
     if (isClosed) return;

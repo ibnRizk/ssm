@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../injection_container.dart';
+import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 class ModalBottomSheetScaffold extends StatelessWidget {
@@ -16,8 +16,11 @@ class ModalBottomSheetScaffold extends StatelessWidget {
     super.key,
   });
 
+  /// Colours come from the active theme — never the context-free `colors`
+  /// getter, which is fixed to the light palette and ignores dark mode.
   @override
   Widget build(BuildContext context) {
+    final AppColors colors = context.colors;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
@@ -25,7 +28,8 @@ class ModalBottomSheetScaffold extends StatelessWidget {
           topStart: Radius.circular(24.r),
           topEnd: Radius.circular(24.r),
         ),
-        color: colors.background,
+        // Same slots as `colorScheme.surface` / `onSurface` in `app_theme`.
+        color: colors.surface,
       ),
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.start,

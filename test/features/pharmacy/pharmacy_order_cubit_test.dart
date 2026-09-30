@@ -4,6 +4,8 @@ import 'package:dartz/dartz.dart';
 import 'package:ssm/core/error/failures.dart';
 import 'package:ssm/features/addresses/domain/entities/address.dart';
 import 'package:ssm/features/addresses/domain/repos/address_repository.dart';
+import 'package:ssm/features/catalog/domain/entities/catalog_page.dart';
+import 'package:ssm/features/catalog/domain/entities/store.dart';
 import 'package:ssm/features/pharmacy/domain/entities/pharmacy_request.dart';
 import 'package:ssm/features/pharmacy/domain/entities/prescription_image.dart';
 import 'package:ssm/features/pharmacy/domain/repos/pharmacy_repository.dart';
@@ -108,7 +110,16 @@ void main() {
     await load;
   }
 
-  test('offers the zone stores and preselects the first address', () async {
+  test('offers only the pharmacy category stores', () async {
+    await loadOptions();
+
+    final PendingCall<CatalogPage<Store>> call = catalog.storeCalls.single;
+    expect(call.method, 'getCategoryStores', reason: 'not every zone store');
+    expect(call.categoryId, PharmacyOrderCubit.pharmacyCategoryId);
+    expect(PharmacyOrderCubit.pharmacyCategoryId, 3);
+  });
+
+  test('preselects the first address, leaving the pharmacy', () async {
     await loadOptions();
 
     expect(catalog.storeCalls.single.page, 1);
