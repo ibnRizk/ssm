@@ -3,6 +3,7 @@ import 'data/datasources/auth_remote_data_source.dart';
 import 'data/repos/auth_repository_impl.dart';
 import 'domain/repos/auth_repository.dart';
 import 'presentation/cubit/auth_cubit.dart';
+import 'presentation/cubit/forgot_password_cubit.dart';
 
 /// Per-feature registration. See `home_injection.dart` for the convention.
 ///
@@ -12,6 +13,9 @@ Future<void> initAuthFeatureInjection() async {
   /// Cubits
   ServiceLocator.instance.registerFactory<AuthCubit>(
     () => AuthCubit(repository: ServiceLocator.instance()),
+  );
+  ServiceLocator.instance.registerFactory<ForgotPasswordCubit>(
+    () => ForgotPasswordCubit(repository: ServiceLocator.instance()),
   );
 
   /// Repository

@@ -39,6 +39,9 @@ class _FakeAccountRepository implements AccountRepository {
   @override
   Future<Either<Failure, Unit>> updateProfile(ProfileUpdate update) =>
       throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, Unit>> deleteAccount() => throw UnimplementedError();
 }
 
 class _FakeLoyaltyRepository implements LoyaltyRepository {

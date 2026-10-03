@@ -17,28 +17,19 @@ abstract class AppEnv {
     await dotenv.load(fileName: fileName);
   }
 
-  static String get appName =>
-      dotenv.get('APP_NAME', fallback: 'ssm');
+  static String get appName => dotenv.get('APP_NAME', fallback: 'ssm');
 
-  static String get baseUrl =>
-      dotenv.get('BASE_URL', fallback: '');
+  static String get baseUrl => dotenv.get('BASE_URL', fallback: '');
 
   static bool get enableNetworkLogs =>
-      dotenv
-          .get('ENABLE_NETWORK_LOGS', fallback: 'false')
-          .toLowerCase() ==
+      dotenv.get('ENABLE_NETWORK_LOGS', fallback: 'false').toLowerCase() ==
       'true';
 
-  static Duration get connectTimeout =>
-      _duration('CONNECT_TIMEOUT_MS', 30000);
+  static Duration get connectTimeout => _duration('CONNECT_TIMEOUT_MS', 30000);
 
-  static Duration get receiveTimeout =>
-      _duration('RECEIVE_TIMEOUT_MS', 30000);
+  static Duration get receiveTimeout => _duration('RECEIVE_TIMEOUT_MS', 30000);
 
-  static Duration _duration(String key, int fallbackMs) =>
-      Duration(
-        milliseconds:
-            int.tryParse(dotenv.get(key, fallback: '')) ??
-            fallbackMs,
-      );
+  static Duration _duration(String key, int fallbackMs) => Duration(
+    milliseconds: int.tryParse(dotenv.get(key, fallback: '')) ?? fallbackMs,
+  );
 }

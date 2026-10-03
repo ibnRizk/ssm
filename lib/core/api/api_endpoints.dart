@@ -21,9 +21,17 @@ abstract class ApiEndpoints {
   static const String login = '$_v1/auth/login';
   static const String signUp = '$_v1/auth/sign-up';
 
+  /// Password recovery: request an OTP, verify it, then set the password.
+  static const String forgotPassword = '$_v1/auth/forgot-password';
+  static const String verifyResetToken = '$_v1/auth/verify-token';
+  static const String resetPassword = '$_v1/auth/reset-password';
+
   // --- Customer ---
   static const String customerInfo = '$_v1/customer/info';
   static const String updateProfile = '$_v1/customer/update-profile';
+
+  /// Refused with HTTP 203 (`on-going`) while an order is in progress.
+  static const String removeAccount = '$_v1/customer/remove-account';
 
   // --- Loyalty ---
   static const String loyalty = '$_v1/customer/loyalty';

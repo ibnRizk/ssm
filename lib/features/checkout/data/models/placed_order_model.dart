@@ -8,17 +8,11 @@ import '../../domain/entities/order_request.dart';
 class PlacedOrderModel extends PlacedOrder {
   const PlacedOrderModel({required super.id, super.totalAmount});
 
-  /// `order/place` also refuses with HTTP 203 — a success status whose body
-  /// is `{"errors":[{"code","message"}]}`. That's thrown as the same
-  /// [ForbiddenException] a 403 refusal becomes. Throws [ServerException]
-  /// for any other body without an order id.
+  /// A 203 refusal is thrown as a [ForbiddenException] — see
+  /// [throwIfRefusal]. Throws [ServerException] for any other body without
+  /// an order id.
   factory PlacedOrderModel.fromJson(dynamic json) {
-    if (json is Map && json['errors'] is List) {
-      throw ForbiddenException(
-        message: apiErrorMessage(json),
-        code: apiErrorCode(json),
-      );
-    }
+    throwIfRefusal(json);
     final int? id = json is Map ? jsonInt(json['order_id']) : null;
     if (json is! Map || id == null) throw const ServerException();
     return PlacedOrderModel(

@@ -57,6 +57,19 @@ AppException mapDioException(DioException error) {
   }
 }
 
+/// Legacy endpoints also refuse with a *success* status — HTTP 203 from
+/// `order/place` and `customer/remove-account` — whose body is
+/// `{"errors":[{"code","message"}]}`. Throws that as the same
+/// [ForbiddenException] a 403 refusal becomes; any other body passes.
+void throwIfRefusal(dynamic data) {
+  if (data is Map && data['errors'] is List) {
+    throw ForbiddenException(
+      message: apiErrorMessage(data),
+      code: apiErrorCode(data),
+    );
+  }
+}
+
 /// First human-readable message in an error body, in the backend's order of
 /// precedence: `errors[0].message`, then the first entry of an
 /// `errors: {field: [...]}` map, then `message`.

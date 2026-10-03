@@ -177,6 +177,73 @@ abstract class Strings {
   static const String _authLoginLink = 'auth_login_link';
   static String get authLoginLink => _authLoginLink.tr;
 
+  // --- Forgot password ---
+  static const String _authForgotPasswordLink = 'auth_forgot_password_link';
+  static String get authForgotPasswordLink => _authForgotPasswordLink.tr;
+
+  static const String _forgotPasswordTitle = 'forgot_password_title';
+  static String get forgotPasswordTitle => _forgotPasswordTitle.tr;
+
+  static const String _forgotPasswordPhoneSubtitle =
+      'forgot_password_phone_subtitle';
+  static String get forgotPasswordPhoneSubtitle =>
+      _forgotPasswordPhoneSubtitle.tr;
+
+  static const String _forgotPasswordSendCode = 'forgot_password_send_code';
+  static String get forgotPasswordSendCode => _forgotPasswordSendCode.tr;
+
+  static const String _forgotPasswordPhoneNotFound =
+      'forgot_password_phone_not_found';
+  static String get forgotPasswordPhoneNotFound =>
+      _forgotPasswordPhoneNotFound.tr;
+
+  static const String _forgotPasswordCodeTitle = 'forgot_password_code_title';
+  static String get forgotPasswordCodeTitle => _forgotPasswordCodeTitle.tr;
+
+  static const String _forgotPasswordCodeSubtitle =
+      'forgot_password_code_subtitle';
+
+  /// `{phone}` in the translation is replaced with the number the code was
+  /// sent to.
+  static String forgotPasswordCodeSubtitle(String phone) =>
+      _forgotPasswordCodeSubtitle.tr.replaceFirst('{phone}', phone);
+
+  static const String _forgotPasswordCodeLabel = 'forgot_password_code_label';
+  static String get forgotPasswordCodeLabel => _forgotPasswordCodeLabel.tr;
+
+  static const String _forgotPasswordInvalidCode =
+      'forgot_password_invalid_code';
+  static String get forgotPasswordInvalidCode => _forgotPasswordInvalidCode.tr;
+
+  static const String _forgotPasswordVerifyButton =
+      'forgot_password_verify_button';
+  static String get forgotPasswordVerifyButton =>
+      _forgotPasswordVerifyButton.tr;
+
+  static const String _forgotPasswordResend = 'forgot_password_resend';
+  static String get forgotPasswordResend => _forgotPasswordResend.tr;
+
+  static const String _forgotPasswordCodeResent = 'forgot_password_code_resent';
+  static String get forgotPasswordCodeResent => _forgotPasswordCodeResent.tr;
+
+  static const String _forgotPasswordNewTitle = 'forgot_password_new_title';
+  static String get forgotPasswordNewTitle => _forgotPasswordNewTitle.tr;
+
+  static const String _forgotPasswordNewSubtitle =
+      'forgot_password_new_subtitle';
+  static String get forgotPasswordNewSubtitle => _forgotPasswordNewSubtitle.tr;
+
+  static const String _forgotPasswordConfirmLabel =
+      'forgot_password_confirm_label';
+  static String get forgotPasswordConfirmLabel =>
+      _forgotPasswordConfirmLabel.tr;
+
+  static const String _forgotPasswordSaveButton = 'forgot_password_save_button';
+  static String get forgotPasswordSaveButton => _forgotPasswordSaveButton.tr;
+
+  static const String _forgotPasswordSuccess = 'forgot_password_success';
+  static String get forgotPasswordSuccess => _forgotPasswordSuccess.tr;
+
   // --- Home ---
   static const String _homeGreeting = 'home_greeting';
   static String homeGreeting(String name) =>
@@ -1202,6 +1269,31 @@ abstract class Strings {
 
   static const String _accountLogoutButton = 'account_logout_button';
   static String get accountLogoutButton => _accountLogoutButton.tr;
+
+  // --- Delete account ---
+  static const String _accountDeleteButton = 'account_delete_button';
+  static String get accountDeleteButton => _accountDeleteButton.tr;
+
+  static const String _accountDeleteTitle = 'account_delete_title';
+  static String get accountDeleteTitle => _accountDeleteTitle.tr;
+
+  static const String _accountDeleteConsequences =
+      'account_delete_consequences';
+  static String get accountDeleteConsequences => _accountDeleteConsequences.tr;
+
+  static const String _accountDeleteAcknowledge = 'account_delete_acknowledge';
+  static String get accountDeleteAcknowledge => _accountDeleteAcknowledge.tr;
+
+  static const String _accountDeleteConfirm = 'account_delete_confirm';
+  static String get accountDeleteConfirm => _accountDeleteConfirm.tr;
+
+  /// HTTP 203 `on-going` — an order is still in progress.
+  static const String _accountDeleteOngoingOrder =
+      'account_delete_ongoing_order';
+  static String get accountDeleteOngoingOrder => _accountDeleteOngoingOrder.tr;
+
+  static const String _accountDeleted = 'account_deleted';
+  static String get accountDeleted => _accountDeleted.tr;
 
   static const String _accountAppearanceTitle = 'account_appearance_title';
   static String get accountAppearanceTitle => _accountAppearanceTitle.tr;

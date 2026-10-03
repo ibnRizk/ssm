@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/app_dimens.dart';
 import '../cubit/profile_cubit.dart';
+import '../widgets/account_delete_button.dart';
 import '../widgets/account_footer.dart';
 import '../widgets/account_header_bar.dart';
 import '../widgets/account_logout_button.dart';
@@ -13,8 +14,9 @@ import '../widgets/account_settings_section.dart';
 /// Account tab body. The bottom navigation bar and its Scaffold live in
 /// [MainScaffold] — this widget is only the scrollable content for that tab.
 ///
-/// Expects a [ProfileCubit] (profile card + loyalty row) and an `AuthCubit`
-/// (logout) above it — both provided at the profile route.
+/// Expects a [ProfileCubit] (profile card + loyalty row), an `AuthCubit`
+/// (logout) and a `DeleteAccountCubit` above it — all provided at the
+/// profile route.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
@@ -44,7 +46,9 @@ class AccountScreen extends StatelessWidget {
               const AccountSettingsSection(),
               SizedBox(height: AppSpacing.lg.h),
               const AccountLogoutButton(),
-              SizedBox(height: AppSpacing.xl.h),
+              SizedBox(height: AppSpacing.sm.h),
+              const AccountDeleteButton(),
+              SizedBox(height: AppSpacing.lg.h),
               const AccountFooter(),
             ],
           ),

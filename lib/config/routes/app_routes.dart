@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/utils/values/strings.dart';
 import '../../core/widgets/coming_soon_screen.dart';
 import '../../core/widgets/slider_photo.dart';
+import '../../features/account/presentation/cubit/delete_account_cubit.dart';
 import '../../features/account/presentation/cubit/edit_profile_cubit.dart';
 import '../../features/account/presentation/cubit/profile_cubit.dart';
 import '../../features/account/presentation/screens/account_screen.dart';
@@ -14,6 +15,8 @@ import '../../features/addresses/presentation/cubit/addresses_cubit.dart';
 import '../../features/addresses/presentation/screens/add_address_screen.dart';
 import '../../features/addresses/presentation/screens/addresses_screen.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
+import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/cart/presentation/cubit/cart_cubit.dart';
@@ -52,6 +55,7 @@ abstract class AppRoutes {
   static const String splash = '/';
   static const String login = '/login';
   static const String register = '/register';
+  static const String forgotPassword = '/forgot-password';
   static const String home = '/home';
   static const String orders = '/orders';
   static const String parcels = '/parcels';
@@ -78,6 +82,7 @@ abstract class AppRoutes {
   static const String splashName = 'splash';
   static const String loginName = 'login';
   static const String registerName = 'register';
+  static const String forgotPasswordName = 'forgotPassword';
   static const String homeName = 'home';
   static const String ordersName = 'orders';
   static const String parcelsName = 'parcels';
@@ -125,6 +130,16 @@ abstract class AppRoutes {
         builder: (_, __) => BlocProvider<AuthCubit>(
           create: (_) => ServiceLocator.instance<AuthCubit>(),
           child: const RegisterScreen(),
+        ),
+      ),
+      // Pushed from Login; all three steps live in this one route so they
+      // share the cubit holding the phone and verified code.
+      GoRoute(
+        path: forgotPassword,
+        name: forgotPasswordName,
+        builder: (_, __) => BlocProvider<ForgotPasswordCubit>(
+          create: (_) => ServiceLocator.instance<ForgotPasswordCubit>(),
+          child: const ForgotPasswordScreen(),
         ),
       ),
 
@@ -260,6 +275,10 @@ abstract class AppRoutes {
                     ),
                     BlocProvider<AuthCubit>(
                       create: (_) => ServiceLocator.instance<AuthCubit>(),
+                    ),
+                    BlocProvider<DeleteAccountCubit>(
+                      create: (_) =>
+                          ServiceLocator.instance<DeleteAccountCubit>(),
                     ),
                   ],
                   child: const AccountScreen(),

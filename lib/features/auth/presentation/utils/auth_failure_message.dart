@@ -13,4 +13,14 @@ extension AuthFailureMessage on Failure {
       message ?? Strings.noInternetConnection,
     _ => message ?? Strings.somethingWentWrong,
   };
+
+  /// Password recovery: a 404 means no account uses the number. A wrong or
+  /// expired code comes back with the server's own (localized) message.
+  String get passwordResetMessage => switch (this) {
+    NotFoundFailure() => Strings.forgotPasswordPhoneNotFound,
+    TooManyRequestsFailure() => Strings.authTooManyAttempts,
+    NetworkFailure(:final String? message) =>
+      message ?? Strings.noInternetConnection,
+    _ => message ?? Strings.somethingWentWrong,
+  };
 }

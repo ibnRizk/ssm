@@ -5,6 +5,7 @@ import 'package:ssm/core/services/local_storage/app_secure_storage.dart';
 import 'package:ssm/core/services/local_storage/app_shared_preferences.dart';
 import 'package:ssm/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:ssm/features/auth/data/models/requests/login_request.dart';
+import 'package:ssm/features/auth/data/models/requests/password_reset_request.dart';
 import 'package:ssm/features/auth/data/models/requests/register_request.dart';
 import 'package:ssm/features/auth/data/models/responses/auth_token_response.dart';
 import 'package:ssm/features/auth/data/repos/auth_repository_impl.dart';
@@ -35,6 +36,25 @@ class _FakeRemote implements AuthRemoteDataSource {
     lastRegister = request;
     return _respond();
   }
+
+  PasswordResetRequest? lastReset;
+
+  Future<void> _recordReset(PasswordResetRequest request) async {
+    lastReset = request;
+    if (error != null) throw error!;
+  }
+
+  @override
+  Future<void> requestPasswordReset(PasswordResetRequest request) =>
+      _recordReset(request);
+
+  @override
+  Future<void> verifyPasswordResetCode(PasswordResetRequest request) =>
+      _recordReset(request);
+
+  @override
+  Future<void> resetPassword(PasswordResetRequest request) =>
+      _recordReset(request);
 }
 
 class _FakeSecureStorage extends AppSecureStorage {
@@ -231,5 +251,69 @@ void main() {
         expect(storage.token, isNull);
       },
     );
+  });
+
+  group('password recovery', () {
+    test('requests a code for the phone', () async {
+      final Either<Failure, Unit> result = await repository
+          .requestPasswordReset('+966512345678');
+
+      expect(result, const Right<Failure, Unit>(unit));
+      expect(remote.lastReset?.toRequestCodeJson(), <String, dynamic>{
+        'verification_method': 'phone',
+        'phone': '+966512345678',
+      });
+    });
+
+    test('maps an unknown phone (404) to NotFoundFailure', () async {
+      remote.error = const NotFoundException(message: 'Not found');
+
+      final Either<Failure, Unit> result = await repository
+          .requestPasswordReset('+966512345678');
+
+      expect(
+        result,
+        const Left<Failure, Unit>(NotFoundFailure(message: 'Not found')),
+      );
+    });
+
+    test('verifies the code for the phone', () async {
+      await repository.verifyPasswordResetCode(
+        phone: '+966512345678',
+        code: '1234',
+      );
+
+      expect(remote.lastReset?.toVerifyJson(), <String, dynamic>{
+        'verification_method': 'phone',
+        'phone': '+966512345678',
+        'reset_token': '1234',
+      });
+    });
+
+    test('resets with the code and the password twice', () async {
+      await repository.resetPassword(
+        phone: '+966512345678',
+        code: '1234',
+        password: 'newSecret1',
+      );
+
+      expect(remote.lastReset?.toResetJson(), <String, dynamic>{
+        'verification_method': 'phone',
+        'phone': '+966512345678',
+        'reset_token': '1234',
+        'password': 'newSecret1',
+        'confirm_password': 'newSecret1',
+      });
+    });
+
+    test('a reset does not sign in', () async {
+      await repository.resetPassword(
+        phone: '+966512345678',
+        code: '1234',
+        password: 'newSecret1',
+      );
+
+      expect(storage.token, isNull);
+    });
   });
 }

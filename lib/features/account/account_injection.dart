@@ -2,6 +2,7 @@ import '../../injection_container.dart';
 import 'data/datasources/account_remote_data_source.dart';
 import 'data/repos/account_repository_impl.dart';
 import 'domain/repos/account_repository.dart';
+import 'presentation/cubit/delete_account_cubit.dart';
 import 'presentation/cubit/edit_profile_cubit.dart';
 import 'presentation/cubit/profile_cubit.dart';
 
@@ -19,6 +20,12 @@ Future<void> initAccountFeatureInjection() async {
   );
   ServiceLocator.instance.registerFactory<EditProfileCubit>(
     () => EditProfileCubit(repository: ServiceLocator.instance()),
+  );
+  ServiceLocator.instance.registerFactory<DeleteAccountCubit>(
+    () => DeleteAccountCubit(
+      accountRepository: ServiceLocator.instance(),
+      authRepository: ServiceLocator.instance(),
+    ),
   );
 
   /// Repository

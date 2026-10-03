@@ -8,8 +8,8 @@ class ThemeCubit extends Cubit<ThemeMode> {
   static const String _themeKey = 'app_theme_mode';
 
   ThemeCubit({required AppSharedPreferences sharedPreferences})
-      : _sharedPreferences = sharedPreferences,
-        super(_loadThemeMode(sharedPreferences));
+    : _sharedPreferences = sharedPreferences,
+      super(_loadThemeMode(sharedPreferences));
 
   static ThemeMode _loadThemeMode(AppSharedPreferences prefs) {
     final String? themeStr = prefs.instance.getString(_themeKey);
@@ -38,8 +38,9 @@ class ThemeCubit extends Cubit<ThemeMode> {
   Future<void> toggleTheme() async {
     // Treat system as light for toggling simplicity or explicitly check brightness.
     // For manual toggle, just switch between light and dark.
-    final ThemeMode newMode =
-        state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    final ThemeMode newMode = state == ThemeMode.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
     await setThemeMode(newMode);
   }
 }

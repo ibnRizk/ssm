@@ -23,6 +23,23 @@ class _SucceedingRepository implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> logout() async =>
       const Right<Failure, Unit>(unit);
+
+  @override
+  Future<Either<Failure, Unit>> requestPasswordReset(String phone) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, Unit>> verifyPasswordResetCode({
+    required String phone,
+    required String code,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, Unit>> resetPassword({
+    required String phone,
+    required String code,
+    required String password,
+  }) => throw UnimplementedError();
 }
 
 /// A screen that triggers [action] on the route-scoped [AuthCubit].

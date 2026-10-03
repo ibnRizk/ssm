@@ -21,8 +21,9 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
   Future<Either<Failure, PlacedOrder>> placeOrder(OrderRequest request) async {
     final int? zoneId = request.zoneId;
     if (zoneId != null) {
-      final Either<Failure, Unit> switched = await zoneRepository
-          .selectZoneIds(<int>[zoneId]);
+      final Either<Failure, Unit> switched = await zoneRepository.selectZoneIds(
+        <int>[zoneId],
+      );
       if (switched case Left<Failure, Unit>(:final Failure value)) {
         return Left<Failure, PlacedOrder>(value);
       }

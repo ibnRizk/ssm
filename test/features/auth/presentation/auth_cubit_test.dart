@@ -39,6 +39,23 @@ class _FakeRepository implements AuthRepository {
     await gate?.future;
     return result;
   }
+
+  @override
+  Future<Either<Failure, Unit>> requestPasswordReset(String phone) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, Unit>> verifyPasswordResetCode({
+    required String phone,
+    required String code,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, Unit>> resetPassword({
+    required String phone,
+    required String code,
+    required String password,
+  }) => throw UnimplementedError();
 }
 
 void main() {

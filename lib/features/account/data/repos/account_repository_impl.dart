@@ -22,4 +22,10 @@ class AccountRepositoryImpl implements AccountRepository {
         await remote.updateProfile(UpdateProfileRequest.fromUpdate(update));
         return unit;
       });
+
+  @override
+  Future<Either<Failure, Unit>> deleteAccount() => safeApiCall(() async {
+    await remote.deleteAccount();
+    return unit;
+  });
 }

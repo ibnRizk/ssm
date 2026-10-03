@@ -193,19 +193,22 @@ void main() {
       expect(preferences.getZoneIds(), isEmpty);
     });
 
-    test('offline, keeps the saved zone and resolves on the next call', () async {
-      await setUpWith(<String, Object>{
-        'zoneIds': <String>['3'],
-      });
-      remote.error = const InternetConnectionException(message: 'offline');
+    test(
+      'offline, keeps the saved zone and resolves on the next call',
+      () async {
+        await setUpWith(<String, Object>{
+          'zoneIds': <String>['3'],
+        });
+        remote.error = const InternetConnectionException(message: 'offline');
 
-      expect(zoneOf(await repository.ensureZoneIds()), <int>[3]);
+        expect(zoneOf(await repository.ensureZoneIds()), <int>[3]);
 
-      remote
-        ..error = null
-        ..addressZones = <int>[4];
-      expect(zoneOf(await repository.ensureZoneIds()), <int>[4]);
-    });
+        remote
+          ..error = null
+          ..addressZones = <int>[4];
+        expect(zoneOf(await repository.ensureZoneIds()), <int>[4]);
+      },
+    );
 
     test('without a saved zone, a network error is a failure', () async {
       await setUpWith(<String, Object>{});
@@ -330,10 +333,7 @@ void main() {
 
     test('the zone at a point is read from its JSON-encoded string', () async {
       final FakeDioConsumer consumer = FakeDioConsumer(
-        response: <String, dynamic>{
-          'zone_id': '[8]',
-          'zone_data': <dynamic>[],
-        },
+        response: <String, dynamic>{'zone_id': '[8]', 'zone_data': <dynamic>[]},
       );
 
       expect(

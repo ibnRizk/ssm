@@ -14,7 +14,10 @@ class AccountFooter extends StatelessWidget {
     final AppColors c = context.colors;
     return Column(
       children: <Widget>[
-        Text(Strings.appName, style: AppTextStyles.caption(color: c.textSecondary)),
+        Text(
+          Strings.appName,
+          style: AppTextStyles.caption(color: c.textSecondary),
+        ),
         SizedBox(height: 2.h),
         Text(
           Strings.accountFooterTagline,

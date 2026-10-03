@@ -36,6 +36,9 @@ class _FakeAccountRepository implements AccountRepository {
     updates.add(update);
     return pending.future;
   }
+
+  @override
+  Future<Either<Failure, Unit>> deleteAccount() => throw UnimplementedError();
 }
 
 void main() {

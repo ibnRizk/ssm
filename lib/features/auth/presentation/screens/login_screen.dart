@@ -96,7 +96,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     onSubmitted: (_) => _submit(),
                   ),
                 ),
-                SizedBox(height: AppSpacing.xl.h),
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: TextButton(
+                    onPressed: () =>
+                        context.pushNamed(AppRoutes.forgotPasswordName),
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.secondary,
+                    ),
+                    child: Text(Strings.authForgotPasswordLink),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md.h),
                 AuthSubmitButton(
                   label: Strings.authLoginButton,
                   onPressed: _submit,

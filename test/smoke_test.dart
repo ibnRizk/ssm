@@ -78,7 +78,10 @@ void main() {
       WidgetTester tester,
     ) async {
       await _pumpApp(tester);
-      expect(AppDecorations.card(AppColors.light).color, AppColors.light.surface);
+      expect(
+        AppDecorations.card(AppColors.light).color,
+        AppColors.light.surface,
+      );
       expect(AppDecorations.card(AppColors.dark).color, AppColors.dark.surface);
       expect(
         AppDecorations.card(AppColors.dark).color,
@@ -91,7 +94,10 @@ void main() {
     ) async {
       await _pumpApp(tester);
       const Color override = Color(0xFF123456);
-      expect(AppDecorations.card(AppColors.dark, color: override).color, override);
+      expect(
+        AppDecorations.card(AppColors.dark, color: override).color,
+        override,
+      );
     });
   });
 

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 
+import '../../../../core/api/safe_api_call.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/services/local_storage/app_secure_storage.dart';
@@ -9,6 +10,7 @@ import '../../domain/entities/registration_details.dart';
 import '../../domain/repos/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
 import '../models/requests/login_request.dart';
+import '../models/requests/password_reset_request.dart';
 import '../models/requests/register_request.dart';
 import '../models/responses/auth_token_response.dart';
 
@@ -50,6 +52,36 @@ class AuthRepositoryImpl implements AuthRepository {
       _authenticate(
         () => remote.register(RegisterRequest.fromDetails(details)),
       );
+
+  @override
+  Future<Either<Failure, Unit>> requestPasswordReset(String phone) =>
+      safeApiCall(() async {
+        await remote.requestPasswordReset(PasswordResetRequest(phone: phone));
+        return unit;
+      });
+
+  @override
+  Future<Either<Failure, Unit>> verifyPasswordResetCode({
+    required String phone,
+    required String code,
+  }) => safeApiCall(() async {
+    await remote.verifyPasswordResetCode(
+      PasswordResetRequest(phone: phone, code: code),
+    );
+    return unit;
+  });
+
+  @override
+  Future<Either<Failure, Unit>> resetPassword({
+    required String phone,
+    required String code,
+    required String password,
+  }) => safeApiCall(() async {
+    await remote.resetPassword(
+      PasswordResetRequest(phone: phone, code: code, password: password),
+    );
+    return unit;
+  });
 
   Future<Either<Failure, Unit>> _authenticate(
     Future<AuthTokenResponse> Function() request,

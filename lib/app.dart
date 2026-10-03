@@ -30,9 +30,7 @@ class _AppState extends State<App> {
     super.initState();
     // Any 401/403 from any request lands here. Clear the session and bounce to
     // the app entry point — swap for your login route once auth exists.
-    _unauthorizedSub = eventBus.unauthorizedStream.listen((
-      _,
-    ) async {
+    _unauthorizedSub = eventBus.unauthorizedStream.listen((_) async {
       await secureStorage.clearAll();
       AppRoutes.router.go(AppRoutes.login);
     });
@@ -53,12 +51,8 @@ class _AppState extends State<App> {
       builder: (_, __) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider<LocaleCubit>.value(
-              value: localeCubit,
-            ),
-            BlocProvider<ThemeCubit>.value(
-              value: themeCubit,
-            ),
+            BlocProvider<LocaleCubit>.value(value: localeCubit),
+            BlocProvider<ThemeCubit>.value(value: themeCubit),
           ],
           child: BlocBuilder<LocaleCubit, Locale?>(
             builder: (BuildContext context, Locale? locale) {
@@ -81,14 +75,11 @@ class _AppState extends State<App> {
                     // Account tab — `localeResolutionCallback` below then keeps
                     // following the device locale, same as before that choice.
                     locale: locale,
-                    supportedLocales: AppLocalizationsSetup
-                        .supportedLocales,
+                    supportedLocales: AppLocalizationsSetup.supportedLocales,
                     localizationsDelegates:
-                        AppLocalizationsSetup
-                            .localizationsDelegates,
+                        AppLocalizationsSetup.localizationsDelegates,
                     localeResolutionCallback:
-                        AppLocalizationsSetup
-                            .localeResolutionCallback,
+                        AppLocalizationsSetup.localeResolutionCallback,
                     routerConfig: AppRoutes.router,
                   );
                 },
