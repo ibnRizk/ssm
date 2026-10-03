@@ -78,6 +78,10 @@ abstract class ApiEndpoints {
   static const String cartRemoveItem = '$_v1/customer/cart/remove-item';
 
   // --- Orders (need the zone headers) ---
+  /// The authoritative price breakdown, before placing.
+  static const String orderQuote = '$_v1/customer/order/quote';
+
+  /// Takes an `Idempotency-Key` header — one per checkout attempt.
   static const String orderPlace = '$_v1/customer/order/place';
 
   /// Paginated like the store list: `offset` is a 1-based page number.

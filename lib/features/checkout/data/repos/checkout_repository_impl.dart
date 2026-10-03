@@ -3,10 +3,12 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/zone/zone_repository.dart';
 import '../../../../core/zone/zone_scoped_call.dart';
+import '../../domain/entities/order_quote.dart';
 import '../../domain/entities/order_request.dart';
 import '../../domain/repos/checkout_repository.dart';
 import '../datasources/checkout_remote_data_source.dart';
 import '../models/requests/place_order_body.dart';
+import '../models/requests/quote_order_body.dart';
 
 class CheckoutRepositoryImpl implements CheckoutRepository {
   final CheckoutRemoteDataSource remote;
@@ -14,11 +16,20 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
 
   CheckoutRepositoryImpl({required this.remote, required this.zoneRepository});
 
+  /// Doesn't switch zones: the customer may still be comparing addresses,
+  /// and the catalog shouldn't follow each one they look at.
+  @override
+  Future<Either<Failure, OrderQuote>> getQuote(QuoteRequest request) =>
+      zoneRepository.inZone(() => remote.getQuote(QuoteOrderBody(request)));
+
   /// The order goes out in the delivery address's zone: switching to it
   /// first means the `zoneId` header matches the coordinates sent, and the
   /// catalog follows the address the customer now uses.
   @override
-  Future<Either<Failure, PlacedOrder>> placeOrder(OrderRequest request) async {
+  Future<Either<Failure, PlacedOrder>> placeOrder(
+    OrderRequest request, {
+    required String idempotencyKey,
+  }) async {
     final int? zoneId = request.zoneId;
     if (zoneId != null) {
       final Either<Failure, Unit> switched = await zoneRepository.selectZoneIds(
@@ -29,7 +40,10 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
       }
     }
     return zoneRepository.inZone(
-      () => remote.placeOrder(PlaceOrderBody(request)),
+      () => remote.placeOrder(
+        PlaceOrderBody(request),
+        idempotencyKey: idempotencyKey,
+      ),
     );
   }
 }

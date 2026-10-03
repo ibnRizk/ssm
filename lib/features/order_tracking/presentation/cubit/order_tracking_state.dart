@@ -49,12 +49,13 @@ final class OrderTrackingLoaded extends OrderTrackingState {
   });
 
   OrderTrackingLoaded copyWith({
+    OrderSummary? summary,
     OrderTracking? tracking,
     OrderStatus? status,
     DeliveryOtpState? otp,
     bool? stale,
   }) => OrderTrackingLoaded(
-    summary: summary,
+    summary: summary ?? this.summary,
     lines: lines,
     tracking: tracking ?? this.tracking,
     status: status ?? this.status,

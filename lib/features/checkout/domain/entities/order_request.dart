@@ -12,6 +12,9 @@ enum CheckoutIssue {
 
   /// The saved address has no map pin; the backend needs coordinates.
   addressWithoutLocation,
+
+  /// The store has no map pin, so the delivery distance is unknown.
+  storeWithoutLocation,
 }
 
 /// A cash-on-delivery order for the customer's cart. The server builds the
@@ -20,6 +23,9 @@ enum CheckoutIssue {
 class OrderRequest extends Equatable {
   final int storeId;
   final double orderAmount;
+
+  /// Store to delivery address, as quoted — the delivery fee depends on it.
+  final double distanceKm;
   final String deliveryAddress;
   final GeoPoint location;
   final String contactPersonName;
@@ -31,6 +37,7 @@ class OrderRequest extends Equatable {
   const OrderRequest({
     required this.storeId,
     required this.orderAmount,
+    required this.distanceKm,
     required this.deliveryAddress,
     required this.location,
     required this.contactPersonName,
@@ -42,6 +49,7 @@ class OrderRequest extends Equatable {
   List<Object?> get props => [
     storeId,
     orderAmount,
+    distanceKm,
     deliveryAddress,
     location,
     contactPersonName,

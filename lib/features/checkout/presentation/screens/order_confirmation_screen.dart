@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/failure_message.dart';
+import '../../../../core/utils/money_format.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
@@ -15,8 +16,10 @@ import '../../../../core/widgets/error_text.dart';
 import '../../../../core/widgets/option_picker_sheet.dart';
 import '../../../../core/widgets/simple_app_bar.dart';
 import '../../../addresses/domain/entities/address.dart';
+import '../../../cart/domain/entities/cart.dart';
 import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../../../cart/presentation/cubit/cart_state.dart';
+import '../../domain/entities/order_quote.dart';
 import '../../domain/entities/order_request.dart';
 import '../cubit/checkout_cubit.dart';
 import '../cubit/checkout_state.dart';
@@ -63,11 +66,14 @@ class OrderConfirmationScreen extends StatelessWidget {
                 const OrderConfirmationPaymentCard(),
                 SizedBox(height: AppSpacing.lg.h),
                 _SectionTitle(Strings.orderConfirmationSummarySectionTitle),
-                BlocSelector<CartCubit, CartState, double>(
-                  selector: (CartState state) =>
-                      state is CartLoaded ? state.cart.subtotal : 0,
-                  builder: (_, double subtotal) =>
-                      OrderConfirmationSummaryCard(subtotal: subtotal),
+                BlocSelector<CheckoutCubit, CheckoutState, CheckoutQuote>(
+                  selector: (CheckoutState state) => state.quote,
+                  builder: (BuildContext context, CheckoutQuote quote) =>
+                      OrderConfirmationSummaryCard(
+                        quote: quote,
+                        onRetry: () =>
+                            context.read<CheckoutCubit>().retryQuote(),
+                      ),
                 ),
                 SizedBox(height: AppSpacing.lg.h),
                 const _PlaceOrderButton(),
@@ -175,6 +181,10 @@ class _PlaceOrderButton extends StatelessWidget {
     final bool placing = context.select<CheckoutCubit, bool>(
       (CheckoutCubit cubit) => cubit.state.placing,
     );
+    // Never without the server's total on screen.
+    final bool quoted = context.select<CheckoutCubit, bool>(
+      (CheckoutCubit cubit) => cubit.state.quote is CheckoutQuoteReady,
+    );
     // Only a settled cart can be ordered: none still loading, no line
     // mid-change.
     final bool cartReady = context.select<CartCubit, bool>(
@@ -187,7 +197,7 @@ class _PlaceOrderButton extends StatelessWidget {
     return AppButton(
       btnText: Strings.orderConfirmationConfirmButton,
       isLoading: placing,
-      onPressed: cartReady
+      onPressed: cartReady && quoted
           ? () {
               final CartState cart = context.read<CartCubit>().state;
               if (cart is CartLoaded) {
@@ -199,16 +209,50 @@ class _PlaceOrderButton extends StatelessWidget {
   }
 }
 
-/// Snackbars for notices; on a placed order, Home with tracking on top.
-class _CheckoutFeedbackListener extends StatelessWidget {
+/// Feeds the cart to the [CheckoutCubit] for quoting — now, and whenever it
+/// settles into new content. Snackbars for notices; on a placed order, the
+/// confirmed total, then Home with tracking on top.
+class _CheckoutFeedbackListener extends StatefulWidget {
   final Widget child;
 
   const _CheckoutFeedbackListener({required this.child});
 
   @override
+  State<_CheckoutFeedbackListener> createState() =>
+      _CheckoutFeedbackListenerState();
+}
+
+class _CheckoutFeedbackListenerState extends State<_CheckoutFeedbackListener> {
+  @override
+  void initState() {
+    super.initState();
+    _syncCart(context.read<CartCubit>().state);
+  }
+
+  /// Only a settled cart — none loading, no line mid-change.
+  static Cart? _settled(CartState state) => switch (state) {
+    CartLoaded(:final cart, :final busyLineIds, :final addingItemIds)
+        when busyLineIds.isEmpty && addingItemIds.isEmpty =>
+      cart,
+    _ => null,
+  };
+
+  void _syncCart(CartState state) {
+    if (_settled(state) case final Cart cart) {
+      context.read<CheckoutCubit>().updateCart(cart);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
+        BlocListener<CartCubit, CartState>(
+          listenWhen: (CartState previous, CartState current) =>
+              _settled(current) != null &&
+              _settled(current) != _settled(previous),
+          listener: (_, CartState state) => _syncCart(state),
+        ),
         BlocListener<CheckoutCubit, CheckoutState>(
           listenWhen: (CheckoutState previous, CheckoutState current) =>
               current.notice != null && previous.notice != current.notice,
@@ -224,9 +268,12 @@ class _CheckoutFeedbackListener extends StatelessWidget {
               previous.placedOrder == null && current.placedOrder != null,
           listener: (BuildContext context, CheckoutState state) {
             final PlacedOrder order = state.placedOrder!;
+            final String? total = _confirmedTotal(state);
             showAppSnackBar(
               context: context,
-              message: Strings.checkoutOrderPlaced,
+              message: total == null
+                  ? Strings.checkoutOrderPlaced
+                  : Strings.checkoutOrderPlacedTotal(total),
               type: ToastType.success,
             );
             GoRouter.of(context)
@@ -235,7 +282,16 @@ class _CheckoutFeedbackListener extends StatelessWidget {
           },
         ),
       ],
-      child: child,
+      child: widget.child,
     );
+  }
+
+  /// The placed order's own total; the quote's if the answer left it out.
+  static String? _confirmedTotal(CheckoutState state) {
+    if (state.quote case CheckoutQuoteReady(:final OrderQuote quote)) {
+      final double total = state.placedOrder?.totalAmount ?? quote.total;
+      return '${formatAmount(total)} ${currencySymbol(quote.currency)}';
+    }
+    return null;
   }
 }

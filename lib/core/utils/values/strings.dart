@@ -705,13 +705,57 @@ abstract class Strings {
   static const String _checkoutCodLimit = 'checkout_cod_limit';
   static String get checkoutCodLimit => _checkoutCodLimit.tr;
 
-  static const String _checkoutDeliveryFeeOnConfirm =
-      'checkout_delivery_fee_on_confirm';
-  static String get checkoutDeliveryFeeOnConfirm =>
-      _checkoutDeliveryFeeOnConfirm.tr;
+  /// The store has no map pin, so delivery can't be quoted.
+  static const String _checkoutStoreWithoutLocation =
+      'checkout_store_without_location';
+  static String get checkoutStoreWithoutLocation =>
+      _checkoutStoreWithoutLocation.tr;
+
+  static const String _checkoutQuoteLoading = 'checkout_quote_loading';
+  static String get checkoutQuoteLoading => _checkoutQuoteLoading.tr;
+
+  static const String _checkoutTaxLabel = 'checkout_tax_label';
+  static String get checkoutTaxLabel => _checkoutTaxLabel.tr;
+
+  static const String _checkoutCouponDiscountLabel =
+      'checkout_coupon_discount_label';
+  static String get checkoutCouponDiscountLabel =>
+      _checkoutCouponDiscountLabel.tr;
+
+  static const String _checkoutFreeDelivery = 'checkout_free_delivery';
+  static String get checkoutFreeDelivery => _checkoutFreeDelivery.tr;
+
+  static const String _checkoutFreeDeliveryCoupon =
+      'checkout_free_delivery_coupon';
+  static String get checkoutFreeDeliveryCoupon =>
+      _checkoutFreeDeliveryCoupon.tr;
+
+  static const String _checkoutFreeDeliverySubscription =
+      'checkout_free_delivery_subscription';
+  static String get checkoutFreeDeliverySubscription =>
+      _checkoutFreeDeliverySubscription.tr;
+
+  static const String _checkoutFreeDeliveryLoyalty =
+      'checkout_free_delivery_loyalty';
+  static String get checkoutFreeDeliveryLoyalty =>
+      _checkoutFreeDeliveryLoyalty.tr;
+
+  /// 409 `order_in_progress` — the first attempt is still being processed.
+  static const String _checkoutOrderInProgress = 'checkout_order_in_progress';
+  static String get checkoutOrderInProgress => _checkoutOrderInProgress.tr;
+
+  /// 409 `idempotency_conflict`.
+  static const String _checkoutOrderChanged = 'checkout_order_changed';
+  static String get checkoutOrderChanged => _checkoutOrderChanged.tr;
 
   static const String _checkoutOrderPlaced = 'checkout_order_placed';
   static String get checkoutOrderPlaced => _checkoutOrderPlaced.tr;
+
+  static const String _checkoutOrderPlacedTotal = 'checkout_order_placed_total';
+
+  /// `{total}` is replaced with the confirmed total, currency included.
+  static String checkoutOrderPlacedTotal(String total) =>
+      _checkoutOrderPlacedTotal.tr.replaceFirst('{total}', total);
 
   static const String _orderTrackingRejectedTitle =
       'order_tracking_rejected_title';

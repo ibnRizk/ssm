@@ -14,6 +14,7 @@ Future<void> initCheckoutFeatureInjection() async {
     () => CheckoutCubit(
       checkoutRepository: ServiceLocator.instance(),
       addressRepository: ServiceLocator.instance(),
+      catalogRepository: ServiceLocator.instance(),
     ),
   );
 

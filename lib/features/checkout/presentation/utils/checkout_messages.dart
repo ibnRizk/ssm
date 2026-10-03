@@ -5,17 +5,22 @@ import '../../domain/entities/order_request.dart';
 import '../../domain/repos/checkout_repository.dart';
 import '../cubit/checkout_state.dart';
 
+extension CheckoutIssueMessage on CheckoutIssue {
+  String get message => switch (this) {
+    CheckoutIssue.emptyCart => Strings.checkoutEmptyCart,
+    CheckoutIssue.unknownStore => Strings.checkoutUnknownStore,
+    CheckoutIssue.noAddress => Strings.checkoutNoAddress,
+    CheckoutIssue.addressWithoutLocation =>
+      Strings.checkoutAddressWithoutLocation,
+    CheckoutIssue.storeWithoutLocation => Strings.checkoutStoreWithoutLocation,
+  };
+}
+
 extension CheckoutNoticeMessage on CheckoutNotice {
   /// Known refusals get our own wording (the guide says to branch on the
   /// code, not the message); any other refusal shows the server's message.
   String get message => switch (this) {
-    CheckoutIncomplete(:final CheckoutIssue issue) => switch (issue) {
-      CheckoutIssue.emptyCart => Strings.checkoutEmptyCart,
-      CheckoutIssue.unknownStore => Strings.checkoutUnknownStore,
-      CheckoutIssue.noAddress => Strings.checkoutNoAddress,
-      CheckoutIssue.addressWithoutLocation =>
-        Strings.checkoutAddressWithoutLocation,
-    },
+    CheckoutIncomplete(:final CheckoutIssue issue) => issue.message,
     CheckoutFailed(
       failure: ForbiddenFailure(code: OrderRefusalCode.coordinates),
     ) =>
@@ -24,6 +29,12 @@ extension CheckoutNoticeMessage on CheckoutNotice {
       failure: ForbiddenFailure(code: OrderRefusalCode.orderAmount),
     ) =>
       Strings.checkoutCodLimit,
+    CheckoutFailed(
+      failure: ConflictFailure(code: IdempotencyCode.inProgress),
+    ) =>
+      Strings.checkoutOrderInProgress,
+    CheckoutFailed(failure: ConflictFailure(code: IdempotencyCode.conflict)) =>
+      Strings.checkoutOrderChanged,
     CheckoutFailed(:final Failure failure) => failure.userMessage,
   };
 }

@@ -11,6 +11,7 @@ class FakeDioConsumer implements DioConsumer {
   String? lastPath;
   Map<String, dynamic>? lastBody;
   Map<String, dynamic>? lastQuery;
+  Map<String, String>? lastHeaders;
   FormData? lastFormData;
 
   FakeDioConsumer({this.response});
@@ -21,9 +22,11 @@ class FakeDioConsumer implements DioConsumer {
     Map<String, dynamic>? body,
     Map<String, dynamic>? query,
     FormData? formData,
+    Map<String, String>? headers,
   }) async {
     lastVerb = verb;
     lastFormData = formData;
+    lastHeaders = headers;
     lastPath = path;
     lastBody = body;
     lastQuery = query;
@@ -41,12 +44,14 @@ class FakeDioConsumer implements DioConsumer {
     FormData? formData,
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
+    Map<String, String>? headers,
   }) => _record(
     'POST',
     path,
     body: body,
     query: queryParameters,
     formData: formData,
+    headers: headers,
   );
 
   @override

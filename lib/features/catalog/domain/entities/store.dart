@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/location/geo_point.dart';
+
 /// A store (restaurant, pharmacy, …) in the customer's zone.
 class Store extends Equatable {
   final int id;
@@ -36,6 +38,10 @@ class Store extends Equatable {
   /// Cuisine or category names, for the subtitle line.
   final List<String> tags;
 
+  /// Where orders are picked up — checkout quotes the delivery fee from the
+  /// distance to it. Null when the backend has no pin.
+  final GeoPoint? location;
+
   const Store({
     required this.id,
     required this.name,
@@ -53,6 +59,7 @@ class Store extends Equatable {
     this.minimumOrder,
     this.isOpen,
     this.tags = const <String>[],
+    this.location,
   });
 
   bool get hasRating => ratingCount > 0 && rating > 0;
@@ -75,5 +82,6 @@ class Store extends Equatable {
     minimumOrder,
     isOpen,
     tags,
+    location,
   ];
 }

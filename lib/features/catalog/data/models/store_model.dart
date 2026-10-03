@@ -1,5 +1,6 @@
 import '../../../../core/api/json_readers.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/location/geo_point.dart';
 import '../../domain/entities/catalog_page.dart';
 import '../../domain/entities/store.dart';
 
@@ -22,6 +23,7 @@ class StoreModel extends Store {
     super.minimumOrder,
     super.isOpen,
     super.tags,
+    super.location,
   });
 
   /// Null for an entry without an id or name — it can't be opened.
@@ -48,7 +50,18 @@ class StoreModel extends Store {
       minimumOrder: jsonDouble(json['minimum_order']),
       isOpen: _isOpen(json),
       tags: _tags(json['cuisine']),
+      location: _location(json),
     );
+  }
+
+  /// Both coordinates, in range — `0,0` is an unset pin, not the Gulf of
+  /// Guinea.
+  static GeoPoint? _location(Map<dynamic, dynamic> json) {
+    final double? lat = jsonDouble(json['latitude']);
+    final double? lng = jsonDouble(json['longitude']);
+    if (lat == null || lng == null || (lat == 0 && lng == 0)) return null;
+    if (lat.abs() > 90 || lng.abs() > 180) return null;
+    return GeoPoint(latitude: lat, longitude: lng);
   }
 
   /// `GET /stores/details/{id}` → the store object at the top level.

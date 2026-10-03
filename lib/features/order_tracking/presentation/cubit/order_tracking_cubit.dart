@@ -84,26 +84,38 @@ class OrderTrackingCubit extends Cubit<OrderTrackingState> {
 
   /// Re-reads the live status — the poll, and pull-to-refresh. Skipped
   /// while one is already in flight.
+  ///
+  /// While `ssm_status` is still null the legacy summary is re-read too:
+  /// until the merchant acts, it's the only place a cancellation shows.
   Future<void> refresh() async {
     if (_refreshing || state is! OrderTrackingLoaded) return;
     _refreshing = true;
     try {
       final Either<Failure, OrderTracking> result = await repository
           .getTracking(orderId);
+      final Either<Failure, OrderSummary>? legacy = switch (result) {
+        Right<Failure, OrderTracking>(value: OrderTracking(status: null)) =>
+          await repository.getSummary(orderId),
+        _ => null,
+      };
       final OrderTrackingState current = state;
       if (isClosed || current is! OrderTrackingLoaded) return;
       result.fold((_) => emit(current.copyWith(stale: true)), (
         OrderTracking live,
       ) {
+        // A failed re-read keeps the last summary, flagged as stale.
+        final OrderSummary? fresh = legacy?.fold((_) => null, (s) => s);
+        final OrderSummary summary = fresh ?? current.summary;
         final OrderStatus status = OrderStatus.resolve(
           live.status,
-          current.summary.legacyStatus,
+          summary.legacyStatus,
         );
         emit(
           current.copyWith(
+            summary: summary,
             tracking: live,
             status: status,
-            stale: false,
+            stale: legacy != null && fresh == null,
             // A code only means something while the courier is on the way.
             otp: status.needsDeliveryOtp ? current.otp : const OtpIdle(),
           ),

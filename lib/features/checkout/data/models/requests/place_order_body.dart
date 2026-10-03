@@ -1,4 +1,5 @@
 import '../../../domain/entities/order_request.dart';
+import 'quote_order_body.dart';
 
 /// The `POST /customer/order/place` body. Only cash on delivery is enabled.
 class PlaceOrderBody {
@@ -14,9 +15,9 @@ class PlaceOrderBody {
     'payment_method': paymentMethod,
     'store_id': request.storeId,
     'order_amount': request.orderAmount,
-    // Required by validation but not authoritative: the server measures
-    // the distance itself when it recomputes the delivery fee.
-    'distance': 0,
+    // The distance the quote was made for, so the fee matches what the
+    // customer saw.
+    'distance': QuoteOrderBody.roundedDistance(request.distanceKm),
     'address': request.deliveryAddress,
     'latitude': request.location.latitude.toString(),
     'longitude': request.location.longitude.toString(),

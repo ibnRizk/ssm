@@ -20,14 +20,17 @@ class _FakeRepository implements OrderTrackingRepository {
   Either<Failure, OrderTracking> tracking = _tracking(OrderStatus.preparing);
 
   int trackingCalls = 0;
+  int summaryCalls = 0;
   int otpCalls = 0;
 
   /// Completed by the test, so an OTP can be kept in flight.
   Completer<Either<Failure, DeliveryOtp>> otp = Completer();
 
   @override
-  Future<Either<Failure, OrderSummary>> getSummary(int orderId) async =>
-      summary;
+  Future<Either<Failure, OrderSummary>> getSummary(int orderId) async {
+    summaryCalls++;
+    return summary;
+  }
 
   @override
   Future<Either<Failure, List<OrderLine>>> getLines(int orderId) async => lines;
@@ -166,6 +169,61 @@ void main() {
     await poll();
 
     expect(timers.single.cancelled, isTrue);
+  });
+
+  group('before the merchant acts (ssm_status null)', () {
+    setUp(() => repository.tracking = _tracking(null));
+
+    // C1.1: a cancellation before the merchant acts only shows in the
+    // legacy status, which used to be read once — the screen then said
+    // "Order sent" and polled forever.
+    test('a poll catches an early cancellation and stops', () async {
+      await cubit.load();
+      expect(loaded().status, OrderStatus.pendingMerchant);
+
+      repository.summary = const Right<Failure, OrderSummary>(
+        OrderSummary(id: 9, legacyStatus: 'canceled'),
+      );
+      await poll();
+
+      expect(loaded().status, OrderStatus.cancelled);
+      expect(timers.single.cancelled, isTrue);
+    });
+
+    test('each poll re-reads the legacy status', () async {
+      await cubit.load();
+      final int callsBefore = repository.summaryCalls;
+
+      await poll();
+      await poll();
+
+      expect(repository.summaryCalls, callsBefore + 2);
+    });
+
+    test(
+      'a failed legacy re-read keeps the status and marks it stale',
+      () async {
+        await cubit.load();
+
+        repository.summary = const Left<Failure, OrderSummary>(
+          NetworkFailure(),
+        );
+        await poll();
+
+        expect(loaded().status, OrderStatus.pendingMerchant);
+        expect(loaded().stale, isTrue);
+        expect(timers.single.cancelled, isFalse, reason: 'keeps trying');
+      },
+    );
+  });
+
+  test('once ssm_status is known, polls skip the legacy status', () async {
+    await cubit.load();
+    final int callsBefore = repository.summaryCalls;
+
+    await poll();
+
+    expect(repository.summaryCalls, callsBefore);
   });
 
   test('closing the screen stops polling', () async {

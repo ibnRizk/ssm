@@ -5,9 +5,12 @@ import 'package:ssm/core/error/failures.dart';
 import 'package:ssm/core/location/geo_point.dart';
 import 'package:ssm/core/zone/zone_repository.dart';
 import 'package:ssm/features/checkout/data/datasources/checkout_remote_data_source.dart';
+import 'package:ssm/features/checkout/data/models/order_quote_model.dart';
 import 'package:ssm/features/checkout/data/models/placed_order_model.dart';
 import 'package:ssm/features/checkout/data/models/requests/place_order_body.dart';
+import 'package:ssm/features/checkout/data/models/requests/quote_order_body.dart';
 import 'package:ssm/features/checkout/data/repos/checkout_repository_impl.dart';
+import 'package:ssm/features/checkout/domain/entities/order_quote.dart';
 import 'package:ssm/features/checkout/domain/entities/order_request.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -37,12 +40,29 @@ class _FakeZoneRepository implements ZoneRepository {
 const OrderRequest _request = OrderRequest(
   storeId: 7,
   orderAmount: 42.5,
+  distanceKm: 3.14159,
   deliveryAddress: 'Olaya St 12, Riyadh',
   location: GeoPoint(latitude: 24.71, longitude: 46.68),
   contactPersonName: 'Sara Customer',
   contactPersonNumber: '+966512345678',
   zoneId: 2,
 );
+
+const String _key = '3b241101-e2bb-4255-8caf-4136c566a962';
+
+/// The production quote shape (Postman "Quote contract").
+Map<String, dynamic> _quoteBody({bool freeDelivery = false, String? source}) =>
+    <String, dynamic>{
+      'subtotal': 40,
+      'tax': 6.05,
+      'discounts': <String, dynamic>{'coupon': 2.5, 'delivery': 0},
+      'original_delivery_charge': 7,
+      'delivery_charge': freeDelivery ? 0 : 7,
+      'free_delivery_applied': freeDelivery,
+      'free_delivery_source': source,
+      'total': 50.55,
+      'currency': 'SAR',
+    };
 
 Map<String, dynamic> _refusal(String code, String message) => <String, dynamic>{
   'errors': <Map<String, String>>[
@@ -58,13 +78,91 @@ void main() {
         'payment_method': 'cash_on_delivery',
         'store_id': 7,
         'order_amount': 42.5,
-        'distance': 0,
+        'distance': 3.142,
         'address': 'Olaya St 12, Riyadh',
         'latitude': '24.71',
         'longitude': '46.68',
         'contact_person_name': 'Sara Customer',
         'contact_person_number': '+966512345678',
       });
+    });
+  });
+
+  group('QuoteOrderBody', () {
+    test('is a delivery quote for the store at the distance, in km', () {
+      expect(
+        const QuoteOrderBody(
+          QuoteRequest(storeId: 7, distanceKm: 3.14159),
+        ).toJson(),
+        <String, dynamic>{
+          'store_id': 7,
+          'order_type': 'delivery',
+          'distance': 3.142,
+        },
+      );
+    });
+  });
+
+  group('OrderQuoteModel.fromJson', () {
+    test('reads the breakdown', () {
+      expect(
+        OrderQuoteModel.fromJson(_quoteBody()),
+        const OrderQuoteModel(
+          subtotal: 40,
+          tax: 6.05,
+          couponDiscount: 2.5,
+          originalDeliveryCharge: 7,
+          deliveryCharge: 7,
+          total: 50.55,
+          currency: 'SAR',
+        ),
+      );
+    });
+
+    test('reads why delivery is free', () {
+      final OrderQuoteModel quote = OrderQuoteModel.fromJson(
+        _quoteBody(freeDelivery: true, source: 'loyalty'),
+      );
+
+      expect(quote.freeDelivery, isTrue);
+      expect(quote.freeDeliverySource, FreeDeliverySource.loyalty);
+      expect(quote.deliveryCharge, 0);
+      expect(quote.originalDeliveryCharge, 7);
+    });
+
+    test('free delivery with an unknown reason is still free', () {
+      final OrderQuoteModel quote = OrderQuoteModel.fromJson(
+        _quoteBody(freeDelivery: true, source: 'promo'),
+      );
+
+      expect(quote.freeDelivery, isTrue);
+      expect(quote.freeDeliverySource, isNull);
+    });
+
+    test('throws without a total — a partial quote is never shown', () {
+      expect(
+        () => OrderQuoteModel.fromJson(_quoteBody()..remove('total')),
+        throwsA(isA<ServerException>()),
+      );
+    });
+  });
+
+  group('CheckoutRepositoryImpl.getQuote', () {
+    test('posts to the quote endpoint without switching zones', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(response: _quoteBody());
+      final _FakeZoneRepository zone = _FakeZoneRepository();
+      final CheckoutRepositoryImpl repository = CheckoutRepositoryImpl(
+        remote: CheckoutRemoteDataSourceImpl(consumer: consumer),
+        zoneRepository: zone,
+      );
+
+      final Either<Failure, OrderQuote> result = await repository.getQuote(
+        const QuoteRequest(storeId: 7, distanceKm: 3),
+      );
+
+      expect(consumer.lastPath, ApiEndpoints.orderQuote);
+      expect(zone.selected, isEmpty);
+      expect(result.isRight(), isTrue);
     });
   });
 
@@ -124,6 +222,7 @@ void main() {
     test('switches to the address zone, then posts the order', () async {
       final Either<Failure, PlacedOrder> result = await repository.placeOrder(
         _request,
+        idempotencyKey: _key,
       );
 
       expect(zone.selected, <List<int>>[
@@ -131,6 +230,7 @@ void main() {
       ]);
       expect(consumer.lastPath, ApiEndpoints.orderPlace);
       expect(consumer.lastBody, const PlaceOrderBody(_request).toJson());
+      expect(consumer.lastHeaders, <String, String>{'Idempotency-Key': _key});
       expect(
         result.fold((_) => null, (PlacedOrder o) => o.props),
         const PlacedOrder(id: 9, totalAmount: 52.5).props,
@@ -142,6 +242,7 @@ void main() {
 
       final Either<Failure, PlacedOrder> result = await repository.placeOrder(
         _request,
+        idempotencyKey: _key,
       );
 
       expect(
@@ -160,6 +261,7 @@ void main() {
 
       final Either<Failure, PlacedOrder> result = await repository.placeOrder(
         _request,
+        idempotencyKey: _key,
       );
 
       expect(
@@ -175,6 +277,7 @@ void main() {
 
       final Either<Failure, PlacedOrder> result = await repository.placeOrder(
         _request,
+        idempotencyKey: _key,
       );
 
       expect(result, const Left<Failure, PlacedOrder>(CacheFailure()));

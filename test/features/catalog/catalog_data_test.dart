@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:ssm/core/api/api_endpoints.dart';
 import 'package:ssm/core/error/exceptions.dart';
 import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/location/geo_point.dart';
 import 'package:ssm/core/zone/zone_repository.dart';
 import 'package:ssm/features/catalog/data/datasources/catalog_remote_data_source.dart';
 import 'package:ssm/features/catalog/data/models/catalog_category_model.dart';
@@ -110,6 +111,34 @@ void main() {
   });
 
   group('StoreModel', () {
+    test('reads the store pin, sent as strings or numbers', () {
+      final Store store = StoreModel.fromJson(<String, dynamic>{
+        'id': 8,
+        'name': 'Cairo Grill Restaurant',
+        'latitude': '30.045198822889834',
+        'longitude': 31.3725095339853,
+      });
+
+      expect(
+        store.location,
+        const GeoPoint(
+          latitude: 30.045198822889834,
+          longitude: 31.3725095339853,
+        ),
+      );
+    });
+
+    test('a 0,0 pin is unset', () {
+      final Store store = StoreModel.fromJson(<String, dynamic>{
+        'id': 8,
+        'name': 'x',
+        'latitude': 0,
+        'longitude': 0,
+      });
+
+      expect(store.location, isNull);
+    });
+
     test('maps the store fields the app shows', () {
       final Store store = StoreModel.fromJson(<String, dynamic>{
         'id': 7,
