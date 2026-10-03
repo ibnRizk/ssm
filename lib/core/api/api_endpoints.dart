@@ -14,6 +14,9 @@
 abstract class ApiEndpoints {
   static const String _v1 = '/api/v1';
 
+  // --- App config (public) ---
+  static const String customerConfig = '$_v1/config/customer';
+
   // --- Auth ---
   static const String login = '$_v1/auth/login';
   static const String signUp = '$_v1/auth/sign-up';

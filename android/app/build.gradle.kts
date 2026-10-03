@@ -13,6 +13,30 @@ val localProperties = Properties().apply {
     if (file.exists()) file.inputStream().use { load(it) }
 }
 
+// Release upload key, from the gitignored `android/key.properties`:
+//   storePassword=…
+//   keyPassword=…
+//   keyAlias=upload
+//   storeFile=<path to upload-keystore.jks, relative to android/app/>
+// See https://docs.flutter.dev/deployment/android#sign-the-app
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) keystorePropertiesFile.inputStream().use { load(it) }
+}
+val hasReleaseKeystore = keystorePropertiesFile.exists()
+
+// A release build without the upload key must fail, never fall back to the
+// debug key. Checked once the task graph is known, so debug builds and
+// `flutter test` keep working on machines that don't have the keystore.
+gradle.taskGraph.whenReady {
+    if (!hasReleaseKeystore && allTasks.any { it.name.contains("Release") }) {
+        throw GradleException(
+            "Release signing is not configured: android/key.properties is missing. " +
+                "See the comment above `keystorePropertiesFile` in android/app/build.gradle.kts."
+        )
+    }
+}
+
 android {
     namespace = "com.ssm.user"
     compileSdk = flutter.compileSdkVersion
@@ -41,11 +65,22 @@ android {
             localProperties.getProperty("MAPS_API_KEY") ?: ""
     }
 
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+                storePassword = keystoreProperties.getProperty("storePassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Null only when key.properties is missing, and then the
+            // task-graph check above fails the build before signing.
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 }

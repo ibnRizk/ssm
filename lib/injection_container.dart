@@ -1,11 +1,19 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'config/locale/app_localizations.dart';
 import 'config/locale/locale_cubit.dart';
 import 'core/api/app_interceptors.dart';
+import 'core/app_config/app_config_remote_data_source.dart';
+import 'core/app_config/app_config_repository.dart';
+import 'core/app_config/app_config_repository_impl.dart';
+import 'core/app_config/app_version.dart';
+import 'core/app_config/installed_app.dart';
 import 'core/api/auth_event_bus.dart';
 import 'core/api/dio_consumer.dart';
 import 'core/location/device_location_data_source.dart';
@@ -31,6 +39,7 @@ import 'features/parcels/parcels_injection.dart';
 import 'features/pharmacy/pharmacy_injection.dart';
 import 'features/loyalty/loyalty_injection.dart';
 import 'features/restaurants/restaurants_injection.dart';
+import 'features/splash/splash_injection.dart';
 import 'features/subscriptions/subscriptions_injection.dart';
 
 /// Composition root.
@@ -55,12 +64,14 @@ abstract class ServiceLocator {
     _injectDioConsumer();
     _injectLocation();
     _injectZone();
+    await _injectAppConfig();
     injectAppColors(AppColors.light);
     injectRoutesStackSingleton(<String>[]);
     _injectLocaleCubit();
     _injectThemeCubit();
 
     // --- Features ---
+    await initSplashFeatureInjection();
     await initAuthFeatureInjection();
     await initAccountFeatureInjection();
     await initAddressesFeatureInjection();
@@ -131,6 +142,28 @@ abstract class ServiceLocator {
         location: instance(),
         preferences: instance(),
       ),
+    );
+  }
+
+  /// `GET /config/customer` and the build it's checked against — the splash
+  /// gate today; support and legal screens read the same config.
+  static Future<void> _injectAppConfig() async {
+    final PackageInfo info = await PackageInfo.fromPlatform();
+    instance.registerSingleton<InstalledApp>(
+      InstalledApp(
+        version: AppVersion.tryParse(info.version),
+        platform: Platform.isAndroid
+            ? AppPlatform.android
+            : Platform.isIOS
+            ? AppPlatform.ios
+            : AppPlatform.other,
+      ),
+    );
+    instance.registerLazySingleton<AppConfigRemoteDataSource>(
+      () => AppConfigRemoteDataSourceImpl(consumer: instance()),
+    );
+    instance.registerLazySingleton<AppConfigRepository>(
+      () => AppConfigRepositoryImpl(remote: instance()),
     );
   }
 

@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/constants.dart';
 import '../../../../core/utils/values/app_assets.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../injection_container.dart';
+import '../cubit/splash_cubit.dart';
+import '../cubit/splash_state.dart';
 
 /// How long the boot animation runs. Kept in one place so the progress bar's
-/// fill and the navigation delay below can never drift apart.
+/// fill and the minimum wait in [SplashCubit.start] can never drift apart.
 const Duration _bootDuration = Duration(milliseconds: 1400);
 
-/// Boot screen. Do warm-up work here — session restore, remote config,
-/// force-update check — then route based on the result.
+/// Boot screen: checks the backend config (force update, maintenance) while
+/// the animation runs, then routes on the session.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -30,15 +36,17 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    _progress = AnimationController(vsync: this, duration: _bootDuration)
-      ..forward();
-    _bootstrap();
+    _progress = AnimationController(vsync: this, duration: _bootDuration);
+    _start();
   }
 
-  Future<void> _bootstrap() async {
-    // Replace with real startup work. Branch on
-    // `sharedPreferences.getUserCycle()` once you have onboarding/auth.
-    await Future<void>.delayed(_bootDuration);
+  /// Also the maintenance screen's retry.
+  void _start() {
+    _progress.forward(from: 0);
+    context.read<SplashCubit>().start(minimumDuration: _bootDuration);
+  }
+
+  Future<void> _enterApp() async {
     final String? token = await secureStorage.getAccessToken();
     if (!mounted) return;
     if (token != null && token.isNotEmpty) {
@@ -56,59 +64,157 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.colors.primary,
-      body: Stack(
-        clipBehavior: Clip.hardEdge,
-        children: <Widget>[
-          const _TopLeftGlow(),
-          const _BottomRightBlob(),
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl.w),
-              child: Column(
-                children: <Widget>[
-                  const Spacer(flex: 3),
-                  const _Logo(),
-                  SizedBox(height: AppSpacing.xl.h),
-                  Text(
-                    Strings.appName,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.display(color: Colors.white),
-                  ),
-                  SizedBox(height: AppSpacing.xs.h),
-                  Text(
-                    Strings.splashTagline,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.bodyLarge(
-                      color: Colors.white.withValues(alpha: 0.85),
+    return BlocListener<SplashCubit, SplashState>(
+      listenWhen: (_, SplashState state) => state is SplashReady,
+      listener: (_, __) => _enterApp(),
+      child: Scaffold(
+        backgroundColor: context.colors.primary,
+        body: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: <Widget>[
+            const _TopLeftGlow(),
+            const _BottomRightBlob(),
+            SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl.w),
+                child: Column(
+                  children: <Widget>[
+                    const Spacer(flex: 3),
+                    const _Logo(),
+                    SizedBox(height: AppSpacing.xl.h),
+                    Text(
+                      Strings.appName,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.display(color: Colors.white),
                     ),
-                  ),
-                  SizedBox(height: AppSpacing.xxs.h),
-                  Text(
-                    Strings.splashSubtitle,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.title(color: context.colors.secondary),
-                  ),
-                  const Spacer(flex: 4),
-                  AnimatedBuilder(
-                    animation: _progress,
-                    builder: (_, __) => _ProgressBar(value: _progress.value),
-                  ),
-                  SizedBox(height: AppSpacing.sm.h),
-                  Text(
-                    Strings.splashLoading,
-                    style: AppTextStyles.caption(
-                      color: Colors.white.withValues(alpha: 0.7),
+                    SizedBox(height: AppSpacing.xs.h),
+                    Text(
+                      Strings.splashTagline,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.bodyLarge(
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: AppSpacing.xxl.h),
-                ],
+                    SizedBox(height: AppSpacing.xxs.h),
+                    Text(
+                      Strings.splashSubtitle,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.title(
+                        color: context.colors.secondary,
+                      ),
+                    ),
+                    const Spacer(flex: 4),
+                    _SplashFooter(progress: _progress, onRetry: _start),
+                    SizedBox(height: AppSpacing.xxl.h),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// The progress bar while checking; in its place, what blocks entry.
+class _SplashFooter extends StatelessWidget {
+  final Animation<double> progress;
+  final VoidCallback onRetry;
+
+  const _SplashFooter({required this.progress, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SplashCubit, SplashState>(
+      builder: (_, SplashState state) => switch (state) {
+        SplashLoading() || SplashReady() => _Progress(progress: progress),
+        SplashUpdateRequired(:final String? storeUrl) => _GateMessage(
+          title: Strings.splashUpdateTitle,
+          message: Strings.splashUpdateMessage,
+          // Without a store link the message alone tells them what to do.
+          actionLabel: storeUrl == null ? null : Strings.splashUpdateButton,
+          onAction: storeUrl == null ? null : () => _openStore(storeUrl),
+        ),
+        SplashMaintenance() => _GateMessage(
+          title: Strings.splashMaintenanceTitle,
+          message: Strings.splashMaintenanceMessage,
+          actionLabel: Strings.retry,
+          onAction: onRetry,
+        ),
+      },
+    );
+  }
+
+  static Future<void> _openStore(String url) async {
+    final bool opened = await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened) showToast(Strings.somethingWentWrong, kind: ToastKind.error);
+  }
+}
+
+class _Progress extends StatelessWidget {
+  final Animation<double> progress;
+
+  const _Progress({required this.progress});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        AnimatedBuilder(
+          animation: progress,
+          builder: (_, __) => _ProgressBar(value: progress.value),
+        ),
+        SizedBox(height: AppSpacing.sm.h),
+        Text(
+          Strings.splashLoading,
+          style: AppTextStyles.caption(
+            color: Colors.white.withValues(alpha: 0.7),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GateMessage extends StatelessWidget {
+  final String title;
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  const _GateMessage({
+    required this.title,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.title(color: Colors.white),
+        ),
+        SizedBox(height: AppSpacing.xs.h),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodyLarge(
+            color: Colors.white.withValues(alpha: 0.85),
+          ),
+        ),
+        if (actionLabel != null) ...<Widget>[
+          SizedBox(height: AppSpacing.lg.h),
+          AppButton(btnText: actionLabel, onPressed: onAction),
+        ],
+      ],
     );
   }
 }

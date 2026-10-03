@@ -92,6 +92,21 @@ abstract class Strings {
   static const String _splashLoading = 'splash_loading';
   static String get splashLoading => _splashLoading.tr;
 
+  static const String _splashUpdateTitle = 'splash_update_title';
+  static String get splashUpdateTitle => _splashUpdateTitle.tr;
+
+  static const String _splashUpdateMessage = 'splash_update_message';
+  static String get splashUpdateMessage => _splashUpdateMessage.tr;
+
+  static const String _splashUpdateButton = 'splash_update_button';
+  static String get splashUpdateButton => _splashUpdateButton.tr;
+
+  static const String _splashMaintenanceTitle = 'splash_maintenance_title';
+  static String get splashMaintenanceTitle => _splashMaintenanceTitle.tr;
+
+  static const String _splashMaintenanceMessage = 'splash_maintenance_message';
+  static String get splashMaintenanceMessage => _splashMaintenanceMessage.tr;
+
   // --- Auth ---
   static const String _authWelcomeTitle = 'auth_welcome_title';
   static String get authWelcomeTitle => _authWelcomeTitle.tr;

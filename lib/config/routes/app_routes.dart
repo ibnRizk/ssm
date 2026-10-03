@@ -39,6 +39,7 @@ import '../../features/restaurants/presentation/cubit/store_details_cubit.dart';
 import '../../features/restaurants/presentation/cubit/stores_cubit.dart';
 import '../../features/restaurants/presentation/screens/restaurant_details_screen.dart';
 import '../../features/restaurants/presentation/screens/restaurants_screen.dart';
+import '../../features/splash/presentation/cubit/splash_cubit.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../features/subscriptions/presentation/cubit/subscriptions_cubit.dart';
 import '../../features/subscriptions/presentation/screens/subscriptions_screen.dart';
@@ -104,7 +105,11 @@ abstract class AppRoutes {
       GoRoute(
         path: splash,
         name: splashName,
-        builder: (_, __) => const SplashScreen(),
+        // Started by the screen, which knows how long its animation runs.
+        builder: (_, __) => BlocProvider<SplashCubit>(
+          create: (_) => ServiceLocator.instance<SplashCubit>(),
+          child: const SplashScreen(),
+        ),
       ),
       GoRoute(
         path: login,

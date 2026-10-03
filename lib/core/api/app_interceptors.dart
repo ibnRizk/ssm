@@ -19,7 +19,6 @@ class AppInterceptors extends Interceptor {
     // The backend translates messages by this header. Read per request so it
     // always matches the language the UI is currently showing.
     options.headers['X-localization'] = _languageCode;
-    //options.headers['Authorization'] = 'Bearer 3|tiLlHT6fseS3KLa5yiDLur94T6HCibEw2opQ4NYS27f0ce1d';
     options.headers.addAll(zoneHeaders(sharedPreferences.getZoneIds()));
 
     super.onRequest(options, handler);
@@ -62,9 +61,13 @@ class AppInterceptors extends Interceptor {
     }
     // Transport failures (refused, DNS, TLS, permission) have no response —
     // `type` and `error` are the only record of what actually went wrong.
-    debugPrint(
-      'ERROR[${err.response?.statusCode}] ${err.type.name} => URL: ${err.requestOptions.uri} => CAUSE: ${err.error ?? err.message} => RESPONSE: ${err.response?.toString()}',
-    );
+    // Debug only: the URL and body carry customer data (phones, addresses),
+    // and `debugPrint` is not stripped from release builds.
+    if (kDebugMode) {
+      debugPrint(
+        'ERROR[${err.response?.statusCode}] ${err.type.name} => URL: ${err.requestOptions.uri} => CAUSE: ${err.error ?? err.message} => RESPONSE: ${err.response?.toString()}',
+      );
+    }
     super.onError(err, handler);
   }
 }
