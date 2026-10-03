@@ -53,7 +53,9 @@ class _AddAddressFormState extends State<AddAddressForm> {
 
   void _submit() {
     FocusScope.of(context).unfocus();
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
     context.read<AddAddressCubit>().submit(
       type: _type,
       contactPersonName: _nameController.text,

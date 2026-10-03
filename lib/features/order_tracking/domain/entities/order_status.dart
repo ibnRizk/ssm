@@ -16,16 +16,22 @@ enum OrderStatus {
   cancelled,
   assignmentFailed;
 
-  /// The status to show. [canonical] (`ssm_status`) wins; it's null until
-  /// the merchant first acts, and then the legacy `order_status` still
-  /// knows about a customer cancellation. Anything else reads as pending.
-  static OrderStatus resolve(OrderStatus? canonical, String? legacyStatus) =>
-      canonical ??
-      switch (legacyStatus?.toLowerCase()) {
-        'canceled' || 'cancelled' || 'failed' => cancelled,
-        'delivered' => delivered,
-        _ => pendingMerchant,
-      };
+  /// The status to show. [canonical] (`ssm_status`) wins once the order is
+  /// past pending. Until then it's null or [pendingMerchant], and a
+  /// customer cancellation shows only in the legacy `order_status` — the
+  /// backend records no canonical entry for it. Anything else reads as
+  /// pending.
+  static OrderStatus resolve(OrderStatus? canonical, String? legacyStatus) {
+    if (canonical != null && canonical != pendingMerchant) return canonical;
+    return switch (legacyStatus?.toLowerCase()) {
+      'canceled' || 'cancelled' || 'failed' => cancelled,
+      'delivered' => delivered,
+      _ => pendingMerchant,
+    };
+  }
+
+  /// Not yet accepted by the merchant — the customer may still cancel.
+  bool get canBeCancelled => this == pendingMerchant;
 
   /// Where this status sits on the customer's timeline. Null for the
   /// terminal failures, which leave the timeline.

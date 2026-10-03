@@ -15,6 +15,15 @@ void main() {
       expect(OrderStatus.resolve(null, 'delivered'), OrderStatus.delivered);
     });
 
+    // A customer cancel is recorded in the legacy status only — ssm_status
+    // can stay at pending_merchant after it.
+    test('a legacy cancellation wins over a canonical pending', () {
+      expect(
+        OrderStatus.resolve(OrderStatus.pendingMerchant, 'canceled'),
+        OrderStatus.cancelled,
+      );
+    });
+
     test('anything else reads as pending', () {
       expect(OrderStatus.resolve(null, 'pending'), OrderStatus.pendingMerchant);
       expect(OrderStatus.resolve(null, null), OrderStatus.pendingMerchant);
@@ -52,6 +61,13 @@ void main() {
           OrderStatus.cancelled,
           OrderStatus.assignmentFailed,
         ],
+      );
+    });
+
+    test('only a pending order can be cancelled', () {
+      expect(
+        OrderStatus.values.where((OrderStatus s) => s.canBeCancelled),
+        <OrderStatus>[OrderStatus.pendingMerchant],
       );
     });
 

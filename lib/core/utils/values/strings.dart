@@ -825,6 +825,32 @@ abstract class Strings {
   static String get orderTrackingLocationUnavailable =>
       _orderTrackingLocationUnavailable.tr;
 
+  // --- Cancel order ---
+  static const String _orderCancelButton = 'order_cancel_button';
+  static String get orderCancelButton => _orderCancelButton.tr;
+
+  static const String _orderCancelSheetTitle = 'order_cancel_sheet_title';
+  static String get orderCancelSheetTitle => _orderCancelSheetTitle.tr;
+
+  static const String _orderCancelSheetSubtitle = 'order_cancel_sheet_subtitle';
+  static String get orderCancelSheetSubtitle => _orderCancelSheetSubtitle.tr;
+
+  static const String _orderCancelReasonLabel = 'order_cancel_reason_label';
+  static String get orderCancelReasonLabel => _orderCancelReasonLabel.tr;
+
+  static const String _orderCancelReasonHint = 'order_cancel_reason_hint';
+  static String get orderCancelReasonHint => _orderCancelReasonHint.tr;
+
+  static const String _orderCancelKeep = 'order_cancel_keep';
+  static String get orderCancelKeep => _orderCancelKeep.tr;
+
+  static const String _orderCancelled = 'order_cancelled';
+  static String get orderCancelled => _orderCancelled.tr;
+
+  /// 403 — the merchant accepted the order before the cancel arrived.
+  static const String _orderCancelNotAllowed = 'order_cancel_not_allowed';
+  static String get orderCancelNotAllowed => _orderCancelNotAllowed.tr;
+
   // --- Subscriptions ---
   static const String _subscriptionsTitle = 'subscriptions_title';
   static String get subscriptionsTitle => _subscriptionsTitle.tr;

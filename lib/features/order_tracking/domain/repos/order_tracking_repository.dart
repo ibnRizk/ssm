@@ -19,4 +19,11 @@ abstract class OrderTrackingRepository {
   /// [ConflictFailure] ([otpNotAvailableCode]). Invalidates the previous
   /// code.
   Future<Either<Failure, DeliveryOtp>> requestDeliveryOtp(int orderId);
+
+  /// Only while the merchant hasn't accepted the order; afterwards a
+  /// [ForbiddenFailure]. Repeating a successful cancel is safe.
+  Future<Either<Failure, Unit>> cancelOrder(
+    int orderId, {
+    required String reason,
+  });
 }

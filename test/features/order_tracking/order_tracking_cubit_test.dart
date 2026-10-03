@@ -46,6 +46,20 @@ class _FakeRepository implements OrderTrackingRepository {
     otpCalls++;
     return otp.future;
   }
+
+  final List<String> cancelReasons = <String>[];
+
+  /// Completed by the test, so a cancel can be kept in flight.
+  Completer<Either<Failure, Unit>> cancel = Completer();
+
+  @override
+  Future<Either<Failure, Unit>> cancelOrder(
+    int orderId, {
+    required String reason,
+  }) {
+    cancelReasons.add(reason);
+    return cancel.future;
+  }
 }
 
 Either<Failure, OrderTracking> _tracking(OrderStatus? status) =>
@@ -300,6 +314,123 @@ void main() {
       expect(repository.otpCalls, 1);
       expect(loaded().otp, const OtpReady(_code));
     });
+  });
+
+  group('cancel order', () {
+    setUp(() => repository.tracking = _tracking(null));
+
+    test('sends the trimmed reason and shows the order cancelled', () async {
+      await cubit.load();
+
+      final Future<void> cancelling = cubit.cancelOrder(
+        '  Ordered by mistake ',
+      );
+      expect(loaded().cancellation, const CancellationInProgress());
+      repository.cancel.complete(const Right<Failure, Unit>(unit));
+      await cancelling;
+
+      expect(repository.cancelReasons, <String>['Ordered by mistake']);
+      expect(loaded().status, OrderStatus.cancelled);
+      expect(loaded().cancellation, const CancellationDone());
+    });
+
+    test('stops polling once cancelled', () async {
+      await cubit.load();
+
+      final Future<void> cancelling = cubit.cancelOrder('Changed my mind');
+      repository.cancel.complete(const Right<Failure, Unit>(unit));
+      await cancelling;
+
+      expect(timers.single.cancelled, isTrue);
+    });
+
+    test('a poll that answers after the cancel does not undo it', () async {
+      await cubit.load();
+      final Future<void> cancelling = cubit.cancelOrder('Changed my mind');
+      repository.cancel.complete(const Right<Failure, Unit>(unit));
+      await cancelling;
+
+      // The backend's legacy status may still say pending for a moment.
+      await cubit.refresh();
+
+      expect(loaded().status, OrderStatus.cancelled);
+    });
+
+    test('a refusal keeps the order and re-reads its status', () async {
+      await cubit.load();
+      final int callsBefore = repository.trackingCalls;
+
+      repository.tracking = _tracking(OrderStatus.accepted);
+      final Future<void> cancelling = cubit.cancelOrder('Too slow');
+      repository.cancel.complete(
+        const Left<Failure, Unit>(ForbiddenFailure(message: 'Not allowed')),
+      );
+      await cancelling;
+      await _settle();
+
+      expect(
+        loaded().cancellation,
+        const CancellationFailed(ForbiddenFailure(message: 'Not allowed')),
+      );
+      expect(repository.trackingCalls, callsBefore + 1);
+      expect(loaded().status, OrderStatus.accepted);
+    });
+
+    test('a network failure keeps the order as it is', () async {
+      await cubit.load();
+
+      final Future<void> cancelling = cubit.cancelOrder('Too slow');
+      repository.cancel.complete(const Left<Failure, Unit>(NetworkFailure()));
+      await cancelling;
+
+      expect(loaded().status, OrderStatus.pendingMerchant);
+      expect(loaded().cancellation, const CancellationFailed(NetworkFailure()));
+    });
+
+    test('a second tap while cancelling sends nothing more', () async {
+      await cubit.load();
+
+      final Future<void> first = cubit.cancelOrder('Changed my mind');
+      await cubit.cancelOrder('Changed my mind');
+      repository.cancel.complete(const Right<Failure, Unit>(unit));
+      await first;
+
+      expect(repository.cancelReasons, hasLength(1));
+    });
+
+    test('is not sent once the merchant has accepted', () async {
+      repository.tracking = _tracking(OrderStatus.accepted);
+      await cubit.load();
+
+      await cubit.cancelOrder('Changed my mind');
+
+      expect(repository.cancelReasons, isEmpty);
+    });
+
+    test('is not sent without a reason', () async {
+      await cubit.load();
+
+      await cubit.cancelOrder('   ');
+
+      expect(repository.cancelReasons, isEmpty);
+    });
+
+    // The legacy cancel leaves ssm_status at pending_merchant.
+    test(
+      'a cancel made elsewhere shows despite a pending ssm_status',
+      () async {
+        repository.tracking = _tracking(OrderStatus.pendingMerchant);
+        await cubit.load();
+
+        repository.summary = const Right<Failure, OrderSummary>(
+          OrderSummary(id: 9, legacyStatus: 'canceled'),
+        );
+        await poll();
+
+        expect(loaded().status, OrderStatus.cancelled);
+        expect(timers.single.cancelled, isTrue);
+      },
+    );
   });
 
   group('delivery OTP', () {

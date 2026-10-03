@@ -3,17 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/utils/failure_message.dart';
 import '../../../../core/utils/values/launch_url_method.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/error_text.dart';
 import '../../../../core/widgets/simple_app_bar.dart';
 import '../../domain/entities/order_tracking.dart';
 import '../cubit/order_tracking_cubit.dart';
 import '../cubit/order_tracking_state.dart';
 import '../utils/order_tracking_labels.dart';
+import '../widgets/order_tracking_cancel_button.dart';
 import '../widgets/order_tracking_contact_card.dart';
 import '../widgets/order_tracking_items_card.dart';
 import '../widgets/order_tracking_otp_card.dart';
@@ -59,21 +62,60 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         onBack: () => context.pop(),
       ),
       body: SafeArea(
-        child: BlocBuilder<OrderTrackingCubit, OrderTrackingState>(
-          builder: (BuildContext context, OrderTrackingState state) =>
-              switch (state) {
-                OrderTrackingLoading() => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-                OrderTrackingError(:final failure) => ErrorText(
-                  message: failure.userMessage,
-                  onRetry: () => context.read<OrderTrackingCubit>().load(),
-                ),
-                final OrderTrackingLoaded loaded => _TrackingContent(loaded),
-              },
+        child: BlocListener<OrderTrackingCubit, OrderTrackingState>(
+          listenWhen: _cancellationChanged,
+          listener: _announceCancellation,
+          child: BlocBuilder<OrderTrackingCubit, OrderTrackingState>(
+            builder: (BuildContext context, OrderTrackingState state) =>
+                switch (state) {
+                  OrderTrackingLoading() => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  OrderTrackingError(:final failure) => ErrorText(
+                    message: failure.userMessage,
+                    onRetry: () => context.read<OrderTrackingCubit>().load(),
+                  ),
+                  final OrderTrackingLoaded loaded => _TrackingContent(loaded),
+                },
+          ),
         ),
       ),
     );
+  }
+
+  static bool _cancellationChanged(
+    OrderTrackingState previous,
+    OrderTrackingState current,
+  ) =>
+      current is OrderTrackingLoaded &&
+      previous is OrderTrackingLoaded &&
+      previous.cancellation != current.cancellation;
+
+  /// Here rather than on the cancel button: a successful cancel removes
+  /// the button in the same state change.
+  static void _announceCancellation(
+    BuildContext context,
+    OrderTrackingState state,
+  ) {
+    if (state is! OrderTrackingLoaded) return;
+    switch (state.cancellation) {
+      case CancellationDone():
+        showAppSnackBar(
+          context: context,
+          message: Strings.orderCancelled,
+          type: ToastType.success,
+        );
+      case CancellationFailed(:final Failure failure):
+        showAppSnackBar(
+          context: context,
+          message: failure is ForbiddenFailure
+              ? Strings.orderCancelNotAllowed
+              : failure.userMessage,
+          type: ToastType.error,
+        );
+      case CancellationIdle() || CancellationInProgress():
+        break;
+    }
   }
 }
 
@@ -112,6 +154,10 @@ class _TrackingContent extends StatelessWidget {
                 otp: state.otp,
                 onRequest: cubit.requestDeliveryOtp,
               ),
+            ],
+            if (state.status.canBeCancelled) ...<Widget>[
+              SizedBox(height: AppSpacing.md.h),
+              const OrderTrackingCancelButton(),
             ],
             SizedBox(height: AppSpacing.lg.h),
             OrderTrackingTimelineCard(steps: state.status.timeline(storeName)),

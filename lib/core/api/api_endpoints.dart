@@ -92,6 +92,9 @@ abstract class ApiEndpoints {
   static const String orderDetails = '$_v1/customer/order/details';
   static const String orderTrack = '$_v1/customer/order/track';
 
+  /// A PUT with `order_id` and `reason` in the body; pending orders only.
+  static const String orderCancel = '$_v1/customer/order/cancel';
+
   /// The SSM shape, with the canonical `ssm_status`.
   static String orderTracking(int orderId) =>
       '$_v1/customer/orders/$orderId/tracking';

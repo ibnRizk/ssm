@@ -1,4 +1,5 @@
 import '../../../../core/api/api_endpoints.dart';
+import '../../../../core/api/api_error_mapper.dart';
 import '../../../../core/api/dio_consumer.dart';
 import '../../domain/entities/order_tracking.dart';
 import '../models/order_tracking_models.dart';
@@ -11,6 +12,10 @@ abstract class OrderTrackingRemoteDataSource {
   Future<OrderTracking> getTracking(int orderId);
 
   Future<DeliveryOtp> requestDeliveryOtp(int orderId);
+
+  /// The 200 body is only a confirmation message. A refusal sent with a
+  /// success status (`errors` body) is thrown as [ForbiddenException].
+  Future<void> cancelOrder(int orderId, {required String reason});
 }
 
 class OrderTrackingRemoteDataSourceImpl
@@ -47,5 +52,14 @@ class OrderTrackingRemoteDataSourceImpl
   Future<DeliveryOtp> requestDeliveryOtp(int orderId) async =>
       OrderTrackingModels.deliveryOtpFromJson(
         await consumer.post(ApiEndpoints.deliveryOtpRequest(orderId)),
+      );
+
+  @override
+  Future<void> cancelOrder(int orderId, {required String reason}) async =>
+      throwIfRefusal(
+        await consumer.put(
+          ApiEndpoints.orderCancel,
+          body: <String, dynamic>{'order_id': orderId, 'reason': reason},
+        ),
       );
 }

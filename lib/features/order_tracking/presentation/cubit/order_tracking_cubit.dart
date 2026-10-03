@@ -85,8 +85,9 @@ class OrderTrackingCubit extends Cubit<OrderTrackingState> {
   /// Re-reads the live status — the poll, and pull-to-refresh. Skipped
   /// while one is already in flight.
   ///
-  /// While `ssm_status` is still null the legacy summary is re-read too:
-  /// until the merchant acts, it's the only place a cancellation shows.
+  /// While `ssm_status` is still null or pending, the legacy summary is
+  /// re-read too: until the merchant acts, it's the only place a
+  /// cancellation shows (see [OrderStatus.resolve]).
   Future<void> refresh() async {
     if (_refreshing || state is! OrderTrackingLoaded) return;
     _refreshing = true;
@@ -94,12 +95,17 @@ class OrderTrackingCubit extends Cubit<OrderTrackingState> {
       final Either<Failure, OrderTracking> result = await repository
           .getTracking(orderId);
       final Either<Failure, OrderSummary>? legacy = switch (result) {
-        Right<Failure, OrderTracking>(value: OrderTracking(status: null)) =>
+        Right<Failure, OrderTracking>(
+          value: OrderTracking(status: null || OrderStatus.pendingMerchant),
+        ) =>
           await repository.getSummary(orderId),
         _ => null,
       };
       final OrderTrackingState current = state;
       if (isClosed || current is! OrderTrackingLoaded) return;
+      // Nothing changes after a final status — and an answer that left
+      // before a cancel went through must not undo it.
+      if (current.status.isFinal) return;
       result.fold((_) => emit(current.copyWith(stale: true)), (
         OrderTracking live,
       ) {
@@ -175,6 +181,44 @@ class OrderTrackingCubit extends Cubit<OrderTrackingState> {
           OtpReady.new,
         ),
       ),
+    );
+  }
+
+  /// Cancels the order with the customer's [reason]. Only while it can
+  /// still be cancelled, and not while a cancel is on its way. A refusal
+  /// (the merchant accepted meanwhile) re-reads the status to show why.
+  Future<void> cancelOrder(String reason) async {
+    final OrderTrackingState current = state;
+    final String trimmed = reason.trim();
+    if (current is! OrderTrackingLoaded ||
+        !current.status.canBeCancelled ||
+        current.cancellation is CancellationInProgress ||
+        trimmed.isEmpty) {
+      return;
+    }
+    emit(current.copyWith(cancellation: const CancellationInProgress()));
+    final Either<Failure, Unit> result = await repository.cancelOrder(
+      orderId,
+      reason: trimmed,
+    );
+    final OrderTrackingState latest = state;
+    if (isClosed || latest is! OrderTrackingLoaded) return;
+    result.fold(
+      (Failure failure) {
+        emit(latest.copyWith(cancellation: CancellationFailed(failure)));
+        if (failure is ForbiddenFailure) unawaited(refresh());
+      },
+      (_) {
+        // The server confirmed it; its legacy status may lag a poll behind.
+        emit(
+          latest.copyWith(
+            status: OrderStatus.cancelled,
+            otp: const OtpIdle(),
+            cancellation: const CancellationDone(),
+          ),
+        );
+        _afterStatusChange();
+      },
     );
   }
 

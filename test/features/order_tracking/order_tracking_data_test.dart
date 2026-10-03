@@ -262,5 +262,52 @@ void main() {
         ),
       );
     });
+
+    test('a cancel PUTs the order id and reason', () async {
+      consumer.response = <String, dynamic>{'message': 'Order canceled'};
+
+      final Either<Failure, Unit> result = await repository.cancelOrder(
+        9,
+        reason: 'Changed my mind',
+      );
+
+      expect(result, const Right<Failure, Unit>(unit));
+      expect(consumer.lastVerb, 'PUT');
+      expect(consumer.lastPath, ApiEndpoints.orderCancel);
+      expect(consumer.lastBody, <String, dynamic>{
+        'order_id': 9,
+        'reason': 'Changed my mind',
+      });
+    });
+
+    test(
+      'a cancel after the merchant accepted is a ForbiddenFailure',
+      () async {
+        consumer.error = const ForbiddenException(message: 'Not allowed');
+
+        expect(
+          await repository.cancelOrder(9, reason: 'Too slow'),
+          const Left<Failure, Unit>(ForbiddenFailure(message: 'Not allowed')),
+        );
+      },
+    );
+
+    test(
+      'a refusal sent with a success status is a ForbiddenFailure',
+      () async {
+        consumer.response = <String, dynamic>{
+          'errors': <dynamic>[
+            <String, dynamic>{'code': 'order', 'message': 'Not allowed'},
+          ],
+        };
+
+        expect(
+          await repository.cancelOrder(9, reason: 'Too slow'),
+          const Left<Failure, Unit>(
+            ForbiddenFailure(message: 'Not allowed', code: 'order'),
+          ),
+        );
+      },
+    );
   });
 }

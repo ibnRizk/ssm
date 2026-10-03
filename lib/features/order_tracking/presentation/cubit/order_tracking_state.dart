@@ -35,6 +35,9 @@ final class OrderTrackingLoaded extends OrderTrackingState {
   final OrderStatus status;
   final DeliveryOtpState otp;
 
+  /// The customer's cancel request, if any — see [OrderStatus.canBeCancelled].
+  final OrderCancellation cancellation;
+
   /// The last status refresh failed — [status] may be behind. Polling
   /// keeps trying.
   final bool stale;
@@ -45,6 +48,7 @@ final class OrderTrackingLoaded extends OrderTrackingState {
     required this.status,
     this.tracking,
     this.otp = const OtpIdle(),
+    this.cancellation = const CancellationIdle(),
     this.stale = false,
   });
 
@@ -53,6 +57,7 @@ final class OrderTrackingLoaded extends OrderTrackingState {
     OrderTracking? tracking,
     OrderStatus? status,
     DeliveryOtpState? otp,
+    OrderCancellation? cancellation,
     bool? stale,
   }) => OrderTrackingLoaded(
     summary: summary ?? this.summary,
@@ -60,11 +65,51 @@ final class OrderTrackingLoaded extends OrderTrackingState {
     tracking: tracking ?? this.tracking,
     status: status ?? this.status,
     otp: otp ?? this.otp,
+    cancellation: cancellation ?? this.cancellation,
     stale: stale ?? this.stale,
   );
 
   @override
-  List<Object?> get props => [summary, lines, tracking, status, otp, stale];
+  List<Object?> get props => [
+    summary,
+    lines,
+    tracking,
+    status,
+    otp,
+    cancellation,
+    stale,
+  ];
+}
+
+sealed class OrderCancellation extends Equatable {
+  const OrderCancellation();
+
+  @override
+  List<Object?> get props => [];
+}
+
+final class CancellationIdle extends OrderCancellation {
+  const CancellationIdle();
+}
+
+final class CancellationInProgress extends OrderCancellation {
+  const CancellationInProgress();
+}
+
+/// The order is cancelled — the screen confirms it once.
+final class CancellationDone extends OrderCancellation {
+  const CancellationDone();
+}
+
+/// Refused ([ForbiddenFailure]: the merchant already accepted) or not
+/// sent. The order stays as it is.
+final class CancellationFailed extends OrderCancellation {
+  final Failure failure;
+
+  const CancellationFailed(this.failure);
+
+  @override
+  List<Object?> get props => [failure];
 }
 
 /// The delivery OTP, only relevant while the order is out for delivery.

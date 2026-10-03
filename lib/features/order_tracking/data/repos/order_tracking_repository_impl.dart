@@ -32,4 +32,13 @@ class OrderTrackingRepositoryImpl implements OrderTrackingRepository {
   @override
   Future<Either<Failure, DeliveryOtp>> requestDeliveryOtp(int orderId) =>
       zoneRepository.inZone(() => remote.requestDeliveryOtp(orderId));
+
+  @override
+  Future<Either<Failure, Unit>> cancelOrder(
+    int orderId, {
+    required String reason,
+  }) => zoneRepository.inZone(() async {
+    await remote.cancelOrder(orderId, reason: reason);
+    return unit;
+  });
 }
