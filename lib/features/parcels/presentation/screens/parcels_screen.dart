@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/delivery_otp/delivery_otp.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/utils/failure_message.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../../core/widgets/delivery_otp_card.dart';
 import '../../../../core/widgets/error_text.dart';
 import '../../../../core/widgets/no_data_found.dart';
 import '../../domain/entities/parcel.dart';
@@ -91,6 +93,11 @@ class _ParcelsContent extends StatelessWidget {
           newCount: parcels.where((Parcel p) => p.awaitsDropoffLocation).length,
         ),
         SizedBox(height: AppSpacing.lg.h),
+        for (final Parcel parcel in parcels)
+          if (parcel.needsDeliveryOtp) ...<Widget>[
+            _ParcelOtpCard(parcel: parcel),
+            SizedBox(height: AppSpacing.lg.h),
+          ],
         if (target != null) ...<Widget>[
           _DropoffCard(parcel: target),
           SizedBox(height: AppSpacing.xl.h),
@@ -103,6 +110,30 @@ class _ParcelsContent extends StatelessWidget {
         else
           ParcelsTrackingSection(parcels: parcels),
       ],
+    );
+  }
+}
+
+/// The code the customer reads to the courier, for a parcel that is out
+/// for delivery. Rebuilds only when this parcel's code changes.
+class _ParcelOtpCard extends StatelessWidget {
+  final Parcel parcel;
+
+  const _ParcelOtpCard({required this.parcel});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<ParcelsCubit, ParcelsState, DeliveryOtpState>(
+      selector: (ParcelsState state) =>
+          (state is ParcelsLoaded ? state.otps[parcel.id] : null) ??
+          const OtpIdle(),
+      builder: (BuildContext context, DeliveryOtpState otp) => DeliveryOtpCard(
+        otp: otp,
+        subtitle: parcel.reference,
+        hint: Strings.parcelsOtpHint,
+        onRequest: () =>
+            context.read<ParcelsCubit>().requestDeliveryOtp(parcel.id),
+      ),
     );
   }
 }

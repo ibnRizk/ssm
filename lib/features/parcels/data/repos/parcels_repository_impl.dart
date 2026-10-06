@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/api/safe_api_call.dart';
+import '../../../../core/delivery_otp/delivery_otp.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/parcel.dart';
 import '../../domain/repos/parcels_repository.dart';
@@ -23,4 +24,8 @@ class ParcelsRepositoryImpl implements ParcelsRepository {
     await remote.sendDropoff(parcelId, dropoff);
     return unit;
   });
+
+  @override
+  Future<Either<Failure, DeliveryOtp>> requestDeliveryOtp(int parcelId) =>
+      safeApiCall(() => remote.requestDeliveryOtp(parcelId));
 }

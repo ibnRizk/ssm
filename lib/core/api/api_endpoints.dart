@@ -48,6 +48,12 @@ abstract class ApiEndpoints {
   static const String parcels = '$_v1/customer/parcels';
   static String parcelLocation(int parcelId) => '$parcels/$parcelId/location';
 
+  /// Same contract as [deliveryOtpRequest]: only while the parcel is out
+  /// for delivery (otherwise 409 `otp-not-available`); requesting again
+  /// invalidates the previous code.
+  static String parcelDeliveryOtpRequest(int parcelId) =>
+      '$parcels/$parcelId/delivery-otp/request';
+
   // --- Zones ---
   static const String zoneList = '$_v1/zone/list';
 

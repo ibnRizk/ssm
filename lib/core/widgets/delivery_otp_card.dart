@@ -2,25 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_decorations.dart';
-import '../../../../core/theme/app_dimens.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/failure_message.dart';
-import '../../../../core/utils/values/strings.dart';
-import '../../domain/entities/order_tracking.dart';
-import '../cubit/order_tracking_state.dart';
+import '../delivery_otp/delivery_otp.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_decorations.dart';
+import '../theme/app_dimens.dart';
+import '../theme/app_text_styles.dart';
+import '../utils/failure_message.dart';
+import '../utils/values/strings.dart';
 
-/// The delivery code, big and spaced out so it can be read aloud to the
-/// courier. [onRequest] fetches a code — a new one replaces the old.
-class OrderTrackingOtpCard extends StatelessWidget {
+/// The delivery code of an order or a parcel, big and spaced out so it can
+/// be read aloud to the courier. [onRequest] fetches a code — a new one
+/// replaces the old. [subtitle] tells codes apart when several show, e.g.
+/// the parcel reference; [hint] replaces the order wording under the code.
+class DeliveryOtpCard extends StatelessWidget {
   final DeliveryOtpState otp;
   final VoidCallback onRequest;
+  final String? subtitle;
+  final String? hint;
 
-  const OrderTrackingOtpCard({
+  const DeliveryOtpCard({
     super.key,
     required this.otp,
     required this.onRequest,
+    this.subtitle,
+    this.hint,
   });
 
   @override
@@ -42,6 +47,16 @@ class OrderTrackingOtpCard extends StatelessWidget {
                 Strings.orderTrackingOtpTitle,
                 style: AppTextStyles.title(color: c.textPrimary),
               ),
+              if (subtitle case final String subtitle) ...<Widget>[
+                SizedBox(width: AppSpacing.xs.w),
+                Flexible(
+                  child: Text(
+                    subtitle,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.caption(color: c.textSecondary),
+                  ),
+                ),
+              ],
             ],
           ),
           SizedBox(height: AppSpacing.md.h),
@@ -50,7 +65,10 @@ class OrderTrackingOtpCard extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: AppSpacing.sm.h),
               child: const CircularProgressIndicator(),
             ),
-            OtpReady(:final DeliveryOtp otp) => _Code(otp: otp),
+            OtpReady(:final DeliveryOtp otp) => _Code(
+              otp: otp,
+              hint: hint ?? Strings.orderTrackingOtpHint,
+            ),
             OtpUnavailable() => _Problem(
               message: Strings.orderTrackingOtpUnavailable,
             ),
@@ -77,8 +95,9 @@ class OrderTrackingOtpCard extends StatelessWidget {
 
 class _Code extends StatelessWidget {
   final DeliveryOtp otp;
+  final String hint;
 
-  const _Code({required this.otp});
+  const _Code({required this.otp, required this.hint});
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +117,7 @@ class _Code extends StatelessWidget {
         ),
         SizedBox(height: AppSpacing.xs.h),
         Text(
-          Strings.orderTrackingOtpHint,
+          hint,
           textAlign: TextAlign.center,
           style: AppTextStyles.caption(color: c.textSecondary),
         ),

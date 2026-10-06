@@ -171,6 +171,16 @@ void main() {
       expect(wire.values.toSet(), OrderStatus.values.toSet());
       expect(OrderTrackingModels.statusFromWire('teleported'), isNull);
     });
+
+    test('failed and refunded orders read as cancelled, not pending', () {
+      for (final String wire in <String>['failed', 'refunded', 'canceled']) {
+        expect(
+          OrderTrackingModels.statusFromWire(wire),
+          OrderStatus.cancelled,
+          reason: wire,
+        );
+      }
+    });
   });
 
   group('OrderTrackingModels.deliveryOtpFromJson', () {

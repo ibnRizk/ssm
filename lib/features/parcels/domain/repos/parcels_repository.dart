@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 
+import '../../../../core/delivery_otp/delivery_otp.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/parcel.dart';
 
@@ -14,4 +15,9 @@ abstract class ParcelsRepository {
     int parcelId,
     ParcelDropoff dropoff,
   );
+
+  /// The code the customer reads to the courier. A [ConflictFailure] means
+  /// the parcel isn't out for delivery on the server (yet). A new request
+  /// invalidates the previous code.
+  Future<Either<Failure, DeliveryOtp>> requestDeliveryOtp(int parcelId);
 }

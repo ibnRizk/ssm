@@ -13,6 +13,8 @@ extension OrderStatusLabels on OrderStatus {
 
   String get description => switch (this) {
     OrderStatus.delivered => Strings.orderTrackingStepDeliveredSubtitle,
+    OrderStatus.assignmentFailed =>
+      Strings.orderTrackingAssignmentFailedDescription,
     _ when isFailed => Strings.orderTrackingFailedDescription,
     _ => Strings.orderTrackingStatusDescription,
   };

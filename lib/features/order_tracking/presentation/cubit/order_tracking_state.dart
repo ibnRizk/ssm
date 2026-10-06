@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/delivery_otp/delivery_otp.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/order_status.dart';
 import '../../domain/entities/order_tracking.dart';
+
+export '../../../../core/delivery_otp/delivery_otp.dart';
 
 sealed class OrderTrackingState extends Equatable {
   const OrderTrackingState();
@@ -107,46 +110,6 @@ final class CancellationFailed extends OrderCancellation {
   final Failure failure;
 
   const CancellationFailed(this.failure);
-
-  @override
-  List<Object?> get props => [failure];
-}
-
-/// The delivery OTP, only relevant while the order is out for delivery.
-sealed class DeliveryOtpState extends Equatable {
-  const DeliveryOtpState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-final class OtpIdle extends DeliveryOtpState {
-  const OtpIdle();
-}
-
-final class OtpLoading extends DeliveryOtpState {
-  const OtpLoading();
-}
-
-final class OtpReady extends DeliveryOtpState {
-  final DeliveryOtp otp;
-
-  const OtpReady(this.otp);
-
-  @override
-  List<Object?> get props => [otp];
-}
-
-/// The backend answered 409 `otp-not-available` — the order isn't out for
-/// delivery on its side (yet).
-final class OtpUnavailable extends DeliveryOtpState {
-  const OtpUnavailable();
-}
-
-final class OtpFailed extends DeliveryOtpState {
-  final Failure failure;
-
-  const OtpFailed(this.failure);
 
   @override
   List<Object?> get props => [failure];

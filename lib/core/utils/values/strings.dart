@@ -334,6 +334,9 @@ abstract class Strings {
   static const String _parcelsEmpty = 'parcels_empty';
   static String get parcelsEmpty => _parcelsEmpty.tr;
 
+  static const String _parcelsOtpHint = 'parcels_otp_hint';
+  static String get parcelsOtpHint => _parcelsOtpHint.tr;
+
   static const String _parcelsPaymentPrepaid = 'parcels_payment_prepaid';
   static String get parcelsPaymentPrepaid => _parcelsPaymentPrepaid.tr;
 
@@ -762,6 +765,16 @@ abstract class Strings {
       'order_tracking_failed_description';
   static String get orderTrackingFailedDescription =>
       _orderTrackingFailedDescription.tr;
+
+  static const String _orderTrackingAssignmentFailedDescription =
+      'order_tracking_assignment_failed_description';
+  static String get orderTrackingAssignmentFailedDescription =>
+      _orderTrackingAssignmentFailedDescription.tr;
+
+  static const String _orderTrackingBrowseStores =
+      'order_tracking_browse_stores';
+  static String get orderTrackingBrowseStores =>
+      _orderTrackingBrowseStores.tr;
 
   static const String _orderTrackingStale = 'order_tracking_stale';
   static String get orderTrackingStale => _orderTrackingStale.tr;

@@ -1,5 +1,7 @@
 import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/api/dio_consumer.dart';
+import '../../../../core/delivery_otp/delivery_otp.dart';
+import '../../../../core/delivery_otp/delivery_otp_parser.dart';
 import '../../domain/entities/parcel.dart';
 import '../models/parcel_model.dart';
 
@@ -7,6 +9,8 @@ abstract class ParcelsRemoteDataSource {
   Future<List<ParcelModel>> getParcels();
 
   Future<void> sendDropoff(int parcelId, ParcelDropoff dropoff);
+
+  Future<DeliveryOtp> requestDeliveryOtp(int parcelId);
 }
 
 class ParcelsRemoteDataSourceImpl implements ParcelsRemoteDataSource {
@@ -31,5 +35,11 @@ class ParcelsRemoteDataSourceImpl implements ParcelsRemoteDataSource {
           if (dropoff.notes case final String notes when notes.isNotEmpty)
             'notes': notes,
         },
+      );
+
+  @override
+  Future<DeliveryOtp> requestDeliveryOtp(int parcelId) async =>
+      parseDeliveryOtp(
+        await consumer.post(ApiEndpoints.parcelDeliveryOtpRequest(parcelId)),
       );
 }

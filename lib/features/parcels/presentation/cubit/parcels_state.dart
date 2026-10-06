@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/delivery_otp/delivery_otp.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/parcel.dart';
 
@@ -31,6 +32,10 @@ final class ParcelsLoaded extends ParcelsState {
   final List<Parcel> parcels;
   final DropoffStatus dropoff;
 
+  /// The delivery code of each parcel that is out for delivery, by id.
+  /// Parcels without an entry show no code.
+  final Map<int, DeliveryOtpState> otps;
+
   /// A manual refresh ("Update now") is running; the list stays visible.
   final bool isRefreshing;
 
@@ -41,6 +46,7 @@ final class ParcelsLoaded extends ParcelsState {
   const ParcelsLoaded({
     required this.parcels,
     this.dropoff = const DropoffIdle(),
+    this.otps = const <int, DeliveryOtpState>{},
     this.isRefreshing = false,
     this.refreshFailure,
   });
@@ -51,17 +57,25 @@ final class ParcelsLoaded extends ParcelsState {
   ParcelsLoaded copyWith({
     List<Parcel>? parcels,
     DropoffStatus? dropoff,
+    Map<int, DeliveryOtpState>? otps,
     bool? isRefreshing,
     Failure? refreshFailure,
   }) => ParcelsLoaded(
     parcels: parcels ?? this.parcels,
     dropoff: dropoff ?? this.dropoff,
+    otps: otps ?? this.otps,
     isRefreshing: isRefreshing ?? this.isRefreshing,
     refreshFailure: refreshFailure,
   );
 
   @override
-  List<Object?> get props => [parcels, dropoff, isRefreshing, refreshFailure];
+  List<Object?> get props => [
+    parcels,
+    dropoff,
+    otps,
+    isRefreshing,
+    refreshFailure,
+  ];
 }
 
 // --- Sending a drop-off location ---

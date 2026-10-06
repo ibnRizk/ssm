@@ -185,6 +185,58 @@ void main() {
     expect(timers.single.cancelled, isTrue);
   });
 
+  test('no courier yet keeps polling and catches a retried dispatch', () async {
+    await cubit.load();
+    repository.tracking = _tracking(OrderStatus.assignmentFailed);
+    await poll();
+
+    repository.tracking = _tracking(OrderStatus.driverAccepted);
+    await poll();
+
+    expect(timers.single.cancelled, isFalse);
+    expect(loaded().status, OrderStatus.driverAccepted);
+  });
+
+  test('the new courier from a retried dispatch is shown', () async {
+    await cubit.load();
+    repository.tracking = _tracking(OrderStatus.assignmentFailed);
+    await poll();
+
+    repository.tracking = const Right<Failure, OrderTracking>(
+      OrderTracking(
+        orderId: 9,
+        status: OrderStatus.driverAccepted,
+        trackingAllowed: true,
+        driverName: 'Khalid',
+      ),
+    );
+    await poll();
+
+    expect(loaded().tracking?.driverName, 'Khalid');
+    expect(loaded().status.isLookingForCourier, isFalse);
+  });
+
+  test('no courier yet is shown as a wait, never as stale', () async {
+    await cubit.load();
+
+    repository.tracking = _tracking(OrderStatus.assignmentFailed);
+    await poll();
+
+    expect(loaded().status, OrderStatus.assignmentFailed);
+    expect(loaded().status.isLookingForCourier, isTrue);
+    expect(loaded().stale, isFalse);
+  });
+
+  test('a cancel by the store or a courier ends polling', () async {
+    await cubit.load();
+
+    repository.tracking = _tracking(OrderStatus.cancelled);
+    await poll();
+
+    expect(loaded().status, OrderStatus.cancelled);
+    expect(timers.single.cancelled, isTrue);
+  });
+
   group('before the merchant acts (ssm_status null)', () {
     setUp(() => repository.tracking = _tracking(null));
 
