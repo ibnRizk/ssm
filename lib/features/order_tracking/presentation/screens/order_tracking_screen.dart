@@ -3,13 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../config/routes/app_routes.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/utils/failure_message.dart';
 import '../../../../core/utils/values/launch_url_method.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../../core/widgets/delivery_otp_card.dart';
 import '../../../../core/widgets/error_text.dart';
 import '../../../../core/widgets/simple_app_bar.dart';
 import '../../domain/entities/order_tracking.dart';
@@ -19,7 +22,6 @@ import '../utils/order_tracking_labels.dart';
 import '../widgets/order_tracking_cancel_button.dart';
 import '../widgets/order_tracking_contact_card.dart';
 import '../widgets/order_tracking_items_card.dart';
-import '../widgets/order_tracking_otp_card.dart';
 import '../widgets/order_tracking_status_banner.dart';
 import '../widgets/order_tracking_timeline_card.dart';
 
@@ -150,7 +152,7 @@ class _TrackingContent extends StatelessWidget {
             ),
             if (state.status.needsDeliveryOtp) ...<Widget>[
               SizedBox(height: AppSpacing.lg.h),
-              OrderTrackingOtpCard(
+              DeliveryOtpCard(
                 otp: state.otp,
                 onRequest: cubit.requestDeliveryOtp,
               ),
@@ -158,6 +160,15 @@ class _TrackingContent extends StatelessWidget {
             if (state.status.canBeCancelled) ...<Widget>[
               SizedBox(height: AppSpacing.md.h),
               const OrderTrackingCancelButton(),
+            ],
+            // Rejected or cancelled (by anyone): the order is over, so
+            // offer the way back instead of a dead end.
+            if (state.status.isFailed) ...<Widget>[
+              SizedBox(height: AppSpacing.md.h),
+              AppButton(
+                btnText: Strings.orderTrackingBrowseStores,
+                onPressed: () => context.go(AppRoutes.home),
+              ),
             ],
             SizedBox(height: AppSpacing.lg.h),
             OrderTrackingTimelineCard(steps: state.status.timeline(storeName)),

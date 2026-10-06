@@ -1,4 +1,5 @@
 import '../../../../core/api/json_readers.dart';
+import '../../../../core/delivery_otp/delivery_otp_parser.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/location/geo_point.dart';
 import '../../domain/entities/order_status.dart';
@@ -86,26 +87,17 @@ abstract final class OrderTrackingModels {
     'out_for_delivery' => OrderStatus.outForDelivery,
     'delivered' => OrderStatus.delivered,
     'rejected' => OrderStatus.rejected,
-    'cancelled' => OrderStatus.cancelled,
+    // A failed or refunded order ended without reaching the customer —
+    // shown as cancelled rather than read as pending forever.
+    'cancelled' ||
+    'canceled' ||
+    'failed' ||
+    'refunded' => OrderStatus.cancelled,
     'assignment_failed' => OrderStatus.assignmentFailed,
     _ => null,
   };
 
-  /// `{ "delivery_otp": { "challenge_id", "otp", "expires_at" } }`. A
-  /// numeric `otp` keeps its leading zeros.
-  static DeliveryOtp deliveryOtpFromJson(dynamic json) {
-    final dynamic otp = json is Map ? json['delivery_otp'] : null;
-    final String? code = otp is Map
-        ? switch (otp['otp']) {
-            final int v => v.toString().padLeft(6, '0'),
-            final dynamic v => jsonString(v),
-          }
-        : null;
-    if (code == null) throw const ServerException();
-    final String? expiresAt = jsonString((otp as Map)['expires_at']);
-    return DeliveryOtp(
-      code: code,
-      expiresAt: expiresAt == null ? null : DateTime.tryParse(expiresAt),
-    );
-  }
+  /// See [parseDeliveryOtp].
+  static DeliveryOtp deliveryOtpFromJson(dynamic json) =>
+      parseDeliveryOtp(json);
 }

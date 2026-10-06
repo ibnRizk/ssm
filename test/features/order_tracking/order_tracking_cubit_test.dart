@@ -185,6 +185,28 @@ void main() {
     expect(timers.single.cancelled, isTrue);
   });
 
+  test('no courier yet keeps polling and catches a retried dispatch', () async {
+    await cubit.load();
+    repository.tracking = _tracking(OrderStatus.assignmentFailed);
+    await poll();
+
+    repository.tracking = _tracking(OrderStatus.driverAccepted);
+    await poll();
+
+    expect(timers.single.cancelled, isFalse);
+    expect(loaded().status, OrderStatus.driverAccepted);
+  });
+
+  test('a cancel by the store or a courier ends polling', () async {
+    await cubit.load();
+
+    repository.tracking = _tracking(OrderStatus.cancelled);
+    await poll();
+
+    expect(loaded().status, OrderStatus.cancelled);
+    expect(timers.single.cancelled, isTrue);
+  });
+
   group('before the merchant acts (ssm_status null)', () {
     setUp(() => repository.tracking = _tracking(null));
 

@@ -1,6 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'dart:async';
+
+import '../../../../core/delivery_otp/delivery_otp.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/location/geo_point.dart';
 import '../../../../core/location/location_repository.dart';
@@ -58,11 +61,76 @@ class ParcelsCubit extends Cubit<ParcelsState> {
       ),
     );
 
+    if (isClosed) return;
+    _syncDeliveryOtps();
+
     if (_reloadOwed) {
       _reloadOwed = false;
       await fetchParcels();
     }
   }
+
+  /// Fetches [parcelId]'s delivery code — a new one replaces the old, so
+  /// only on the customer's request once a code has been shown. Only while
+  /// the parcel is out for delivery, and not while a request is on its way.
+  Future<void> requestDeliveryOtp(int parcelId) async {
+    final ParcelsState before = state;
+    if (before is! ParcelsLoaded ||
+        !_isOutForDelivery(before, parcelId) ||
+        before.otps[parcelId] is OtpLoading) {
+      return;
+    }
+    emit(before.copyWith(otps: _withOtp(before, parcelId, const OtpLoading())));
+
+    final Either<Failure, DeliveryOtp> result = await parcelsRepository
+        .requestDeliveryOtp(parcelId);
+    if (isClosed) return;
+    final ParcelsState latest = state;
+    // Delivered, or gone from the list, while the code was coming.
+    if (latest is! ParcelsLoaded || !_isOutForDelivery(latest, parcelId)) {
+      return;
+    }
+    final DeliveryOtpState otp = result.fold(
+      (Failure failure) => switch (failure) {
+        // 409 `otp-not-available`: not out for delivery on the server yet.
+        // 404: the parcel has no code to give (or isn't this customer's).
+        ConflictFailure() || NotFoundFailure() => const OtpUnavailable(),
+        _ => OtpFailed(failure),
+      },
+      OtpReady.new,
+    );
+    emit(latest.copyWith(otps: _withOtp(latest, parcelId, otp)));
+  }
+
+  /// Keeps a code only for parcels still out for delivery, and fetches the
+  /// first code of each parcel that just went out.
+  void _syncDeliveryOtps() {
+    final ParcelsState current = state;
+    if (current is! ParcelsLoaded) return;
+    final Map<int, DeliveryOtpState> otps = <int, DeliveryOtpState>{
+      for (final Parcel parcel in current.parcels)
+        if (parcel.needsDeliveryOtp)
+          parcel.id: current.otps[parcel.id] ?? const OtpIdle(),
+    };
+    final bool changed =
+        otps.length != current.otps.length ||
+        otps.entries.any(
+          (MapEntry<int, DeliveryOtpState> e) => current.otps[e.key] != e.value,
+        );
+    if (changed) emit(current.copyWith(otps: otps));
+    for (final MapEntry<int, DeliveryOtpState> entry in otps.entries) {
+      if (entry.value is OtpIdle) unawaited(requestDeliveryOtp(entry.key));
+    }
+  }
+
+  static bool _isOutForDelivery(ParcelsLoaded state, int parcelId) =>
+      state.parcels.any((Parcel p) => p.id == parcelId && p.needsDeliveryOtp);
+
+  static Map<int, DeliveryOtpState> _withOtp(
+    ParcelsLoaded state,
+    int parcelId,
+    DeliveryOtpState otp,
+  ) => <int, DeliveryOtpState>{...state.otps, parcelId: otp};
 
   /// Refetches after an accepted drop-off. If a fetch is already running
   /// it started before the send, so instead of being skipped, the reload is

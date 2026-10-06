@@ -1,6 +1,7 @@
 /// The canonical order status (`ssm_status`) the merchant and driver drive,
-/// in the order it normally advances; the last three are terminal
-/// alternatives.
+/// in the order it normally advances. [rejected] and [cancelled] are
+/// terminal alternatives; [assignmentFailed] is a pause the store recovers
+/// from by retrying dispatch.
 enum OrderStatus {
   pendingMerchant,
   accepted,
@@ -38,12 +39,15 @@ enum OrderStatus {
   OrderStage? get stage => switch (this) {
     pendingMerchant => OrderStage.placed,
     accepted || preparing || readyForPickup => OrderStage.preparing,
+    // No courier accepted yet: the store can retry dispatch, so the order
+    // is still waiting for one, not over.
     dispatching ||
     driverAssigned ||
-    driverAccepted => OrderStage.courierToStore,
+    driverAccepted ||
+    assignmentFailed => OrderStage.courierToStore,
     pickedUp || outForDelivery => OrderStage.courierToCustomer,
     delivered => OrderStage.delivered,
-    rejected || cancelled || assignmentFailed => null,
+    rejected || cancelled => null,
   };
 
   bool get isFailed => stage == null;

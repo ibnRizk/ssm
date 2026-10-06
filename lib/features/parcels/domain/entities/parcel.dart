@@ -60,6 +60,10 @@ class Parcel extends Equatable {
 
   bool get hasDropoffLocation => dropoffLocation != null;
 
+  /// The courier is on the way and completes the delivery with the
+  /// customer's delivery code.
+  bool get needsDeliveryOtp => status == ParcelStatus.outForDelivery;
+
   /// The backend refuses a drop-off once the parcel is delivered.
   bool get acceptsDropoffLocation => status != ParcelStatus.delivered;
 

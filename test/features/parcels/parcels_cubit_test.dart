@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
+import 'package:ssm/core/delivery_otp/delivery_otp.dart';
 import 'package:ssm/core/error/failures.dart';
 import 'package:ssm/core/location/geo_point.dart';
 import 'package:ssm/core/location/location_repository.dart';
@@ -20,6 +21,18 @@ const Parcel _atWarehouse = Parcel(
   currency: 'SAR',
 );
 
+const Parcel _outForDelivery = Parcel(
+  id: 3001,
+  reference: 'SSM-P3001',
+  status: ParcelStatus.outForDelivery,
+  paymentType: ParcelPaymentType.prepaid,
+  codAmount: 0,
+  deliveryFee: 0,
+  currency: 'SAR',
+);
+
+const DeliveryOtp _code = DeliveryOtp(code: '042913');
+
 const GeoPoint _here = GeoPoint(latitude: 24.705, longitude: 46.69);
 
 /// Answers through [Completer]s the test controls, so ordering is explicit
@@ -28,8 +41,11 @@ class _FakeParcelsRepository implements ParcelsRepository {
   Completer<Either<Failure, List<Parcel>>> list =
       Completer<Either<Failure, List<Parcel>>>();
   Completer<Either<Failure, Unit>> send = Completer<Either<Failure, Unit>>();
+  Completer<Either<Failure, DeliveryOtp>> otp =
+      Completer<Either<Failure, DeliveryOtp>>();
   int listCalls = 0;
   final List<(int, ParcelDropoff)> sent = <(int, ParcelDropoff)>[];
+  final List<int> otpRequests = <int>[];
 
   @override
   Future<Either<Failure, List<Parcel>>> getParcels() {
@@ -44,6 +60,12 @@ class _FakeParcelsRepository implements ParcelsRepository {
   ) {
     sent.add((parcelId, dropoff));
     return send.future;
+  }
+
+  @override
+  Future<Either<Failure, DeliveryOtp>> requestDeliveryOtp(int parcelId) {
+    otpRequests.add(parcelId);
+    return otp.future;
   }
 }
 
@@ -309,6 +331,106 @@ void main() {
       await send();
 
       expect(cubit.state, const ParcelsInitial());
+    });
+  });
+
+  group('delivery OTP', () {
+    Future<void> answerOtp(Either<Failure, DeliveryOtp> answer) async {
+      parcels.otp.complete(answer);
+      await pumpEventQueue();
+      parcels.otp = Completer<Either<Failure, DeliveryOtp>>();
+    }
+
+    test('is fetched once a parcel is out for delivery', () async {
+      await loadWith(<Parcel>[_outForDelivery]);
+
+      expect(parcels.otpRequests, <int>[3001]);
+    });
+
+    test('is not fetched for a parcel still at the warehouse', () async {
+      await loadWith(<Parcel>[_atWarehouse]);
+
+      expect(parcels.otpRequests, isEmpty);
+    });
+
+    test('shows the code once it arrives', () async {
+      await loadWith(<Parcel>[_outForDelivery]);
+
+      await answerOtp(const Right<Failure, DeliveryOtp>(_code));
+
+      expect(loaded().otps, <int, DeliveryOtpState>{
+        3001: const OtpReady(_code),
+      });
+    });
+
+    test('a 409 reads as not available yet', () async {
+      await loadWith(<Parcel>[_outForDelivery]);
+
+      await answerOtp(const Left<Failure, DeliveryOtp>(ConflictFailure()));
+
+      expect(loaded().otps[3001], const OtpUnavailable());
+    });
+
+    test('a network failure is shown with a retry', () async {
+      await loadWith(<Parcel>[_outForDelivery]);
+
+      await answerOtp(const Left<Failure, DeliveryOtp>(NetworkFailure()));
+
+      expect(loaded().otps[3001], const OtpFailed(NetworkFailure()));
+    });
+
+    test('a refresh keeps the code instead of requesting another', () async {
+      await loadWith(<Parcel>[_outForDelivery]);
+      await answerOtp(const Right<Failure, DeliveryOtp>(_code));
+
+      await loadWith(<Parcel>[_outForDelivery]);
+
+      expect(parcels.otpRequests, <int>[3001]);
+      expect(loaded().otps[3001], const OtpReady(_code));
+    });
+
+    test('the customer can ask for a new code', () async {
+      await loadWith(<Parcel>[_outForDelivery]);
+      await answerOtp(const Right<Failure, DeliveryOtp>(_code));
+
+      unawaited(cubit.requestDeliveryOtp(3001));
+
+      expect(parcels.otpRequests, <int>[3001, 3001]);
+      expect(loaded().otps[3001], const OtpLoading());
+    });
+
+    test('a second request while one is on its way is ignored', () async {
+      await loadWith(<Parcel>[_outForDelivery]);
+
+      await cubit.requestDeliveryOtp(3001);
+
+      expect(parcels.otpRequests, <int>[3001]);
+    });
+
+    test('is dropped once the parcel is delivered', () async {
+      await loadWith(<Parcel>[_outForDelivery]);
+      await answerOtp(const Right<Failure, DeliveryOtp>(_code));
+      const Parcel delivered = Parcel(
+        id: 3001,
+        reference: 'SSM-P3001',
+        status: ParcelStatus.delivered,
+        paymentType: ParcelPaymentType.prepaid,
+        codAmount: 0,
+        deliveryFee: 0,
+        currency: 'SAR',
+      );
+
+      await loadWith(<Parcel>[delivered]);
+
+      expect(loaded().otps, isEmpty);
+    });
+
+    test('is never requested for a parcel not out for delivery', () async {
+      await loadWith(<Parcel>[_atWarehouse]);
+
+      await cubit.requestDeliveryOtp(_atWarehouse.id);
+
+      expect(parcels.otpRequests, isEmpty);
     });
   });
 }

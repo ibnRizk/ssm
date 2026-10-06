@@ -3,6 +3,8 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/location/geo_point.dart';
 import 'order_status.dart';
 
+export '../../../../core/delivery_otp/delivery_otp.dart' show DeliveryOtp;
+
 /// `GET /customer/order/track` — the legacy summary.
 class OrderSummary extends Equatable {
   final int id;
@@ -94,16 +96,4 @@ class OrderTracking extends Equatable {
     driverName,
     location,
   ];
-}
-
-/// The code the customer tells the courier to complete the delivery.
-/// Requesting another one invalidates this one.
-class DeliveryOtp extends Equatable {
-  final String code;
-  final DateTime? expiresAt;
-
-  const DeliveryOtp({required this.code, this.expiresAt});
-
-  @override
-  List<Object?> get props => [code, expiresAt];
 }

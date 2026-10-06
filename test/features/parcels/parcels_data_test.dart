@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:ssm/core/api/api_endpoints.dart';
+import 'package:ssm/core/delivery_otp/delivery_otp.dart';
 import 'package:ssm/core/error/exceptions.dart';
 import 'package:ssm/core/error/failures.dart';
 import 'package:ssm/core/location/geo_point.dart';
@@ -207,6 +208,46 @@ void main() {
         const Left<Failure, Unit>(
           ServerFailure(message: 'The parcel has already been delivered.'),
         ),
+      );
+    });
+  });
+
+  group('POST /customer/parcels/{id}/delivery-otp/request', () {
+    test('posts to the parcel and keeps leading zeros', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{
+          'delivery_otp': <String, dynamic>{
+            'otp': 42913,
+            'expires_at': '2026-10-06T12:30:00Z',
+          },
+        },
+      );
+
+      final DeliveryOtp otp = await ParcelsRemoteDataSourceImpl(
+        consumer: consumer,
+      ).requestDeliveryOtp(3001);
+
+      expect(consumer.lastPath, ApiEndpoints.parcelDeliveryOtpRequest(3001));
+      expect(
+        otp,
+        DeliveryOtp(
+          code: '042913',
+          expiresAt: DateTime.utc(2026, 10, 6, 12, 30),
+        ),
+      );
+    });
+
+    test('a 409 maps to a ConflictFailure', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer()
+        ..error = const ConflictException(code: 'otp-not-available');
+
+      final Either<Failure, DeliveryOtp> result = await ParcelsRepositoryImpl(
+        remote: ParcelsRemoteDataSourceImpl(consumer: consumer),
+      ).requestDeliveryOtp(3001);
+
+      expect(
+        result.fold((Failure f) => f, (_) => null),
+        isA<ConflictFailure>(),
       );
     });
   });

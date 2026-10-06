@@ -47,7 +47,7 @@ void main() {
           OrderStage.delivered,
           null,
           null,
-          null,
+          OrderStage.courierToStore,
         ],
       );
     });
@@ -59,9 +59,13 @@ void main() {
           OrderStatus.delivered,
           OrderStatus.rejected,
           OrderStatus.cancelled,
-          OrderStatus.assignmentFailed,
         ],
       );
+    });
+
+    test('no courier yet is not final: the store can retry dispatch', () {
+      expect(OrderStatus.assignmentFailed.isFinal, isFalse);
+      expect(OrderStatus.assignmentFailed.isFailed, isFalse);
     });
 
     test('only a pending order can be cancelled', () {
