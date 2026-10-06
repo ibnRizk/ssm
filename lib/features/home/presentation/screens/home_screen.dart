@@ -5,18 +5,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/utils/failure_message.dart';
 import '../../../../core/widgets/error_text.dart';
+import '../../../promotions/presentation/cubit/promotions_cubit.dart';
+import '../../../promotions/presentation/widgets/featured_slider_widget.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
 import '../widgets/home_categories_section.dart';
 import '../widgets/home_header.dart';
-import '../widgets/home_offers_section.dart';
 import '../widgets/home_search_field.dart';
 import '../widgets/home_stores_section.dart';
-import '../widgets/home_subscription_banner.dart';
 
 /// Home tab body. The bottom navigation bar and its Scaffold live in
 /// [MainScaffold] — this widget is only the scrollable content for that tab.
-/// Expects a [HomeCubit] above it (provided at the route).
+/// Expects a [HomeCubit] and a [PromotionsCubit] above it (provided at the
+/// route).
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -25,7 +26,10 @@ class HomeScreen extends StatelessWidget {
     return SafeArea(
       bottom: false,
       child: RefreshIndicator(
-        onRefresh: () => context.read<HomeCubit>().load(),
+        onRefresh: () => Future.wait<void>(<Future<void>>[
+          context.read<HomeCubit>().load(),
+          context.read<PromotionsCubit>().load(),
+        ]),
         child: SingleChildScrollView(
           // Pull-to-refresh must work even on a short page.
           physics: const AlwaysScrollableScrollPhysics(),
@@ -42,11 +46,9 @@ class HomeScreen extends StatelessWidget {
               SizedBox(height: AppSpacing.lg.h),
               const HomeSearchField(),
               SizedBox(height: AppSpacing.lg.h),
-              const HomeSubscriptionBanner(),
-              SizedBox(height: AppSpacing.xl.h),
+              // Owns its gap below, so the layout closes up when it hides.
+              FeaturedSliderWidget(bottomSpacing: AppSpacing.xl.h),
               const _HomeCatalog(),
-              SizedBox(height: AppSpacing.xl.h),
-              const HomeOffersSection(),
             ],
           ),
         ),

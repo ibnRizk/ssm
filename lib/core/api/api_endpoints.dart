@@ -66,6 +66,9 @@ abstract class ApiEndpoints {
   static const String searchStores = '$_v1/stores/search';
   static String storeDetails(int storeId) => '$_v1/stores/details/$storeId';
 
+  /// Home banners. Paged by `page` (1-based) and `limit`, not `offset`.
+  static const String featuredPromotions = '$_v1/stores/featured-promotions';
+
   /// Filtered by the `store_id` / `category_id` query parameters.
   static const String latestItems = '$_v1/items/latest';
 
