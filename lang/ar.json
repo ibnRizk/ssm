@@ -195,7 +195,7 @@
   "checkout_order_placed_total": "تم إرسال طلبك · الإجمالي {total}",
   "order_tracking_rejected_title": "اعتذر المتجر عن طلبك",
   "order_tracking_cancelled_title": "تم إلغاء الطلب",
-  "order_tracking_assignment_failed_title": "لم يتوفر مندوب توصيل",
+  "order_tracking_assignment_failed_title": "نبحث عن مندوب جديد",
   "order_tracking_failed_description": "لم يتم تحصيل أي مبلغ. يمكنك إنشاء طلب جديد في أي وقت.",
   "order_tracking_assignment_failed_description": "يبحث المتجر عن مندوب آخر. سيتم تحديث هذه الصفحة تلقائياً.",
   "order_tracking_browse_stores": "اطلب من متجر",

@@ -149,6 +149,7 @@ class _TrackingContent extends StatelessWidget {
               description: state.status.description,
               orderId: state.summary.id,
               stale: state.stale,
+              waiting: state.status.isLookingForCourier,
             ),
             if (state.status.needsDeliveryOtp) ...<Widget>[
               SizedBox(height: AppSpacing.lg.h),

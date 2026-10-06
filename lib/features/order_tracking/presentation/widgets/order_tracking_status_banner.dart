@@ -9,11 +9,14 @@ import '../../../../core/utils/values/strings.dart';
 /// The dark navy "current status" hero card: status label, the headline
 /// blown up large in orange, a short description, the order number, and
 /// — when the last refresh failed — a note that the status may be behind.
+/// [waiting] adds a running progress bar while the order waits on something
+/// that happens without the customer (finding a courier).
 class OrderTrackingStatusBanner extends StatelessWidget {
   final String headline;
   final String description;
   final int orderId;
   final bool stale;
+  final bool waiting;
 
   const OrderTrackingStatusBanner({
     super.key,
@@ -21,6 +24,7 @@ class OrderTrackingStatusBanner extends StatelessWidget {
     required this.description,
     required this.orderId,
     this.stale = false,
+    this.waiting = false,
   });
 
   @override
@@ -42,6 +46,17 @@ class OrderTrackingStatusBanner extends StatelessWidget {
           ),
           SizedBox(height: AppSpacing.xxs.h),
           Text(headline, style: AppTextStyles.h1(color: c.secondary)),
+          if (waiting) ...<Widget>[
+            SizedBox(height: AppSpacing.xs.h),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.lg.r),
+              child: LinearProgressIndicator(
+                minHeight: 3,
+                color: c.secondary,
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+              ),
+            ),
+          ],
           SizedBox(height: AppSpacing.xs.h),
           Text(
             description,

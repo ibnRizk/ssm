@@ -52,6 +52,11 @@ enum OrderStatus {
 
   bool get isFailed => stage == null;
 
+  /// Ready, but no courier has taken it yet — dispatch is searching, or
+  /// searching again after nobody accepted. The screen shows it's working.
+  bool get isLookingForCourier =>
+      this == dispatching || this == assignmentFailed;
+
   /// Nothing changes after these — polling stops.
   bool get isFinal => this == delivered || isFailed;
 

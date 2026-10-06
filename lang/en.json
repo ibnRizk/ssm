@@ -195,7 +195,7 @@
   "checkout_order_placed_total": "Your order has been placed · Total {total}",
   "order_tracking_rejected_title": "The store declined your order",
   "order_tracking_cancelled_title": "Order cancelled",
-  "order_tracking_assignment_failed_title": "No courier was available",
+  "order_tracking_assignment_failed_title": "Finding a new courier",
   "order_tracking_failed_description": "Nothing was charged. You can place a new order anytime.",
   "order_tracking_assignment_failed_description": "The store is looking for another courier. This page updates on its own.",
   "order_tracking_browse_stores": "Order from a store",

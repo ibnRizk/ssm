@@ -63,6 +63,13 @@ void main() {
       );
     });
 
+    test('dispatching and no courier yet both read as looking for one', () {
+      expect(
+        OrderStatus.values.where((OrderStatus s) => s.isLookingForCourier),
+        <OrderStatus>[OrderStatus.dispatching, OrderStatus.assignmentFailed],
+      );
+    });
+
     test('no courier yet is not final: the store can retry dispatch', () {
       expect(OrderStatus.assignmentFailed.isFinal, isFalse);
       expect(OrderStatus.assignmentFailed.isFailed, isFalse);
