@@ -37,6 +37,7 @@ import 'features/order_tracking/order_tracking_injection.dart';
 import 'features/orders/orders_injection.dart';
 import 'features/parcels/parcels_injection.dart';
 import 'features/pharmacy/pharmacy_injection.dart';
+import 'features/promotions/promotions_injection.dart';
 import 'features/loyalty/loyalty_injection.dart';
 import 'features/restaurants/restaurants_injection.dart';
 import 'features/splash/splash_injection.dart';
@@ -84,6 +85,7 @@ abstract class ServiceLocator {
     await initHomeFeatureInjection();
     await initParcelsFeatureInjection();
     await initPharmacyFeatureInjection();
+    await initPromotionsFeatureInjection();
     await initRestaurantsFeatureInjection();
     await initSubscriptionsFeatureInjection();
     // Register new features here.

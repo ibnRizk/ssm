@@ -259,15 +259,6 @@ abstract class Strings {
   static const String _homeSearchHint = 'home_search_hint';
   static String get homeSearchHint => _homeSearchHint.tr;
 
-  static const String _homeSubscriptionBadge = 'home_subscription_badge';
-  static String get homeSubscriptionBadge => _homeSubscriptionBadge.tr;
-
-  static const String _homeSubscriptionTitle = 'home_subscription_title';
-  static String get homeSubscriptionTitle => _homeSubscriptionTitle.tr;
-
-  static const String _homeSubscriptionSubtitle = 'home_subscription_subtitle';
-  static String get homeSubscriptionSubtitle => _homeSubscriptionSubtitle.tr;
-
   static const String _homeCategoriesTitle = 'home_categories_title';
   static String get homeCategoriesTitle => _homeCategoriesTitle.tr;
 
@@ -283,17 +274,12 @@ abstract class Strings {
   static const String _homeStoresEmpty = 'home_stores_empty';
   static String get homeStoresEmpty => _homeStoresEmpty.tr;
 
-  static const String _homeOffersTitle = 'home_offers_title';
-  static String get homeOffersTitle => _homeOffersTitle.tr;
+  // --- Featured store promotions ---
+  static const String _featuredStore = 'featured_store';
+  static String get featuredStore => _featuredStore.tr;
 
-  static const String _homeOfferTitle = 'home_offer_title';
-  static String get homeOfferTitle => _homeOfferTitle.tr;
-
-  static const String _homeOfferSubtitle = 'home_offer_subtitle';
-  static String get homeOfferSubtitle => _homeOfferSubtitle.tr;
-
-  static const String _homeOfferButton = 'home_offer_button';
-  static String get homeOfferButton => _homeOfferButton.tr;
+  static const String _featuredStoreVideo = 'featured_store_video';
+  static String get featuredStoreVideo => _featuredStoreVideo.tr;
 
   // --- Parcels ---
   static const String _parcelsTitle = 'parcels_title';

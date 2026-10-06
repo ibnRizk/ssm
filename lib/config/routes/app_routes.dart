@@ -38,6 +38,7 @@ import '../../features/parcels/presentation/cubit/parcels_cubit.dart';
 import '../../features/parcels/presentation/screens/parcels_screen.dart';
 import '../../features/pharmacy/presentation/cubit/pharmacy_order_cubit.dart';
 import '../../features/pharmacy/presentation/screens/pharmacy_order_screen.dart';
+import '../../features/promotions/presentation/cubit/promotions_cubit.dart';
 import '../../features/restaurants/presentation/cubit/store_details_cubit.dart';
 import '../../features/restaurants/presentation/cubit/stores_cubit.dart';
 import '../../features/restaurants/presentation/screens/restaurant_details_screen.dart';
@@ -157,8 +158,17 @@ abstract class AppRoutes {
               GoRoute(
                 path: home,
                 name: homeName,
-                builder: (_, __) => BlocProvider<HomeCubit>(
-                  create: (_) => ServiceLocator.instance<HomeCubit>()..load(),
+                builder: (_, __) => MultiBlocProvider(
+                  providers: <BlocProvider<dynamic>>[
+                    BlocProvider<HomeCubit>(
+                      create: (_) =>
+                          ServiceLocator.instance<HomeCubit>()..load(),
+                    ),
+                    BlocProvider<PromotionsCubit>(
+                      create: (_) =>
+                          ServiceLocator.instance<PromotionsCubit>()..load(),
+                    ),
+                  ],
                   child: const HomeScreen(),
                 ),
                 routes: <RouteBase>[
