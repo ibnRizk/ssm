@@ -27,11 +27,13 @@ class EditProfileForm extends StatefulWidget {
   const EditProfileForm({super.key, required this.initial});
 
   @override
-  State<EditProfileForm> createState() => _EditProfileFormState();
+  State<EditProfileForm> createState() =>
+      _EditProfileFormState();
 }
 
 class _EditProfileFormState extends State<EditProfileForm> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey =
+      GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
   late final TextEditingController _emailController;
@@ -39,12 +41,16 @@ class _EditProfileFormState extends State<EditProfileForm> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.initial.name);
+    _nameController = TextEditingController(
+      text: widget.initial.name,
+    );
     // The field has a fixed +966 prefix, so it holds the local form.
     _phoneController = TextEditingController(
       text: SaudiPhone.toLocal(widget.initial.phone),
     );
-    _emailController = TextEditingController(text: widget.initial.email);
+    _emailController = TextEditingController(
+      text: widget.initial.email,
+    );
   }
 
   @override
@@ -57,7 +63,8 @@ class _EditProfileFormState extends State<EditProfileForm> {
 
   void _submit() {
     FocusScope.of(context).unfocus();
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!(_formKey.currentState?.validate() ?? false))
+      return;
     context.read<EditProfileCubit>().submit(
       current: widget.initial,
       name: _nameController.text,
@@ -66,10 +73,15 @@ class _EditProfileFormState extends State<EditProfileForm> {
     );
   }
 
-  void _onStateChanged(BuildContext context, EditProfileState state) {
+  void _onStateChanged(
+    BuildContext context,
+    EditProfileState state,
+  ) {
     switch (state) {
       case EditProfileSuccess(:final profile):
-        context.read<ProfileCubit>().profileUpdated(profile);
+        context.read<ProfileCubit>().profileUpdated(
+          profile,
+        );
         showAppSnackBar(
           context: context,
           message: Strings.editProfileSuccess,
@@ -106,56 +118,76 @@ class _EditProfileFormState extends State<EditProfileForm> {
           key: _formKey,
           child: AutofillGroup(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment:
+                  CrossAxisAlignment.stretch,
               children: <Widget>[
                 LabeledField(
                   label: Strings.authFullNameLabel,
                   child: TextFormField(
                     controller: _nameController,
                     textInputAction: TextInputAction.next,
-                    textCapitalization: TextCapitalization.words,
-                    autofillHints: const <String>[AutofillHints.name],
+                    textCapitalization:
+                        TextCapitalization.words,
+                    autofillHints: const <String>[
+                      AutofillHints.name,
+                    ],
                     style: inputStyle,
                     decoration: InputDecoration(
                       hintText: Strings.authFullNameHint,
                     ),
                     // The API takes one `name` field — require first + last.
                     validator: (String? value) =>
-                        Validator.call(value: value, type: ValidatorType.name),
+                        Validator.call(
+                          value: value,
+                          type: ValidatorType.name,
+                        ),
                   ),
                 ),
                 SizedBox(height: AppSpacing.lg.h),
                 LabeledField(
                   label: Strings.authPhoneLabel,
-                  child: PhoneField(controller: _phoneController),
+                  child: PhoneField(
+                    controller: _phoneController,
+                  ),
                 ),
                 SizedBox(height: AppSpacing.lg.h),
                 LabeledField(
                   label: Strings.authEmailLabel,
                   child: TextFormField(
                     controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
+                    keyboardType:
+                        TextInputType.emailAddress,
                     textInputAction: TextInputAction.done,
                     autocorrect: false,
-                    autofillHints: const <String>[AutofillHints.email],
+                    autofillHints: const <String>[
+                      AutofillHints.email,
+                    ],
                     style: inputStyle,
                     decoration: InputDecoration(
                       hintText: Strings.authEmailHint,
                     ),
-                    validator: (String? value) => Validator.call(
-                      value: value?.trim(),
-                      type: ValidatorType.email,
-                    ),
+                    validator: (String? value) =>
+                        Validator.call(
+                          value: value?.trim(),
+                          type: ValidatorType.email,
+                        ),
                     onFieldSubmitted: (_) => _submit(),
                   ),
                 ),
                 SizedBox(height: AppSpacing.xl.h),
                 // Only the button rebuilds while the request runs.
-                BlocSelector<EditProfileCubit, EditProfileState, bool>(
+                BlocSelector<
+                  EditProfileCubit,
+                  EditProfileState,
+                  bool
+                >(
                   selector: (EditProfileState state) =>
                       state is EditProfileSubmitting,
-                  builder: (BuildContext context, bool isSubmitting) =>
-                      AppButton(
+                  builder:
+                      (
+                        BuildContext context,
+                        bool isSubmitting,
+                      ) => AppButton(
                         btnText: Strings.save,
                         isLoading: isSubmitting,
                         onPressed: _submit,

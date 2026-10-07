@@ -31,12 +31,15 @@ class PharmacyHeader extends StatelessWidget {
             ),
             // Points toward the reading direction's "back" side — right
             // under RTL, left under LTR — rather than a fixed glyph.
-            child: Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? Icons.arrow_forward
-                  : Icons.arrow_back,
-              size: 18.r,
-              color: c.textPrimary,
+            child: Transform.flip(
+              flipX:
+                  Directionality.of(context) ==
+                  TextDirection.rtl,
+              child: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 18.r,
+                color: c.textPrimary,
+              ),
             ),
           ),
         ),
@@ -48,7 +51,9 @@ class PharmacyHeader extends StatelessWidget {
         SizedBox(height: AppSpacing.xxs.h),
         Text(
           Strings.pharmacySubtitle,
-          style: AppTextStyles.caption(color: c.textSecondary),
+          style: AppTextStyles.caption(
+            color: c.textSecondary,
+          ),
         ),
       ],
     );

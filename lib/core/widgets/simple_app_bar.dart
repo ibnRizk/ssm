@@ -8,7 +8,8 @@ import '../theme/app_text_styles.dart';
 /// pushed inner screen (Cart, Order Confirmation, Order Tracking, …). Pulled
 /// into `core/` once the third screen needed the exact same bar, per the
 /// project's "2+ places" rule for shared widgets.
-class SimpleAppBar extends StatelessWidget implements PreferredSizeWidget {
+class SimpleAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onBack;
 
@@ -24,7 +25,8 @@ class SimpleAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize =>
+      const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +36,17 @@ class SimpleAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       centerTitle: true,
       automaticallyImplyLeading: false,
-      title: Text(title, style: AppTextStyles.h2(color: c.textPrimary)),
+      title: Text(
+        title,
+        style: AppTextStyles.h2(color: c.textPrimary),
+      ),
       actions: trailing == null
           ? null
           : <Widget>[
               Padding(
-                padding: EdgeInsetsDirectional.only(end: 12.w),
+                padding: EdgeInsetsDirectional.only(
+                  end: 12.w,
+                ),
                 child: Center(child: trailing!),
               ),
             ],
@@ -57,12 +64,15 @@ class SimpleAppBar extends StatelessWidget implements PreferredSizeWidget {
               shape: BoxShape.circle,
               border: Border.all(color: c.border),
             ),
-            child: Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? Icons.arrow_forward
-                  : Icons.arrow_back,
-              size: 18.r,
-              color: c.textPrimary,
+            child: Transform.flip(
+              flipX:
+                  Directionality.of(context) ==
+                  TextDirection.rtl,
+              child: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 18.r,
+                color: c.textPrimary,
+              ),
             ),
           ),
         ),

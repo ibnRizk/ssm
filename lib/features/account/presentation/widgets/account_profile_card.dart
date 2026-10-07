@@ -86,7 +86,7 @@ class AccountProfileCard extends StatelessWidget {
                         vertical: AppSpacing.xs.h,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: c.surface,
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                       child: Text(

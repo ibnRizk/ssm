@@ -21,7 +21,12 @@ class RestaurantsHeader extends StatelessWidget {
   final String? subtitle;
   final VoidCallback? onBack;
 
-  const RestaurantsHeader({super.key, this.title, this.subtitle, this.onBack});
+  const RestaurantsHeader({
+    super.key,
+    this.title,
+    this.subtitle,
+    this.onBack,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,20 +42,27 @@ class RestaurantsHeader extends StatelessWidget {
               // Narrower than the header, so a long category name can't run
               // under the back button or the logo.
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 48.r),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 48.r,
+                ),
                 child: Text(
                   title ?? Strings.restaurantsTitle,
-                  style: AppTextStyles.h1(color: c.textPrimary),
+                  style: AppTextStyles.h1(
+                    color: c.textPrimary,
+                  ),
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (subtitle case final String subtitle) ...<Widget>[
+              if (subtitle
+                  case final String subtitle) ...<Widget>[
                 SizedBox(height: AppSpacing.xxs.h),
                 Text(
                   subtitle,
-                  style: AppTextStyles.caption(color: c.textSecondary),
+                  style: AppTextStyles.caption(
+                    color: c.textSecondary,
+                  ),
                 ),
               ],
             ],
@@ -68,12 +80,15 @@ class RestaurantsHeader extends StatelessWidget {
                 ),
                 // Points toward the reading direction's "back" side — right
                 // under RTL, left under LTR — rather than a fixed glyph.
-                child: Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.arrow_forward
-                      : Icons.arrow_back,
-                  size: 18.r,
-                  color: c.textPrimary,
+                child: Transform.flip(
+                  flipX:
+                      Directionality.of(context) ==
+                      TextDirection.rtl,
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 18.r,
+                    color: c.textPrimary,
+                  ),
                 ),
               ),
             ),
@@ -90,7 +105,10 @@ class RestaurantsHeader extends StatelessWidget {
                 boxShadow: AppShadows.card,
               ),
               child: ClipOval(
-                child: Image.asset(AppAssets.logo, fit: BoxFit.cover),
+                child: Image.asset(
+                  AppAssets.logo,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),

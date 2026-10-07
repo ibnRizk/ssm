@@ -5,7 +5,7 @@ extension LanguageCodeExtension on LanguageCode {
   static LanguageCode fromString(String value) =>
       LanguageCode.values.firstWhere(
         (LanguageCode element) => element.name == value,
-        orElse: () => LanguageCode.en,
+        orElse: () => LanguageCode.ar,
       );
 
   String get displayName {

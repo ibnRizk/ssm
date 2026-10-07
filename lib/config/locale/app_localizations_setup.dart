@@ -7,8 +7,8 @@ abstract class AppLocalizationsSetup {
   /// Order matters: the first entry is the fallback when the device locale is
   /// unsupported.
   static const Iterable<Locale> supportedLocales = <Locale>[
-    Locale('en'),
     Locale('ar'),
+    Locale('en'),
   ];
 
   static const Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates =

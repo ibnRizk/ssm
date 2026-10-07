@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
@@ -16,7 +15,6 @@ class AuthPasswordField extends StatefulWidget {
   /// [AutofillHints.password] on login, [AutofillHints.newPassword] on sign-up
   /// so the OS offers to generate and save one.
   final String autofillHint;
-
   const AuthPasswordField({
     super.key,
     required this.controller,
@@ -26,14 +24,14 @@ class AuthPasswordField extends StatefulWidget {
     this.onSubmitted,
     this.autofillHint = AutofillHints.password,
   });
-
   @override
-  State<AuthPasswordField> createState() => _AuthPasswordFieldState();
+  State<AuthPasswordField> createState() =>
+      _AuthPasswordFieldState();
 }
 
-class _AuthPasswordFieldState extends State<AuthPasswordField> {
+class _AuthPasswordFieldState
+    extends State<AuthPasswordField> {
   bool _obscured = true;
-
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -46,7 +44,9 @@ class _AuthPasswordFieldState extends State<AuthPasswordField> {
       autofillHints: <String>[widget.autofillHint],
       validator: widget.validator,
       onFieldSubmitted: widget.onSubmitted,
-      style: AppTextStyles.bodyLarge(color: context.colors.textPrimary),
+      style: AppTextStyles.bodyLarge(
+        color: context.colors.textPrimary,
+      ),
       decoration: InputDecoration(
         hintText: widget.hintText,
         suffixIcon: IconButton(
@@ -58,7 +58,8 @@ class _AuthPasswordFieldState extends State<AuthPasswordField> {
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
           ),
-          onPressed: () => setState(() => _obscured = !_obscured),
+          onPressed: () =>
+              setState(() => _obscured = !_obscured),
         ),
       ),
     );

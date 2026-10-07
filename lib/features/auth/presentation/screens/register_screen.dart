@@ -22,11 +22,13 @@ class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<RegisterScreen> createState() =>
+      _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey =
+      GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
   late final TextEditingController _emailController;
@@ -52,7 +54,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _submit() {
     FocusScope.of(context).unfocus();
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!(_formKey.currentState?.validate() ?? false))
+      return;
     context.read<AuthCubit>().register(
       name: _nameController.text,
       phone: _phoneController.text,
@@ -73,12 +76,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
           key: _formKey,
           child: AutofillGroup(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment:
+                  CrossAxisAlignment.stretch,
               children: <Widget>[
                 Text(
                   Strings.authRegisterTitle,
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.h1(color: context.colors.textPrimary),
+                  style: AppTextStyles.h1(
+                    color: context.colors.textPrimary,
+                  ),
                 ),
                 SizedBox(height: AppSpacing.xs.h),
                 Text(
@@ -94,39 +100,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: TextFormField(
                     controller: _nameController,
                     textInputAction: TextInputAction.next,
-                    textCapitalization: TextCapitalization.words,
-                    autofillHints: const <String>[AutofillHints.name],
+                    textCapitalization:
+                        TextCapitalization.words,
+                    autofillHints: const <String>[
+                      AutofillHints.name,
+                    ],
                     style: inputStyle,
                     decoration: InputDecoration(
                       hintText: Strings.authFullNameHint,
                     ),
                     // The API takes one `name` field — require first + last.
                     validator: (String? value) =>
-                        Validator.call(value: value, type: ValidatorType.name),
+                        Validator.call(
+                          value: value,
+                          type: ValidatorType.name,
+                        ),
                   ),
                 ),
                 SizedBox(height: AppSpacing.lg.h),
                 LabeledField(
                   label: Strings.authPhoneLabel,
-                  child: PhoneField(controller: _phoneController),
+                  child: PhoneField(
+                    controller: _phoneController,
+                  ),
                 ),
                 SizedBox(height: AppSpacing.lg.h),
                 LabeledField(
                   label: Strings.authEmailLabel,
                   child: TextFormField(
                     controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
+                    keyboardType:
+                        TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     autocorrect: false,
-                    autofillHints: const <String>[AutofillHints.email],
+                    autofillHints: const <String>[
+                      AutofillHints.email,
+                    ],
                     style: inputStyle,
                     decoration: InputDecoration(
                       hintText: Strings.authEmailHint,
                     ),
-                    validator: (String? value) => Validator.call(
-                      value: value?.trim(),
-                      type: ValidatorType.email,
-                    ),
+                    validator: (String? value) =>
+                        Validator.call(
+                          value: value?.trim(),
+                          type: ValidatorType.email,
+                        ),
                   ),
                 ),
                 SizedBox(height: AppSpacing.lg.h),
@@ -136,10 +154,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _passwordController,
                     hintText: Strings.authNewPasswordHint,
                     autofillHint: AutofillHints.newPassword,
-                    validator: (String? value) => Validator.call(
-                      value: value,
-                      type: ValidatorType.password,
-                    ),
+                    validator: (String? value) =>
+                        Validator.call(
+                          value: value,
+                          type: ValidatorType.password,
+                        ),
                     onSubmitted: (_) => _submit(),
                   ),
                 ),
@@ -152,7 +171,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 AuthToggleLink(
                   question: Strings.authHaveAccount,
                   action: Strings.authLoginLink,
-                  onTap: () => context.goNamed(AppRoutes.loginName),
+                  onTap: () =>
+                      context.goNamed(AppRoutes.loginName),
                 ),
               ],
             ),

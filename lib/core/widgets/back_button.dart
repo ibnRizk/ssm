@@ -28,16 +28,21 @@ class CustomBackButton extends StatelessWidget {
           color: colors.surface,
           borderRadius: BorderRadius.circular(raduis.r),
           border: Border.all(
-            color: colors.textPrimary.withValues(alpha: 0.2),
+            color: colors.textPrimary.withValues(
+              alpha: 0.2,
+            ),
             width: 1.w,
           ),
         ),
-        child: Icon(
-          AppLocalizations.of(context)!.isArLocale
-              ? Icons.arrow_back_ios_new_rounded
-              : Icons.arrow_forward_ios_outlined,
-          size: 16.w,
-          color: colors.textPrimary,
+        child: Transform.flip(
+          flipX:
+              Directionality.of(context) ==
+              TextDirection.rtl,
+          child: Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 16.w,
+            color: colors.textPrimary,
+          ),
         ),
       ),
     );

@@ -57,21 +57,28 @@ class RestaurantDetailsHeader extends StatelessWidget {
                     height: 36.r,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: Colors.white.withValues(
+                        alpha: 0.15,
+                      ),
                     ),
-                    child: Icon(
-                      Directionality.of(context) == TextDirection.rtl
-                          ? Icons.arrow_forward
-                          : Icons.arrow_back,
-                      size: 18.r,
-                      color: Colors.white,
+                    child: Transform.flip(
+                      flipX:
+                          Directionality.of(context) ==
+                          TextDirection.rtl,
+                      child: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 18.r,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(height: AppSpacing.lg.h),
                 Text(
                   storeName,
-                  style: AppTextStyles.h1(color: Colors.white),
+                  style: AppTextStyles.h1(
+                    color: Colors.white,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -79,7 +86,9 @@ class RestaurantDetailsHeader extends StatelessWidget {
                 Text(
                   storeSubtitle,
                   style: AppTextStyles.caption(
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: Colors.white.withValues(
+                      alpha: 0.8,
+                    ),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

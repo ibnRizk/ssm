@@ -15,7 +15,7 @@ class ThemeCubit extends Cubit<ThemeMode> {
     final String? themeStr = prefs.instance.getString(_themeKey);
     if (themeStr == 'light') return ThemeMode.light;
     if (themeStr == 'dark') return ThemeMode.dark;
-    return ThemeMode.system;
+    return ThemeMode.light;
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
