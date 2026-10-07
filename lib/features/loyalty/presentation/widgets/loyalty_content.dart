@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -73,9 +75,8 @@ class LoyaltyContent extends StatelessWidget {
                       style: AppTextStyles.title(color: c.textPrimary),
                     ),
                   ),
-                  // TODO: open the full order-history screen once it exists.
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () => context.goNamed(AppRoutes.ordersName),
                     child: Text(
                       Strings.loyaltyViewHistoryLink,
                       style: AppTextStyles.titleSmall(color: c.secondary),
@@ -105,9 +106,7 @@ class LoyaltyContent extends StatelessWidget {
             SizedBox(height: AppSpacing.lg.h),
             AppButton(
               btnText: Strings.loyaltyOrderNowButton,
-              // TODO: navigate to the ordering flow's entry point once
-              // there's one canonical place to send this to.
-              onPressed: () {},
+              onPressed: () => context.goNamed(AppRoutes.homeName),
             ),
           ],
         ),

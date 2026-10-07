@@ -238,6 +238,10 @@ abstract class AppRoutes {
                     BlocProvider<ReorderCubit>(
                       create: (_) => ServiceLocator.instance<ReorderCubit>(),
                     ),
+                    BlocProvider<ProfileCubit>(
+                      create: (_) =>
+                          ServiceLocator.instance<ProfileCubit>()..load(),
+                    ),
                   ],
                   child: const OrdersScreen(),
                 ),

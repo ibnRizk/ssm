@@ -63,8 +63,9 @@ class _EditProfileFormState extends State<EditProfileForm> {
 
   void _submit() {
     FocusScope.of(context).unfocus();
-    if (!(_formKey.currentState?.validate() ?? false))
+    if (!(_formKey.currentState?.validate() ?? false)) {
       return;
+    }
     context.read<EditProfileCubit>().submit(
       current: widget.initial,
       name: _nameController.text,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '/config/locale/app_localizations.dart';
 import '/injection_container.dart';
 
 class CustomBackButton extends StatelessWidget {

@@ -54,8 +54,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _submit() {
     FocusScope.of(context).unfocus();
-    if (!(_formKey.currentState?.validate() ?? false))
+    if (!(_formKey.currentState?.validate() ?? false)) {
       return;
+    }
     context.read<AuthCubit>().register(
       name: _nameController.text,
       phone: _phoneController.text,
