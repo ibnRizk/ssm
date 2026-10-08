@@ -281,6 +281,9 @@ abstract class Strings {
   static const String _featuredStoreVideo = 'featured_store_video';
   static String get featuredStoreVideo => _featuredStoreVideo.tr;
 
+  static const String _featuredStoreCta = 'featured_store_cta';
+  static String get featuredStoreCta => _featuredStoreCta.tr;
+
   // --- Parcels ---
   static const String _parcelsTitle = 'parcels_title';
   static String get parcelsTitle => _parcelsTitle.tr;

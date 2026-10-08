@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -8,15 +9,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/extension.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_shimmer.dart';
 import '../../domain/entities/store_promotion.dart';
 import '../cubit/promotions_cubit.dart';
 import '../cubit/promotions_state.dart';
+import 'banner_media/banner_media.dart';
 
 /// Home's auto-playing carousel of featured store banners. Expects a
 /// [PromotionsCubit] above it.
@@ -28,7 +28,18 @@ class FeaturedSliderWidget extends StatelessWidget {
   /// The gap to the next Home section, kept only while something shows.
   final double bottomSpacing;
 
-  const FeaturedSliderWidget({super.key, this.bottomSpacing = 0});
+  /// Loads a banner by URL — from the network and its disk cache, unless a
+  /// test supplies the images.
+  final BannerImageBuilder bannerImage;
+
+  const FeaturedSliderWidget({
+    super.key,
+    this.bottomSpacing = 0,
+    this.bannerImage = _networkBanner,
+  });
+
+  static ImageProvider _networkBanner(String url) =>
+      CachedNetworkImageProvider(url);
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +52,7 @@ class FeaturedSliderWidget extends StatelessWidget {
           PromotionsLoaded(:final promotions) => _PromotionsCarousel(
             key: ObjectKey(promotions),
             promotions: promotions,
+            bannerImage: bannerImage,
           ),
           PromotionsEmpty() || PromotionsError() => null,
         };
@@ -54,31 +66,59 @@ class FeaturedSliderWidget extends StatelessWidget {
   }
 }
 
-/// Shared by the carousel and its shimmer, so loading doesn't jump.
-abstract class _SliderLayout {
-  /// The backend's phone banner is 1080 × 1350.
-  static const double bannerAspectRatio = 4 / 5;
+typedef BannerImageBuilder = ImageProvider Function(String url);
 
-  /// Lets the neighbouring banners peek in, hinting the row swipes.
-  static const double viewportFraction = 0.86;
+/// Shared by the carousel and its shimmer, so loading doesn't jump.
+///
+/// A card is a full-width image over a strip with the store's name and the
+/// call to action. Every slide has the same frame, whatever each upload's
+/// shape: [BannerMedia] adapts how each image fills it.
+abstract class _SliderLayout {
+  /// Landscape, like the storefront photos admins mostly upload.
+  static const double mediaAspectRatio = 16 / 9;
+
+  /// Caps the image on wide screens, where 16:9 would make the card tower;
+  /// the frame just gets wider there.
+  static const double maxMediaHeight = 240;
+
+  /// Lets the neighbouring card peek in, hinting the row swipes.
+  static const double viewportFraction = 0.92;
 
   static double get pageGap => AppSpacing.xs.w;
-  static double get dotsGap => AppSpacing.sm.h;
+
+  /// Holds the eyebrow and title at up to [maxTextScale]. In `sp`, like the
+  /// text: `r` also shrinks with a screen shorter than the design, which
+  /// the text doesn't.
+  static double get detailsHeight => 76.sp;
+
+  /// The details strip has a fixed height, so very large text is capped
+  /// rather than overflowing it.
+  static const double maxTextScale = 1.2;
+
+  static double get dotsGap => AppSpacing.md.h;
   static double get dotSize => 6.r;
 
-  static double bannerWidth(double maxWidth) =>
+  static double cardWidth(double maxWidth) =>
       maxWidth * viewportFraction - pageGap;
 
-  static double bannerHeight(double maxWidth) =>
-      bannerWidth(maxWidth) / bannerAspectRatio;
+  static double mediaHeight(double maxWidth) =>
+      math.min(cardWidth(maxWidth) / mediaAspectRatio, maxMediaHeight);
 
-  static BorderRadius get radius => BorderRadius.circular(AppRadius.xl.r);
+  static double cardHeight(double maxWidth) =>
+      mediaHeight(maxWidth) + detailsHeight;
+
+  static BorderRadius get cardRadius => BorderRadius.circular(AppRadius.xl.r);
 }
 
 class _PromotionsCarousel extends StatefulWidget {
   final List<StorePromotion> promotions;
+  final BannerImageBuilder bannerImage;
 
-  const _PromotionsCarousel({super.key, required this.promotions});
+  const _PromotionsCarousel({
+    super.key,
+    required this.promotions,
+    required this.bannerImage,
+  });
 
   @override
   State<_PromotionsCarousel> createState() => _PromotionsCarouselState();
@@ -165,12 +205,14 @@ class _PromotionsCarouselState extends State<_PromotionsCarousel> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final double width = _SliderLayout.bannerWidth(constraints.maxWidth);
+        final double mediaHeight = _SliderLayout.mediaHeight(
+          constraints.maxWidth,
+        );
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             SizedBox(
-              height: _SliderLayout.bannerHeight(constraints.maxWidth),
+              height: _SliderLayout.cardHeight(constraints.maxWidth),
               child: NotificationListener<ScrollNotification>(
                 onNotification: _onScroll,
                 child: PageView.builder(
@@ -181,9 +223,10 @@ class _PromotionsCarouselState extends State<_PromotionsCarousel> {
                     padding: EdgeInsets.symmetric(
                       horizontal: _SliderLayout.pageGap / 2,
                     ),
-                    child: _PromotionBanner(
+                    child: _PromotionCard(
                       promotion: widget.promotions[page % _count],
-                      width: width,
+                      mediaHeight: mediaHeight,
+                      bannerImage: widget.bannerImage,
                     ),
                   ),
                 ),
@@ -204,19 +247,22 @@ class _PromotionsCarouselState extends State<_PromotionsCarousel> {
   }
 }
 
-/// One banner, shown whole: letterboxed, never cropped — admins put text and
-/// phone numbers on them. Opens the store by id.
-class _PromotionBanner extends StatelessWidget {
+/// One featured store: its banner across the top, its name and a call to
+/// action beneath, on a soft brand tint. The whole card opens the store.
+class _PromotionCard extends StatelessWidget {
   final StorePromotion promotion;
-  final double width;
+  final double mediaHeight;
+  final BannerImageBuilder bannerImage;
 
-  const _PromotionBanner({required this.promotion, required this.width});
+  const _PromotionCard({
+    required this.promotion,
+    required this.mediaHeight,
+    required this.bannerImage,
+  });
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
-    final String? bannerUrl = promotion.bannerUrl;
-    final Widget fallback = _BannerFallback(storeName: promotion.storeName);
     return Semantics(
       button: true,
       label: <String>[
@@ -228,33 +274,155 @@ class _PromotionBanner extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: () =>
             context.push(AppRoutes.storeDetailsPath(promotion.storeId)),
-        child: DecoratedBox(
-          decoration: AppDecorations.card(c, radius: AppRadius.xl),
-          child: ClipRRect(
-            borderRadius: _SliderLayout.radius,
-            child: Stack(
-              fit: StackFit.expand,
+        child: ClipRRect(
+          borderRadius: _SliderLayout.cardRadius,
+          child: ColoredBox(
+            color: c.primary.withValues(alpha: 0.08),
+            child: Column(
               children: <Widget>[
-                if (bannerUrl == null)
-                  fallback
-                else
-                  CachedNetworkImage(
-                    imageUrl: bannerUrl,
-                    fit: BoxFit.contain,
-                    memCacheWidth: width.cacheSize(context),
-                    fadeInDuration: const Duration(milliseconds: 250),
-                    placeholder: (_, __) => const _ShimmerBox(),
-                    errorWidget: (_, __, ___) => fallback,
+                // Clipped: a blurred backdrop paints past its bounds, into
+                // the strip below.
+                SizedBox(
+                  height: mediaHeight,
+                  width: double.infinity,
+                  child: ClipRect(
+                    child: _CardMedia(
+                      promotion: promotion,
+                      bannerImage: bannerImage,
+                    ),
                   ),
-                if (promotion.hasVideo)
-                  PositionedDirectional(
-                    top: AppSpacing.sm.r,
-                    end: AppSpacing.sm.r,
-                    child: const _VideoBadge(),
+                ),
+                Expanded(
+                  child: MediaQuery.withClampedTextScaling(
+                    maxScaleFactor: _SliderLayout.maxTextScale,
+                    child: _CardDetails(storeName: promotion.storeName),
                   ),
+                ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The banner, presented to suit the image (see [BannerMedia]), with the
+/// video badge over it.
+class _CardMedia extends StatelessWidget {
+  final StorePromotion promotion;
+  final BannerImageBuilder bannerImage;
+
+  const _CardMedia({required this.promotion, required this.bannerImage});
+
+  @override
+  Widget build(BuildContext context) {
+    final String? bannerUrl = promotion.bannerUrl;
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) => Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          if (bannerUrl == null)
+            const _BannerFallback()
+          else
+            BannerMedia(
+              image: bannerImage(bannerUrl),
+              // The frame's real shape: wider than 16:9 where the height
+              // is capped.
+              frameAspectRatio: constraints.maxWidth / constraints.maxHeight,
+              placeholder: const _ShimmerBox(),
+              fallback: const _BannerFallback(),
+            ),
+          if (promotion.hasVideo)
+            PositionedDirectional(
+              top: AppSpacing.sm.r,
+              end: AppSpacing.sm.r,
+              child: const _VideoBadge(),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The strip under the banner: an eyebrow and the store's name, with the
+/// call to action at the end.
+class _CardDetails extends StatelessWidget {
+  final String? storeName;
+
+  const _CardDetails({required this.storeName});
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors c = context.colors;
+    final String? storeName = this.storeName;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md.r,
+        vertical: AppSpacing.sm.sp,
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                // Without a name the title already says it's a featured
+                // store.
+                if (storeName != null)
+                  Text(
+                    Strings.featuredStore,
+                    style: AppTextStyles.label(color: c.primary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                Text(
+                  storeName ?? Strings.featuredStore,
+                  style: AppTextStyles.title(color: c.textPrimary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: AppSpacing.sm.r),
+          const _CtaPill(),
+        ],
+      ),
+    );
+  }
+}
+
+/// Looks like a button, but the whole card is the tap target.
+class _CtaPill extends StatelessWidget {
+  const _CtaPill();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors c = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.primary,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.md.r,
+          vertical: AppSpacing.xs.r,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              Strings.featuredStoreCta,
+              style: AppTextStyles.titleSmall(color: Colors.white),
+              maxLines: 1,
+            ),
+            SizedBox(width: AppSpacing.xxs.r),
+            // Mirrors in RTL, pointing the way the text reads.
+            Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16.r),
+          ],
         ),
       ),
     );
@@ -288,35 +456,18 @@ class _VideoBadge extends StatelessWidget {
   }
 }
 
-/// No banner, or it failed to load: the store's name on the brand colour.
+/// No banner, or it failed to load: a storefront on the brand tint — the
+/// store's name is right below it.
 class _BannerFallback extends StatelessWidget {
-  final String? storeName;
-
-  const _BannerFallback({required this.storeName});
+  const _BannerFallback();
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
-    final String? storeName = this.storeName;
     return ColoredBox(
-      color: c.primary,
+      color: c.primary.withValues(alpha: 0.12),
       child: Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.lg.r),
-          child: storeName == null
-              ? Icon(
-                  Icons.storefront_outlined,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  size: 48.r,
-                )
-              : Text(
-                  storeName,
-                  style: AppTextStyles.h2(color: Colors.white),
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-        ),
+        child: Icon(Icons.storefront_outlined, color: c.primary, size: 48.r),
       ),
     );
   }
@@ -343,7 +494,9 @@ class _PageDots extends StatelessWidget {
             width: i == current ? size * 3 : size,
             height: size,
             decoration: BoxDecoration(
-              color: i == current ? c.primary : c.border,
+              color: i == current
+                  ? c.primary
+                  : c.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(AppRadius.pill),
             ),
           ),
@@ -352,7 +505,7 @@ class _PageDots extends StatelessWidget {
   }
 }
 
-/// The carousel's first frame: the same banner box, and room for the dots.
+/// The carousel's first frame: the same card box, and room for the dots.
 class _SliderShimmer extends StatelessWidget {
   const _SliderShimmer();
 
@@ -363,9 +516,9 @@ class _SliderShimmer extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           SizedBox(
-            width: _SliderLayout.bannerWidth(constraints.maxWidth),
-            height: _SliderLayout.bannerHeight(constraints.maxWidth),
-            child: const _ShimmerBox(),
+            width: _SliderLayout.cardWidth(constraints.maxWidth),
+            height: _SliderLayout.cardHeight(constraints.maxWidth),
+            child: _ShimmerBox(radius: _SliderLayout.cardRadius),
           ),
           SizedBox(height: _SliderLayout.dotsGap + _SliderLayout.dotSize),
         ],
@@ -375,16 +528,16 @@ class _SliderShimmer extends StatelessWidget {
 }
 
 class _ShimmerBox extends StatelessWidget {
-  const _ShimmerBox();
+  /// Null fills the parent's own clip (the card's).
+  final BorderRadius? radius;
+
+  const _ShimmerBox({this.radius});
 
   @override
   Widget build(BuildContext context) {
     return AppShimmer(
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: _SliderLayout.radius,
-        ),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: radius),
         child: const SizedBox.expand(),
       ),
     );

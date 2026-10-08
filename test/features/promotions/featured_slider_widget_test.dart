@@ -47,8 +47,11 @@ void main() {
 
   setUp(() => visited = <String>[]);
 
-  Future<void> pumpSlider(WidgetTester tester) async {
-    tester.view.physicalSize = _designSize;
+  Future<void> pumpSlider(
+    WidgetTester tester, {
+    Size screen = _designSize,
+  }) async {
+    tester.view.physicalSize = screen;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     // A Completer resolves in the zone that created it, so the fake is made
@@ -110,6 +113,74 @@ void main() {
 
     expect(find.byType(AppShimmer), findsOneWidget);
     expect(sliderHeight(tester), greaterThan(0));
+  });
+
+  testWidgets('keeps the shimmer height once the banners load', (
+    WidgetTester tester,
+  ) async {
+    await pumpSlider(tester);
+    final double loading = sliderHeight(tester);
+
+    await answer(tester, Right(<StorePromotion>[_promotion(1), _promotion(2)]));
+
+    expect(sliderHeight(tester), loading);
+  });
+
+  testWidgets('titles the card with the store name and a call to action', (
+    WidgetTester tester,
+  ) async {
+    await pumpSlider(tester);
+    await answer(tester, Right(<StorePromotion>[_promotion(1)]));
+
+    expect(find.text('Store 1'), findsOneWidget);
+    expect(find.text('Featured store'), findsOneWidget);
+    expect(find.text('Shop now'), findsOneWidget);
+  });
+
+  testWidgets('without a store name, the title says featured store', (
+    WidgetTester tester,
+  ) async {
+    await pumpSlider(tester);
+    await answer(
+      tester,
+      const Right(<StorePromotion>[StorePromotion(id: 1, storeId: 10)]),
+    );
+
+    expect(find.text('Featured store'), findsOneWidget);
+    expect(find.byIcon(Icons.storefront_outlined), findsOneWidget);
+  });
+
+  testWidgets('fits a small phone with large text and a long name', (
+    WidgetTester tester,
+  ) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await pumpSlider(tester, screen: const Size(320, 640));
+    await answer(
+      tester,
+      const Right(<StorePromotion>[
+        StorePromotion(
+          id: 1,
+          storeId: 10,
+          storeName: 'A store with a remarkably long name indeed',
+        ),
+      ]),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('fits a phone shorter than the design, with large text', (
+    WidgetTester tester,
+  ) async {
+    // Text scales with the screen's width, so the strip under the banner
+    // must too — not shrink with its height.
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await pumpSlider(tester, screen: const Size(390, 600));
+    await answer(tester, Right(<StorePromotion>[_promotion(1)]));
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('disappears, gap included, when there are no promotions', (
