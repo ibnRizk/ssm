@@ -77,14 +77,15 @@ class RestaurantsScreen extends StatelessWidget {
                           ),
                     ),
                     SizedBox(height: AppSpacing.lg.h),
+                    // Only the zone-wide list can be searched or sorted.
                     if (!scoped) ...<Widget>[
                       StoresSearchField(
                         onSearch: (String query) =>
                             context.read<StoresCubit>().search(query),
                       ),
                       SizedBox(height: AppSpacing.md.h),
+                      const RestaurantFilterChips(),
                     ],
-                    const RestaurantFilterChips(),
                     SizedBox(height: AppSpacing.xl.h),
                     Text(
                       Strings.restaurantsSectionTitle,

@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/location/geo_point.dart';
 import 'package:ssm/features/catalog/domain/entities/catalog_category.dart';
 import 'package:ssm/features/catalog/domain/entities/catalog_page.dart';
 import 'package:ssm/features/catalog/domain/entities/store.dart';
 import 'package:ssm/features/catalog/domain/entities/store_item.dart';
+import 'package:ssm/features/catalog/domain/entities/store_sort.dart';
 import 'package:ssm/features/catalog/domain/repos/catalog_repository.dart';
 
 /// One request the fake received; the test answers it through [completer],
@@ -15,9 +17,18 @@ class PendingCall<T> {
   final int page;
   final String? query;
   final int? categoryId;
+  final StoreSort? sort;
+  final GeoPoint? origin;
   final Completer<Either<Failure, T>> completer = Completer();
 
-  PendingCall(this.method, {this.page = 1, this.query, this.categoryId});
+  PendingCall(
+    this.method, {
+    this.page = 1,
+    this.query,
+    this.categoryId,
+    this.sort,
+    this.origin,
+  });
 
   void succeed(T value) => completer.complete(Right<Failure, T>(value));
 
@@ -43,10 +54,14 @@ class FakeCatalogRepository implements CatalogRepository {
   Future<Either<Failure, CatalogPage<Store>>> getStores({
     required int page,
     int pageSize = catalogPageSize,
+    StoreSort? sort,
+    GeoPoint? origin,
   }) {
     final PendingCall<CatalogPage<Store>> call = PendingCall(
       'getStores',
       page: page,
+      sort: sort,
+      origin: origin,
     );
     storeCalls.add(call);
     return call.completer.future;

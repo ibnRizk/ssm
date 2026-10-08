@@ -35,8 +35,11 @@ class FakeDioConsumer implements DioConsumer {
   }
 
   @override
-  Future<dynamic> get(String path, {Map<String, dynamic>? queryParameters}) =>
-      _record('GET', path, query: queryParameters);
+  Future<dynamic> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, String>? headers,
+  }) => _record('GET', path, query: queryParameters, headers: headers);
 
   @override
   Future<dynamic> post(

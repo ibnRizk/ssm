@@ -1,7 +1,11 @@
 import 'dart:async';
 
+import 'package:dartz/dartz.dart';
 import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/location/geo_point.dart';
+import 'package:ssm/core/location/location_repository.dart';
 import 'package:ssm/features/catalog/domain/entities/store.dart';
+import 'package:ssm/features/catalog/domain/entities/store_sort.dart';
 import 'package:ssm/features/restaurants/presentation/cubit/stores_cubit.dart';
 import 'package:ssm/features/restaurants/presentation/cubit/stores_state.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,18 +13,38 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/fake_catalog_repository.dart';
 import '../../helpers/fake_zone_repository.dart';
 
+const GeoPoint _here = GeoPoint(latitude: 30.05, longitude: 31.2);
+
+/// Answers every location request with [answer], counting them.
+class _FakeLocationRepository implements LocationRepository {
+  Either<Failure, GeoPoint> answer = const Right<Failure, GeoPoint>(_here);
+  int calls = 0;
+
+  @override
+  Future<Either<Failure, GeoPoint>> getCurrentLocation() async {
+    calls++;
+    return answer;
+  }
+}
+
 List<int> _ids(StoresState state) =>
     (state as StoresLoaded).stores.map((Store s) => s.id).toList();
 
 void main() {
   late FakeCatalogRepository catalog;
   late FakeZoneRepository zone;
+  late _FakeLocationRepository location;
   late StoresCubit cubit;
 
   setUp(() {
     catalog = FakeCatalogRepository();
     zone = FakeZoneRepository();
-    cubit = StoresCubit(repository: catalog, zoneRepository: zone);
+    location = _FakeLocationRepository();
+    cubit = StoresCubit(
+      repository: catalog,
+      locationRepository: location,
+      zoneRepository: zone,
+    );
   });
 
   tearDown(() => cubit.close());
@@ -170,6 +194,7 @@ void main() {
     setUp(
       () => scoped = StoresCubit(
         repository: catalog,
+        locationRepository: location,
         zoneRepository: zone,
         categoryId: 3,
       ),
@@ -243,6 +268,142 @@ void main() {
     unawaited(cubit.loadMore());
 
     expect(catalog.storeCalls.last.page, 2);
+  });
+
+  group('sorting', () {
+    /// The sorted list's first page needs no location, so it's requested
+    /// synchronously; nearest-first awaits the fix before it.
+    Future<void> sortFirstPage(StoreSort? sort) async {
+      final Future<void> sorted = cubit.sortBy(sort);
+      await pumpEventQueue();
+      catalog.storeCalls.last.succeed(storesPage(<int>[5, 6], total: 4));
+      await sorted;
+    }
+
+    test('a new sort reloads the first page in that order', () async {
+      await loadFirstPage();
+
+      final Future<void> sorted = cubit.sortBy(StoreSort.topRated);
+      expect(cubit.state, const StoresLoading(sort: StoreSort.topRated));
+      expect(catalog.storeCalls.last.method, 'getStores');
+      expect(catalog.storeCalls.last.sort, StoreSort.topRated);
+      expect(catalog.storeCalls.last.page, 1);
+      expect(catalog.storeCalls.last.origin, isNull);
+
+      catalog.storeCalls.last.succeed(storesPage(<int>[5, 6], total: 4));
+      await sorted;
+
+      expect(_ids(cubit.state), <int>[5, 6]);
+      expect(cubit.state.sort, StoreSort.topRated);
+    });
+
+    test('loadMore pages through the same order', () async {
+      await sortFirstPage(StoreSort.fastest);
+
+      unawaited(cubit.loadMore());
+
+      expect(catalog.storeCalls.last.sort, StoreSort.fastest);
+      expect(catalog.storeCalls.last.page, 2);
+    });
+
+    test('nearest sends the customer location', () async {
+      await sortFirstPage(StoreSort.nearest);
+
+      expect(catalog.storeCalls.last.sort, StoreSort.nearest);
+      expect(catalog.storeCalls.last.origin, _here);
+      expect(_ids(cubit.state), <int>[5, 6]);
+    });
+
+    test('nearest pages from the same location, not a new fix', () async {
+      await sortFirstPage(StoreSort.nearest);
+
+      unawaited(cubit.loadMore());
+
+      expect(catalog.storeCalls.last.page, 2);
+      expect(catalog.storeCalls.last.origin, _here);
+      expect(location.calls, 1);
+    });
+
+    test('nearest without a location is an error, not a fetch', () async {
+      location.answer = const Left<Failure, GeoPoint>(
+        LocationFailure(reason: LocationFailureReason.permissionDenied),
+      );
+
+      await cubit.sortBy(StoreSort.nearest);
+
+      expect(
+        cubit.state,
+        const StoresError(
+          LocationFailure(reason: LocationFailureReason.permissionDenied),
+          sort: StoreSort.nearest,
+        ),
+      );
+      expect(catalog.storeCalls, isEmpty);
+    });
+
+    test('the sort already shown is not refetched', () async {
+      await sortFirstPage(StoreSort.topRated);
+
+      await cubit.sortBy(StoreSort.topRated);
+
+      expect(catalog.storeCalls, hasLength(1));
+    });
+
+    test('clearing the sort restores the default order', () async {
+      await sortFirstPage(StoreSort.topRated);
+
+      unawaited(cubit.sortBy(null));
+
+      expect(catalog.storeCalls.last.method, 'getStores');
+      expect(catalog.storeCalls.last.sort, isNull);
+      expect(cubit.state, const StoresLoading());
+    });
+
+    test('an older sort answering last is dropped', () async {
+      final Future<void> first = cubit.sortBy(StoreSort.topRated);
+      final Future<void> second = cubit.sortBy(StoreSort.fastest);
+
+      catalog.storeCalls.last.succeed(storesPage(<int>[9], total: 1));
+      await second;
+      catalog.storeCalls.first.succeed(storesPage(<int>[5, 6], total: 2));
+      await first;
+
+      expect(_ids(cubit.state), <int>[9]);
+      expect(cubit.state.sort, StoreSort.fastest);
+    });
+
+    test('a search is not sorted, and keeps the sort for after it', () async {
+      await sortFirstPage(StoreSort.nearest);
+
+      final Future<void> search = cubit.search('burger');
+      expect(catalog.storeCalls.last.method, 'searchStores');
+      catalog.storeCalls.last.succeed(storesPage(<int>[9], total: 1));
+      await search;
+      expect(cubit.state.sort, StoreSort.nearest);
+
+      final Future<void> cleared = cubit.search('');
+      await pumpEventQueue();
+      expect(catalog.storeCalls.last.method, 'getStores');
+      expect(catalog.storeCalls.last.sort, StoreSort.nearest);
+      expect(catalog.storeCalls.last.origin, _here);
+      catalog.storeCalls.last.succeed(storesPage(<int>[5], total: 1));
+      await cleared;
+    });
+
+    test('a category list ignores the sort', () async {
+      final StoresCubit scoped = StoresCubit(
+        repository: catalog,
+        locationRepository: location,
+        zoneRepository: zone,
+        categoryId: 3,
+      );
+      addTearDown(scoped.close);
+
+      unawaited(scoped.sortBy(StoreSort.nearest));
+
+      expect(catalog.storeCalls.single.method, 'getCategoryStores');
+      expect(location.calls, 0);
+    });
   });
 
   test('a new zone reloads the list for it', () async {

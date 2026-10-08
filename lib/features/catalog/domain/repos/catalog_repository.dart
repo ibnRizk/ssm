@@ -1,10 +1,12 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/location/geo_point.dart';
 import '../entities/catalog_category.dart';
 import '../entities/catalog_page.dart';
 import '../entities/store.dart';
 import '../entities/store_item.dart';
+import '../entities/store_sort.dart';
 
 /// Everything here is scoped to the customer's delivery zone, resolved
 /// before the first call; a [ZoneUnavailableFailure] means there's none to
@@ -12,10 +14,14 @@ import '../entities/store_item.dart';
 abstract class CatalogRepository {
   Future<Either<Failure, List<CatalogCategory>>> getCategories();
 
-  /// [page] is 1-based.
+  /// [page] is 1-based. Without [sort], in the backend's default order.
+  /// [StoreSort.nearest] measures from [origin] — the customer's location —
+  /// so pass the same one for every page of a list.
   Future<Either<Failure, CatalogPage<Store>>> getStores({
     required int page,
     int pageSize = catalogPageSize,
+    StoreSort? sort,
+    GeoPoint? origin,
   });
 
   /// The stores listed under the category [categoryId]. [page] is 1-based.

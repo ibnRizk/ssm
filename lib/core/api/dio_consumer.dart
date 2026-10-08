@@ -14,7 +14,12 @@ import 'api_error_mapper.dart';
 /// Thin, typed wrapper over Dio. Data sources depend on this abstraction, not
 /// on Dio itself, which keeps them unit-testable with a fake consumer.
 abstract class DioConsumer {
-  Future<dynamic> get(String path, {Map<String, dynamic>? queryParameters});
+  /// [headers] are added to this request only.
+  Future<dynamic> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, String>? headers,
+  });
 
   /// [headers] are added to this request only.
   Future<dynamic> post(
@@ -112,13 +117,21 @@ class DioConsumerImpl implements DioConsumer {
       client.options.headers['device-type'] = _devicePlatform;
 
   @override
-  Future<dynamic> get(String path, {Map<String, dynamic>? queryParameters}) =>
-      _request(
-        'GET',
-        path,
-        () => client.get<dynamic>(path, queryParameters: queryParameters),
-        details: 'params: $queryParameters',
-      );
+  Future<dynamic> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, String>? headers,
+  }) => _request(
+    'GET',
+    path,
+    () => client.get<dynamic>(
+      path,
+      queryParameters: queryParameters,
+      options: headers == null ? null : Options(headers: headers),
+    ),
+    // Headers aren't logged: they can carry the customer's location.
+    details: 'params: $queryParameters',
+  );
 
   @override
   Future<dynamic> post(

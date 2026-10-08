@@ -1,12 +1,14 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/location/geo_point.dart';
 import '../../../../core/zone/zone_repository.dart';
 import '../../../../core/zone/zone_scoped_call.dart';
 import '../../domain/entities/catalog_category.dart';
 import '../../domain/entities/catalog_page.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/entities/store_item.dart';
+import '../../domain/entities/store_sort.dart';
 import '../../domain/repos/catalog_repository.dart';
 import '../datasources/catalog_remote_data_source.dart';
 
@@ -28,8 +30,15 @@ class CatalogRepositoryImpl implements CatalogRepository {
   Future<Either<Failure, CatalogPage<Store>>> getStores({
     required int page,
     int pageSize = catalogPageSize,
+    StoreSort? sort,
+    GeoPoint? origin,
   }) => zoneRepository.inZone(
-    () => remote.getStores(page: page, limit: pageSize),
+    () => remote.getStores(
+      page: page,
+      limit: pageSize,
+      sort: sort,
+      origin: origin,
+    ),
   );
 
   @override

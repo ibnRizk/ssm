@@ -13,6 +13,7 @@ import 'package:ssm/features/catalog/domain/entities/catalog_category.dart';
 import 'package:ssm/features/catalog/domain/entities/catalog_page.dart';
 import 'package:ssm/features/catalog/domain/entities/store.dart';
 import 'package:ssm/features/catalog/domain/entities/store_item.dart';
+import 'package:ssm/features/catalog/domain/entities/store_sort.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio_consumer.dart';
@@ -388,6 +389,51 @@ void main() {
 
       expect(consumer.lastPath, ApiEndpoints.allStores);
       expect(consumer.lastQuery, <String, dynamic>{'offset': 2, 'limit': 10});
+      expect(consumer.lastHeaders, isNull);
+    });
+
+    test('each store sort is sent as its sort_by value', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{'total_size': 0, 'stores': <dynamic>[]},
+      );
+      final CatalogRemoteDataSourceImpl remote = CatalogRemoteDataSourceImpl(
+        consumer: consumer,
+      );
+
+      final Map<StoreSort, String> sent = <StoreSort, String>{};
+      for (final StoreSort sort in StoreSort.values) {
+        await remote.getStores(page: 1, limit: 10, sort: sort);
+        sent[sort] = consumer.lastQuery?['sort_by'] as String;
+      }
+
+      expect(sent, <StoreSort, String>{
+        StoreSort.nearest: 'nearest',
+        StoreSort.topRated: 'top_rated',
+        StoreSort.fastest: 'fastest',
+      });
+    });
+
+    test('nearest sends the origin as latitude/longitude headers', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{'total_size': 0, 'stores': <dynamic>[]},
+      );
+
+      await CatalogRemoteDataSourceImpl(consumer: consumer).getStores(
+        page: 1,
+        limit: 10,
+        sort: StoreSort.nearest,
+        origin: const GeoPoint(latitude: 30.05, longitude: 31.2),
+      );
+
+      expect(consumer.lastQuery, <String, dynamic>{
+        'offset': 1,
+        'limit': 10,
+        'sort_by': 'nearest',
+      });
+      expect(consumer.lastHeaders, <String, String>{
+        'latitude': '30.05',
+        'longitude': '31.2',
+      });
     });
 
     test("a category's stores go to its path, paged the same way", () async {
@@ -484,6 +530,24 @@ void main() {
         const Left<Failure, List<CatalogCategory>>(ZoneUnavailableFailure()),
       );
       expect(consumer.lastPath, isNull);
+    });
+
+    test('passes the sort and origin through to the stores call', () async {
+      consumer.response = <String, dynamic>{
+        'total_size': 0,
+        'stores': <dynamic>[],
+      };
+
+      final Either<Failure, CatalogPage<Store>> result = await repository
+          .getStores(
+            page: 1,
+            sort: StoreSort.nearest,
+            origin: const GeoPoint(latitude: 30.05, longitude: 31.2),
+          );
+
+      expect(result.isRight(), isTrue);
+      expect(consumer.lastQuery?['sort_by'], 'nearest');
+      expect(consumer.lastHeaders?['latitude'], '30.05');
     });
 
     test("a category's stores need the zone too", () async {
