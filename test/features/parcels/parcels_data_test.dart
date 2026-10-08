@@ -251,4 +251,46 @@ void main() {
       );
     });
   });
+
+  group('POST /customer/parcels/{id}/delivery-otp/request', () {
+    test('posts to the parcel path and parses the code', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{
+          'delivery_otp': <String, dynamic>{
+            'otp': '048213',
+            'expires_at': '2026-10-08T12:30:00Z',
+          },
+        },
+      );
+
+      final DeliveryOtp otp = await ParcelsRemoteDataSourceImpl(
+        consumer: consumer,
+      ).requestDeliveryOtp(2048);
+
+      expect(consumer.lastVerb, 'POST');
+      expect(
+        consumer.lastPath,
+        '/api/v1/customer/parcels/2048/delivery-otp/request',
+      );
+      expect(otp.code, '048213');
+      expect(otp.expiresAt, DateTime.utc(2026, 10, 8, 12, 30));
+    });
+
+    test('a 409 before out-for-delivery maps to a ConflictFailure', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer()
+        ..error = const ConflictException(
+          message: 'Not available',
+          code: 'otp-not-available',
+        );
+
+      final Either<Failure, DeliveryOtp> result = await ParcelsRepositoryImpl(
+        remote: ParcelsRemoteDataSourceImpl(consumer: consumer),
+      ).requestDeliveryOtp(2048);
+
+      expect(
+        result.fold((Failure f) => f, (_) => null),
+        isA<ConflictFailure>(),
+      );
+    });
+  });
 }
