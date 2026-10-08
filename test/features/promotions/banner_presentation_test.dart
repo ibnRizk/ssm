@@ -49,12 +49,32 @@ void main() {
     expect(_present(60, 40, _noise), const CoverPresentation());
   });
 
-  test('a portrait photo is framed whole instead of cropped', () {
-    expect(_present(30, 40, _noise), const FramedPresentation());
+  test('a portrait photo is framed instead of cropped to fill', () {
+    expect(
+      _present(30, 40, _noise),
+      const FramedPresentation(aspectRatio: 0.75),
+    );
   });
 
   test('a square photo is too far from 16:9 to crop', () {
-    expect(_present(40, 40, _noise), const FramedPresentation());
+    expect(_present(40, 40, _noise), const FramedPresentation(aspectRatio: 1));
+  });
+
+  group('FramedPresentation.zoom', () {
+    test('a moderate portrait grows, giving up a fifth of its height', () {
+      // 3:4 — like the live 1600 × 2133 upload.
+      expect(const FramedPresentation(aspectRatio: 0.75).zoom, 1.25);
+      expect(const FramedPresentation(aspectRatio: 0.6).zoom, 1.25);
+    });
+
+    test('a very tall portrait stays whole', () {
+      expect(const FramedPresentation(aspectRatio: 9 / 16).zoom, 1);
+    });
+
+    test('a square or wide photo stays whole', () {
+      expect(const FramedPresentation(aspectRatio: 1).zoom, 1);
+      expect(const FramedPresentation(aspectRatio: 3).zoom, 1);
+    });
   });
 
   test('a logo on white is shown whole on that white', () {

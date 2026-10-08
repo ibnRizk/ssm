@@ -83,12 +83,19 @@ class _BannerMediaState extends State<BannerMedia> {
             );
             return switch (presentation) {
               CoverPresentation() => picture(BoxFit.cover),
-              FramedPresentation() => Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  _BlurredBackdrop(image: widget.image),
-                  picture(BoxFit.contain),
-                ],
+              FramedPresentation(:final double zoom) => ClipRect(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    _BlurredBackdrop(image: widget.image),
+                    // Enlarged about the centre, so a moderate portrait
+                    // loses its top and bottom edges evenly.
+                    Transform.scale(
+                      scale: zoom,
+                      child: picture(BoxFit.contain),
+                    ),
+                  ],
+                ),
               ),
               IsolatedPresentation(
                 :final int? backdrop,

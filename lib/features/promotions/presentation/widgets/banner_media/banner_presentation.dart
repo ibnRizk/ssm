@@ -19,11 +19,31 @@ final class CoverPresentation extends BannerPresentation {
   const CoverPresentation();
 }
 
-/// A photo too tall or too wide to crop that much: shown whole, over a
-/// blurred copy of itself instead of empty bands.
+/// A photo too tall or too wide to crop that much: shown over a blurred copy
+/// of itself instead of empty bands — whole, or enlarged by [zoom].
 final class FramedPresentation extends BannerPresentation {
-  const FramedPresentation();
+  /// The whole image's width over its height.
+  final double aspectRatio;
+
+  const FramedPresentation({required this.aspectRatio});
+
+  /// How far past fitting whole the photo is enlarged. A moderate portrait
+  /// fitted whole is small in a landscape frame, so it gives up at most
+  /// [maxPortraitCrop] of its height — evenly, top and bottom — to grow; a
+  /// very tall one would lose too much, so stays whole.
+  double get zoom => aspectRatio >= minModeratePortrait && aspectRatio < 1
+      ? 1 / (1 - maxPortraitCrop)
+      : 1;
+
+  @override
+  List<Object?> get props => [aspectRatio];
 }
+
+/// The most of its height a moderate portrait photo may lose to grow.
+const double maxPortraitCrop = 0.2;
+
+/// 3:5. Taller than this, a portrait is shown whole.
+const double minModeratePortrait = 0.6;
 
 /// Art on a flat or transparent background — a logo, a product: shown whole,
 /// trimmed to its [content], on its own background colour so the margins
@@ -182,7 +202,7 @@ BannerPresentation presentBanner({
           math.max(aspectRatio, frameAspectRatio);
   return crop <= maxCoverCrop
       ? const CoverPresentation()
-      : const FramedPresentation();
+      : FramedPresentation(aspectRatio: aspectRatio);
 }
 
 /// The bounds of the pixels [isContent] accepts, a pixel wider each way
