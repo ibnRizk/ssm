@@ -39,6 +39,13 @@ final class C2cParcelsListLoaded extends C2cParcelsListState {
     this.loadMore = const LoadMoreIdle(),
   });
 
+  /// The loaded parcels that can still move — what "track current
+  /// shipments" shows. Only the pages fetched so far are considered.
+  List<C2cParcelSummary> get active => <C2cParcelSummary>[
+    for (final C2cParcelSummary parcel in parcels)
+      if (!parcel.status.isTerminal) parcel,
+  ];
+
   C2cParcelsListLoaded copyWith({
     List<C2cParcelSummary>? parcels,
     int? page,

@@ -204,6 +204,14 @@ abstract class AppRoutes {
                       create: (_) =>
                           ServiceLocator.instance<PromotionsCubit>()..load(),
                     ),
+                    // Lazy: created — and loaded, by HomeParcelsView — only
+                    // once the "send parcels" side is first opened.
+                    BlocProvider<C2cParcelsListCubit>(
+                      create: (_) =>
+                          ServiceLocator.instance<C2cParcelsListCubit>(
+                            param1: C2cParcelBox.sent,
+                          ),
+                    ),
                   ],
                   child: const HomeScreen(),
                 ),

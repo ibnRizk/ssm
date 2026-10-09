@@ -268,6 +268,18 @@ abstract class Strings {
   static const String _homeViewAll = 'home_view_all';
   static String get homeViewAll => _homeViewAll.tr;
 
+  static const String _homeServiceOrders = 'home_service_orders';
+  static String get homeServiceOrders => _homeServiceOrders.tr;
+
+  static const String _homeServiceParcels = 'home_service_parcels';
+  static String get homeServiceParcels => _homeServiceParcels.tr;
+
+  static const String _homeActiveParcelsTitle = 'home_active_parcels_title';
+  static String get homeActiveParcelsTitle => _homeActiveParcelsTitle.tr;
+
+  static const String _homeActiveParcelsEmpty = 'home_active_parcels_empty';
+  static String get homeActiveParcelsEmpty => _homeActiveParcelsEmpty.tr;
+
   static const String _homePharmacyCategory = 'home_pharmacy_category';
   static String get homePharmacyCategory => _homePharmacyCategory.tr;
 
@@ -1034,9 +1046,6 @@ abstract class Strings {
   static const String _c2cSupportReasonOther = 'c2c_support_reason_other';
   static String get c2cSupportReasonOther => _c2cSupportReasonOther.tr;
 
-  static const String _c2cHeroBadge = 'c2c_hero_badge';
-  static String get c2cHeroBadge => _c2cHeroBadge.tr;
-
   static const String _c2cHeroTitle = 'c2c_hero_title';
   static String get c2cHeroTitle => _c2cHeroTitle.tr;
 
@@ -1045,9 +1054,6 @@ abstract class Strings {
 
   static const String _c2cHeroButton = 'c2c_hero_button';
   static String get c2cHeroButton => _c2cHeroButton.tr;
-
-  static const String _c2cHeroMyParcels = 'c2c_hero_my_parcels';
-  static String get c2cHeroMyParcels => _c2cHeroMyParcels.tr;
 
   // --- Restaurants ---
   static const String _restaurantsTitle = 'restaurants_title';

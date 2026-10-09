@@ -57,11 +57,16 @@ class AppOutlinedButton extends StatelessWidget {
                 children: [
                   icon!,
                   SizedBox(width: 8.w),
-                  _text,
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: _text,
+                    ),
+                  ),
                 ],
               );
             }
-            return _text;
+            return FittedBox(fit: BoxFit.scaleDown, child: _text);
           },
         ),
       ),

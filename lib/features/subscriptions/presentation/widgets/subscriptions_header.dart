@@ -17,16 +17,18 @@ class SubscriptionsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Text(
           Strings.subscriptionsTitle,
           style: AppTextStyles.h1(color: c.textPrimary),
+          textAlign: TextAlign.center,
         ),
         SizedBox(height: AppSpacing.xxs.h),
         Text(
           Strings.subscriptionsSubtitle,
           style: AppTextStyles.caption(color: c.textSecondary),
+          textAlign: TextAlign.center,
         ),
       ],
     );
