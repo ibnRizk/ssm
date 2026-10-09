@@ -80,7 +80,7 @@ class NotificationHubCubit extends Cubit<NotificationHubState> {
         _applyCount(unreadCount);
       case RealtimeReconnected():
         refreshUnreadCount();
-      case OrderRealtimeEvent():
+      case OrderRealtimeEvent() || ParcelRealtimeEvent():
         break;
     }
   }

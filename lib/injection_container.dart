@@ -38,6 +38,7 @@ import 'core/zone/zone_repository_impl.dart';
 import 'features/account/account_injection.dart';
 import 'features/addresses/addresses_injection.dart';
 import 'features/auth/auth_injection.dart';
+import 'features/c2c_parcels/c2c_parcels_injection.dart';
 import 'features/cart/cart_injection.dart';
 import 'features/catalog/catalog_injection.dart';
 import 'features/checkout/checkout_injection.dart';
@@ -96,6 +97,7 @@ abstract class ServiceLocator {
     await initOrdersFeatureInjection();
     await initHomeFeatureInjection();
     await initParcelsFeatureInjection();
+    await initC2cParcelsFeatureInjection();
     await initPharmacyFeatureInjection();
     await initPromotionsFeatureInjection();
     await initRestaurantsFeatureInjection();

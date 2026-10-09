@@ -17,6 +17,69 @@ DioException _badResponse(int status, dynamic data) {
 }
 
 void main() {
+  group('mapDioException — error codes', () {
+    test('422 keeps the errors[0] code next to the message', () {
+      final AppException result = mapDioException(
+        _badResponse(422, <String, dynamic>{
+          'message':
+              'The parcel cannot move from driver_accepted to picked_up.',
+          'errors': <Map<String, String>>[
+            <String, String>{
+              'code': 'invalid_transition',
+              'message':
+                  'The parcel cannot move from driver_accepted to picked_up.',
+            },
+          ],
+          'current_status': 'driver_accepted',
+          'current_version': 5,
+        }),
+      );
+
+      expect(
+        result,
+        const ServerException(
+          message: 'The parcel cannot move from driver_accepted to picked_up.',
+          code: 'invalid_transition',
+        ),
+      );
+    });
+
+    test('a field-validation 422 has no code', () {
+      final AppException result = mapDioException(
+        _badResponse(422, <String, dynamic>{
+          'message': 'The title field is required.',
+          'errors': <String, dynamic>{
+            'title': <String>['The title field is required.'],
+          },
+        }),
+      );
+
+      expect(result, isA<ServerException>());
+      expect((result as ServerException).code, isNull);
+    });
+
+    test('428 idempotency_key_required keeps its code', () {
+      final AppException result = mapDioException(
+        _badResponse(428, <String, dynamic>{
+          'errors': <Map<String, String>>[
+            <String, String>{
+              'code': 'idempotency_key_required',
+              'message': 'Idempotency-Key header is required.',
+            },
+          ],
+        }),
+      );
+
+      expect(
+        result,
+        const ServerException(
+          message: 'Idempotency-Key header is required.',
+          code: 'idempotency_key_required',
+        ),
+      );
+    });
+  });
+
   group('mapDioException', () {
     test('404 maps to NotFoundException with the body message', () {
       final AppException result = mapDioException(

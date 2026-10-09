@@ -44,10 +44,10 @@ class SendParcelCubit extends Cubit<SendParcelState> {
     );
   }
 
-  void setSize(ParcelSize size) {
-    if (size == state.size) return;
+  void setCategory(ParcelCategory category) {
+    if (category == state.category) return;
     _invalidate();
-    emit(state.copyWith(size: size, quote: _idle));
+    emit(state.copyWith(category: category, quote: _idle));
   }
 
   void setFragile(bool isFragile) {
@@ -75,22 +75,24 @@ class SendParcelCubit extends Cubit<SendParcelState> {
     emit(state.copyWith(quote: const QuoteLoading()));
 
     final String? trimmedTitle = title?.trim();
+    final C2cQuoteRequest request = C2cQuoteRequest(
+      sender: pickup,
+      recipient: dropoff,
+      category: state.category,
+      weightKg: weightKg,
+      isFragile: state.isFragile,
+      title: trimmedTitle == null || trimmedTitle.isEmpty ? null : trimmedTitle,
+    );
     final Either<Failure, C2cParcelQuote> result = await repository.getQuote(
-      C2cQuoteRequest(
-        sender: pickup,
-        recipient: dropoff,
-        size: state.size,
-        weightKg: weightKg,
-        isFragile: state.isFragile,
-        title: trimmedTitle == null || trimmedTitle.isEmpty
-            ? null
-            : trimmedTitle,
-      ),
+      request,
     );
     if (isClosed || generation != _generation) return;
     emit(
       state.copyWith(
-        quote: result.fold<QuoteStatus>(QuoteFailed.new, QuoteReady.new),
+        quote: result.fold<QuoteStatus>(
+          QuoteFailed.new,
+          (C2cParcelQuote quote) => QuoteReady(quote, request),
+        ),
       ),
     );
   }

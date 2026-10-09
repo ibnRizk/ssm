@@ -1,9 +1,83 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ssm/core/location/geo_point.dart';
 import 'package:ssm/core/realtime/realtime_event.dart';
 import 'package:ssm/core/realtime/realtime_event_parser.dart';
 import 'package:ssm/core/realtime/status_version_gate.dart';
 
 void main() {
+  group('parseRealtimeEvent — door-to-door parcels', () {
+    test('every status event reads as a status change', () {
+      for (final String name in <String>[
+        'parcel.created',
+        'parcel.status_changed',
+        'parcel.driver_assigned',
+        'parcel.cancelled',
+        'parcel.failed_delivery',
+        'parcel.return_started',
+        'parcel.returned_to_sender',
+        '.parcel.delivered',
+      ]) {
+        expect(
+          parseRealtimeEvent(
+            name: name,
+            channelName: null,
+            data: <String, dynamic>{
+              'parcel_id': 12,
+              'status': 'picked_up',
+              'status_version': 7,
+            },
+          ),
+          const ParcelStatusChanged(12, status: 'picked_up', statusVersion: 7),
+          reason: name,
+        );
+      }
+    });
+
+    test('a driver location carries the position', () {
+      expect(
+        parseRealtimeEvent(
+          name: 'parcel.driver_location_updated',
+          channelName: 'private-c2c-parcel.12.tracking',
+          data: <String, dynamic>{
+            'driver_id': 4,
+            'latitude': '30.05',
+            'longitude': 31.24,
+            'heading': 90,
+            'recorded_at': '2026-10-08T12:05:00Z',
+          },
+        ),
+        ParcelDriverLocationUpdated(
+          12,
+          location: const GeoPoint(latitude: 30.05, longitude: 31.24),
+          heading: 90,
+          recordedAt: DateTime.utc(2026, 10, 8, 12, 5),
+        ),
+      );
+    });
+
+    test('a location without coordinates is dropped', () {
+      expect(
+        parseRealtimeEvent(
+          name: 'parcel.driver_location_updated',
+          channelName: 'private-c2c-parcel.12.tracking',
+          data: <String, dynamic>{'latitude': 30.05},
+        ),
+        isNull,
+      );
+    });
+
+    test('a status event without any parcel id is dropped', () {
+      expect(
+        parseRealtimeEvent(
+          name: 'parcel.status_changed',
+          channelName: 'private-customer.1',
+          data: <String, dynamic>{'status': 'picked_up'},
+        ),
+        isNull,
+      );
+    });
+  });
+
   group('parseRealtimeEvent', () {
     test('status_changed carries the order, status and version', () {
       expect(

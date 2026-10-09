@@ -27,6 +27,11 @@ class _FakeSocket implements RealtimeSocketDataSource {
   @override
   Stream<void> get connectionEstablished => establishedController.stream;
 
+  bool connected = false;
+
+  @override
+  bool get isConnected => connected;
+
   @override
   Future<void> connect() async => connectCalls++;
 
@@ -199,6 +204,76 @@ void main() {
       expect(events, hasLength(2));
     },
   );
+
+  group('parcels', () {
+    test('a watched parcel and its tracking get their own channels', () async {
+      await repository.connect();
+
+      repository
+        ..watchParcel(12)
+        ..watchParcelTracking(12);
+
+      expect(
+        socket.subscribed,
+        containsAll(<String>[
+          'private-c2c-parcel.12',
+          'private-c2c-parcel.12.tracking',
+        ]),
+      );
+
+      repository.unwatchParcelTracking(12);
+      expect(socket.unsubscribed, <String>['private-c2c-parcel.12.tracking']);
+    });
+
+    test(
+      'a parcel watched before connecting is subscribed on connect',
+      () async {
+        repository.watchParcel(12);
+
+        await repository.connect();
+
+        expect(socket.subscribed, contains('private-c2c-parcel.12'));
+      },
+    );
+
+    test('parcel and order versions are gated apart', () async {
+      await repository.connect();
+
+      socket
+        ..frame('ssm.order.status_changed', <String, dynamic>{
+          'order_id': 12,
+          'status_version': 5,
+        })
+        // Same id and version, but a parcel: not a duplicate.
+        ..frame('parcel.status_changed', <String, dynamic>{
+          'parcel_id': 12,
+          'status_version': 5,
+        })
+        // The same parcel change again, on its own channel.
+        ..frame('parcel.status_changed', <String, dynamic>{
+          'parcel_id': 12,
+          'status_version': 5,
+        }, channel: 'private-c2c-parcel.12');
+
+      await pumpEventQueue();
+
+      expect(events, <RealtimeEvent>[
+        const OrderStatusChanged(12, statusVersion: 5),
+        const ParcelStatusChanged(12, statusVersion: 5),
+      ]);
+    });
+
+    test('isConnected follows the socket during a session', () async {
+      socket.connected = true;
+      expect(repository.isConnected, isFalse);
+
+      await repository.connect();
+      expect(repository.isConnected, isTrue);
+
+      socket.connected = false;
+      expect(repository.isConnected, isFalse);
+    });
+  });
 
   test('a disconnect during the id lookup leaves the socket closed', () async {
     final Completer<int?> id = Completer<int?>();

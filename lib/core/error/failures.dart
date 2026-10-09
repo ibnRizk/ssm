@@ -13,7 +13,14 @@ class ServerFailure extends Failure {
   @override
   final String? message;
 
-  const ServerFailure({this.message});
+  /// `errors[0].code` when the body carries one — e.g. a 422
+  /// `invalid_transition` or a 428 `idempotency_key_required`.
+  final String? code;
+
+  const ServerFailure({this.message, this.code});
+
+  @override
+  List<Object?> get props => [message, code];
 }
 
 class UnauthorizedFailure extends Failure {

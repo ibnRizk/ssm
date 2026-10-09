@@ -15,6 +15,10 @@ sealed class NotificationTarget extends Equatable {
     final int? id = int.tryParse(entityId?.trim() ?? '');
     return switch (type) {
       'order' || 'orders' when id != null => OrderTarget(id),
+      // `c2c_parcel` / `SsmC2cParcel` — digits are stripped, hence `cc`.
+      'ccparcel' ||
+      'ccparcels' ||
+      'ssmccparcel' when id != null => C2cParcelTarget(id),
       'parcel' || 'parcels' => const ParcelsTarget(),
       'subscription' || 'subscriptions' => const SubscriptionsTarget(),
       _ => const InboxTarget(),
@@ -42,7 +46,18 @@ final class OrderTarget extends NotificationTarget {
   List<Object?> get props => [orderId];
 }
 
-/// The Parcels tab. There is no single-parcel screen; the tab lists them.
+/// One door-to-door parcel's tracking screen (`entity_type = c2c_parcel`).
+final class C2cParcelTarget extends NotificationTarget {
+  final int parcelId;
+
+  const C2cParcelTarget(this.parcelId);
+
+  @override
+  List<Object?> get props => [parcelId];
+}
+
+/// The Parcels tab. Warehouse parcels have no single-parcel screen; the tab
+/// lists them.
 final class ParcelsTarget extends NotificationTarget {
   const ParcelsTarget();
 }

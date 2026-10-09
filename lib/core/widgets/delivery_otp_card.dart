@@ -13,10 +13,12 @@ import '../utils/values/strings.dart';
 /// The delivery code of an order or a parcel, big and spaced out so it can
 /// be read aloud to the courier. [onRequest] fetches a code — a new one
 /// replaces the old. [subtitle] tells codes apart when several show, e.g.
-/// the parcel reference; [hint] replaces the order wording under the code.
+/// the parcel reference; [hint] replaces the order wording under the code,
+/// and [title] the "delivery code" heading (e.g. for a return code).
 class DeliveryOtpCard extends StatelessWidget {
   final DeliveryOtpState otp;
   final VoidCallback onRequest;
+  final String? title;
   final String? subtitle;
   final String? hint;
 
@@ -24,6 +26,7 @@ class DeliveryOtpCard extends StatelessWidget {
     super.key,
     required this.otp,
     required this.onRequest,
+    this.title,
     this.subtitle,
     this.hint,
   });
@@ -44,7 +47,7 @@ class DeliveryOtpCard extends StatelessWidget {
               Icon(Icons.lock_outline, color: c.secondary, size: 20.r),
               SizedBox(width: AppSpacing.xs.w),
               Text(
-                Strings.orderTrackingOtpTitle,
+                title ?? Strings.orderTrackingOtpTitle,
                 style: AppTextStyles.title(color: c.textPrimary),
               ),
               if (subtitle case final String subtitle) ...<Widget>[

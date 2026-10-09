@@ -30,7 +30,7 @@ class PushBannerCopy {
                 'تحديث على طلبك',
                 'يوجد تحديث جديد على الطلب رقم $orderId.',
               ),
-      ParcelsTarget() =>
+      ParcelsTarget() || C2cParcelTarget() =>
         en
             ? const _Copy('Parcel update', 'There is an update on your parcel.')
             : const _Copy('تحديث على شحنتك', 'يوجد تحديث جديد على شحنتك.'),

@@ -2,15 +2,15 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../core/location/geo_point.dart';
 
-/// The size class of a door-to-door parcel, sent as its [name]
-/// (`small` / `medium` / `large`).
-enum ParcelSize { small, medium, large }
+/// What kind of parcel it is, sent as its [name]. The server prices each
+/// category differently.
+enum ParcelCategory { documents, small, medium, large, fragile, other }
 
 /// What the customer wants priced: both ends and the parcel itself.
 class C2cQuoteRequest extends Equatable {
   final GeoPoint sender;
   final GeoPoint recipient;
-  final ParcelSize size;
+  final ParcelCategory category;
   final double weightKg;
   final bool isFragile;
 
@@ -20,7 +20,7 @@ class C2cQuoteRequest extends Equatable {
   const C2cQuoteRequest({
     required this.sender,
     required this.recipient,
-    required this.size,
+    required this.category,
     required this.weightKg,
     required this.isFragile,
     this.title,
@@ -30,7 +30,7 @@ class C2cQuoteRequest extends Equatable {
   List<Object?> get props => [
     sender,
     recipient,
-    size,
+    category,
     weightKg,
     isFragile,
     title,
@@ -79,6 +79,9 @@ class C2cParcelQuote extends Equatable {
   final String currency;
 
   final double? distanceKm;
+  final int? estimatedDeliveryMinutes;
+
+  /// When [quoteToken] stops holding the price (15 minutes after quoting).
   final DateTime? expiresAt;
 
   /// Null when no plan applies: no active plan, or the parcel is outside
@@ -92,9 +95,17 @@ class C2cParcelQuote extends Equatable {
     required this.totalFee,
     required this.currency,
     this.distanceKm,
+    this.estimatedDeliveryMinutes,
     this.expiresAt,
     this.appliedSubscription,
   });
+
+  /// Whether the price is still held at [now]. A quote without an expiry
+  /// is trusted until the server says otherwise.
+  bool isValidAt(DateTime now) {
+    final DateTime? expiresAt = this.expiresAt;
+    return quoteToken != null && (expiresAt == null || now.isBefore(expiresAt));
+  }
 
   @override
   List<Object?> get props => [
@@ -104,6 +115,7 @@ class C2cParcelQuote extends Equatable {
     totalFee,
     currency,
     distanceKm,
+    estimatedDeliveryMinutes,
     expiresAt,
     appliedSubscription,
   ];

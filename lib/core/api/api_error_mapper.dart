@@ -39,6 +39,7 @@ AppException mapDioException(DioException error) {
       if (data is Map<String, dynamic>) {
         return ServerException(
           message: APIError.fromJson(data).getFirstError(),
+          code: apiErrorCode(data),
         );
       }
       return ServerException(message: apiErrorMessage(data));
@@ -53,7 +54,11 @@ AppException mapDioException(DioException error) {
     case DioExceptionType.cancel:
       return ServerException(message: Strings.requestCancelled);
     default:
-      return ServerException(message: apiErrorMessage(data));
+      // E.g. 428 `idempotency_key_required`.
+      return ServerException(
+        message: apiErrorMessage(data),
+        code: apiErrorCode(data),
+      );
   }
 }
 

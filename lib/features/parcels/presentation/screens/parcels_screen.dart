@@ -98,10 +98,25 @@ class _ParcelsContent extends StatelessWidget {
           newCount: parcels.where((Parcel p) => p.awaitsDropoffLocation).length,
         ),
         SizedBox(height: AppSpacing.lg.h),
-        AppOutlinedButton(
-          text: Strings.parcelsSendButton,
-          icon: Icon(Icons.local_shipping_outlined, color: c.secondary),
-          onPressed: () => context.push(AppRoutes.sendParcel),
+        // Door-to-door parcels live in their own feature; these lead there.
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: AppOutlinedButton(
+                text: Strings.parcelsSendButton,
+                icon: Icon(Icons.local_shipping_outlined, color: c.secondary),
+                onPressed: () => context.push(AppRoutes.sendParcel),
+              ),
+            ),
+            SizedBox(width: AppSpacing.sm.w),
+            Expanded(
+              child: AppOutlinedButton(
+                text: Strings.parcelsMyC2cButton,
+                icon: Icon(Icons.inventory_outlined, color: c.secondary),
+                onPressed: () => context.push(AppRoutes.c2cParcels),
+              ),
+            ),
+          ],
         ),
         SizedBox(height: AppSpacing.lg.h),
         for (final Parcel parcel in parcels)

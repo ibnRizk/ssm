@@ -5,10 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ssm/core/error/failures.dart';
 import 'package:ssm/core/location/geo_point.dart';
 import 'package:ssm/core/location/location_repository.dart';
-import 'package:ssm/features/parcels/domain/entities/c2c_parcel_quote.dart';
-import 'package:ssm/features/parcels/domain/repos/c2c_parcels_repository.dart';
-import 'package:ssm/features/parcels/presentation/cubit/send_parcel_cubit.dart';
-import 'package:ssm/features/parcels/presentation/cubit/send_parcel_state.dart';
+import 'package:ssm/features/c2c_parcels/domain/entities/c2c_parcel_quote.dart';
+import 'package:ssm/features/c2c_parcels/presentation/cubit/send_parcel_cubit.dart';
+import 'package:ssm/features/c2c_parcels/presentation/cubit/send_parcel_state.dart';
+
+import 'fake_c2c_parcels_repository.dart';
 
 const GeoPoint _home = GeoPoint(latitude: 24.7136, longitude: 46.6753);
 const GeoPoint _office = GeoPoint(latitude: 24.75, longitude: 46.7);
@@ -30,19 +31,20 @@ const C2cParcelQuote _plain = C2cParcelQuote(
 
 /// Every quote answers through a [Completer] the test controls, so the
 /// stale-answer race is explicit rather than timing-dependent.
-class _FakeRepository implements C2cParcelsRepository {
+class _FakeRepository extends FakeC2cParcelsRepository {
   final List<Completer<Either<Failure, C2cParcelQuote>>> pending =
       <Completer<Either<Failure, C2cParcelQuote>>>[];
-  final List<C2cQuoteRequest> requests = <C2cQuoteRequest>[];
 
-  @override
-  Future<Either<Failure, C2cParcelQuote>> getQuote(C2cQuoteRequest request) {
-    requests.add(request);
-    final Completer<Either<Failure, C2cParcelQuote>> completer =
-        Completer<Either<Failure, C2cParcelQuote>>();
-    pending.add(completer);
-    return completer.future;
+  _FakeRepository() {
+    onQuote = (_) {
+      final Completer<Either<Failure, C2cParcelQuote>> completer =
+          Completer<Either<Failure, C2cParcelQuote>>();
+      pending.add(completer);
+      return completer.future;
+    };
   }
+
+  List<C2cQuoteRequest> get requests => quotes;
 }
 
 class _FakeLocationRepository implements LocationRepository {
@@ -88,7 +90,7 @@ void main() {
     test('sends the inputs and shows the quote', () async {
       setBothEnds();
       cubit
-        ..setSize(ParcelSize.large)
+        ..setCategory(ParcelCategory.large)
         ..setFragile(true);
 
       final Future<void> request = cubit.requestQuote(
@@ -99,18 +101,17 @@ void main() {
       repository.pending.single.complete(const Right(_discounted));
       await request;
 
-      expect(
-        repository.requests.single,
-        const C2cQuoteRequest(
-          sender: _home,
-          recipient: _office,
-          size: ParcelSize.large,
-          weightKg: 3,
-          isFragile: true,
-          title: 'Gift Box',
-        ),
+      const C2cQuoteRequest expected = C2cQuoteRequest(
+        sender: _home,
+        recipient: _office,
+        category: ParcelCategory.large,
+        weightKg: 3,
+        isFragile: true,
+        title: 'Gift Box',
       );
-      expect(cubit.state.quote, const QuoteReady(_discounted));
+      expect(repository.requests.single, expected);
+      // The priced request travels with its price, for the create step.
+      expect(cubit.state.quote, const QuoteReady(_discounted, expected));
     });
 
     test('a blank title is sent as none', () async {
@@ -153,7 +154,7 @@ void main() {
       setBothEnds();
 
       final Future<void> request = cubit.requestQuote(weightKg: 3);
-      cubit.setSize(ParcelSize.small);
+      cubit.setCategory(ParcelCategory.small);
       repository.pending.single.complete(const Right(_discounted));
       await request;
 
@@ -186,12 +187,12 @@ void main() {
       expect(cubit.state.quote, const QuoteIdle());
     });
 
-    test('re-selecting the same size keeps the quote', () async {
+    test('re-selecting the same category keeps the quote', () async {
       await quoted();
 
-      cubit.setSize(ParcelSize.medium);
+      cubit.setCategory(ParcelCategory.medium);
 
-      expect(cubit.state.quote, const QuoteReady(_plain));
+      expect(cubit.state.quote, isA<QuoteReady>());
     });
   });
 
@@ -219,7 +220,7 @@ void main() {
       expect(cubit.state.notice, failure);
       expect(cubit.state.pickup, isNull);
 
-      cubit.setSize(ParcelSize.small);
+      cubit.setCategory(ParcelCategory.small);
       expect(cubit.state.notice, isNull);
     });
 

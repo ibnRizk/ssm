@@ -32,13 +32,16 @@ class RealtimeRepositoryImpl implements RealtimeRepository {
     StatusVersionGate? gate,
   }) : _gate = gate ?? StatusVersionGate();
 
+  /// Parcels and orders have separate id spaces, so separate gates.
+  final StatusVersionGate _parcelGate = StatusVersionGate();
+
   final StreamController<RealtimeEvent> _events =
       StreamController<RealtimeEvent>.broadcast();
   StreamSubscription<RealtimeSocketFrame>? _framesSub;
   StreamSubscription<void>? _establishedSub;
 
-  /// Watch counts per order — see [watchOrder].
-  final Map<int, int> _watched = <int, int>{};
+  /// Watch counts per channel name — see [watchOrder].
+  final Map<String, int> _watched = <String, int>{};
 
   String? _customerChannel;
   bool _sessionActive = false;
@@ -51,6 +54,9 @@ class RealtimeRepositoryImpl implements RealtimeRepository {
 
   @override
   Stream<RealtimeEvent> get events => _events.stream;
+
+  @override
+  bool get isConnected => _sessionActive && socket.isConnected;
 
   @override
   Future<void> connect() async {
@@ -74,9 +80,7 @@ class RealtimeRepositoryImpl implements RealtimeRepository {
       });
       _customerChannel = 'private-customer.$id';
       socket.subscribe(_customerChannel!);
-      for (final int orderId in _watched.keys) {
-        socket.subscribe(_orderChannel(orderId));
-      }
+      _watched.keys.forEach(socket.subscribe);
       await socket.connect();
     } catch (error) {
       // Offline, or the profile call failed: realtime is best-effort.
@@ -95,6 +99,7 @@ class RealtimeRepositoryImpl implements RealtimeRepository {
     _customerChannel = null;
     _watched.clear();
     _gate.reset();
+    _parcelGate.reset();
     await _framesSub?.cancel();
     await _establishedSub?.cancel();
     _framesSub = null;
@@ -103,23 +108,41 @@ class RealtimeRepositoryImpl implements RealtimeRepository {
   }
 
   @override
-  void watchOrder(int orderId) {
-    final int count = (_watched[orderId] ?? 0) + 1;
-    _watched[orderId] = count;
-    // Before [connect] the channel is subscribed as part of connecting.
-    if (count == 1 && _sessionActive) socket.subscribe(_orderChannel(orderId));
-  }
+  void watchOrder(int orderId) => _watch(_orderChannel(orderId));
 
   @override
-  void unwatchOrder(int orderId) {
-    final int? count = _watched[orderId];
+  void unwatchOrder(int orderId) => _unwatch(_orderChannel(orderId));
+
+  @override
+  void watchParcel(int parcelId) => _watch(_parcelChannel(parcelId));
+
+  @override
+  void unwatchParcel(int parcelId) => _unwatch(_parcelChannel(parcelId));
+
+  @override
+  void watchParcelTracking(int parcelId) =>
+      _watch('${_parcelChannel(parcelId)}.tracking');
+
+  @override
+  void unwatchParcelTracking(int parcelId) =>
+      _unwatch('${_parcelChannel(parcelId)}.tracking');
+
+  void _watch(String channel) {
+    final int count = (_watched[channel] ?? 0) + 1;
+    _watched[channel] = count;
+    // Before [connect] the channel is subscribed as part of connecting.
+    if (count == 1 && _sessionActive) socket.subscribe(channel);
+  }
+
+  void _unwatch(String channel) {
+    final int? count = _watched[channel];
     if (count == null) return;
     if (count > 1) {
-      _watched[orderId] = count - 1;
+      _watched[channel] = count - 1;
       return;
     }
-    _watched.remove(orderId);
-    if (_sessionActive) socket.unsubscribe(_orderChannel(orderId));
+    _watched.remove(channel);
+    if (_sessionActive) socket.unsubscribe(channel);
   }
 
   void _onFrame(RealtimeSocketFrame frame) {
@@ -129,12 +152,19 @@ class RealtimeRepositoryImpl implements RealtimeRepository {
       data: frame.data,
     );
     if (event == null) return;
-    if (event is OrderStatusChanged &&
-        !_gate.admit(event.orderId, event.statusVersion)) {
-      return;
-    }
-    _events.add(event);
+    final bool admitted = switch (event) {
+      OrderStatusChanged(:final orderId, :final statusVersion) => _gate.admit(
+        orderId,
+        statusVersion,
+      ),
+      ParcelStatusChanged(:final parcelId, :final statusVersion) =>
+        _parcelGate.admit(parcelId, statusVersion),
+      _ => true,
+    };
+    if (admitted) _events.add(event);
   }
 
   static String _orderChannel(int orderId) => 'private-order.$orderId';
+
+  static String _parcelChannel(int parcelId) => 'private-c2c-parcel.$parcelId';
 }

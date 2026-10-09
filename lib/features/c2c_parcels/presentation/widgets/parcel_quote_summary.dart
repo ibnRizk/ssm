@@ -12,20 +12,24 @@ import 'parcel_price_breakdown.dart';
 import 'subscription_discount_banner.dart';
 
 /// A priced parcel: the plan banner (only when a plan applied), the payment
-/// summary, and the confirm button.
-///
-/// Creating the parcel isn't wired yet, so the button stays disabled with a
-/// note saying so.
+/// summary, and the button that carries the price on to the details step.
+/// Without a `quote_token` the price can't be booked, so the button is off.
 class ParcelQuoteSummary extends StatelessWidget {
   final C2cParcelQuote quote;
+  final VoidCallback onConfirm;
 
-  const ParcelQuoteSummary({super.key, required this.quote});
+  const ParcelQuoteSummary({
+    super.key,
+    required this.quote,
+    required this.onConfirm,
+  });
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
     final AppliedParcelSubscription? applied = quote.appliedSubscription;
     final double? distanceKm = quote.distanceKm;
+    final int? minutes = quote.estimatedDeliveryMinutes;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -60,17 +64,25 @@ class ParcelQuoteSummary extends StatelessWidget {
           currency: quote.currency,
         ),
         SizedBox(height: AppSpacing.sm.h),
+        if (minutes != null)
+          Row(
+            children: <Widget>[
+              Icon(Icons.schedule, size: 16.r, color: c.secondary),
+              SizedBox(width: AppSpacing.xs.w),
+              Text(
+                Strings.sendParcelEta('$minutes'),
+                style: AppTextStyles.caption(color: c.textPrimary),
+              ),
+            ],
+          ),
         Text(
           Strings.sendParcelQuoteHeld,
           style: AppTextStyles.caption(color: c.textSecondary),
         ),
         SizedBox(height: AppSpacing.lg.h),
-        AppButton(btnText: Strings.sendParcelConfirmButton, onPressed: null),
-        SizedBox(height: AppSpacing.xs.h),
-        Text(
-          Strings.sendParcelConfirmSoon,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.caption(color: c.textHint),
+        AppButton(
+          btnText: Strings.sendParcelConfirmButton,
+          onPressed: quote.quoteToken == null ? null : onConfirm,
         ),
       ],
     );

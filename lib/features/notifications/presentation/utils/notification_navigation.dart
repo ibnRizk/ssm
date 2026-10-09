@@ -19,6 +19,8 @@ void openNotificationTarget(
   switch (target) {
     case OrderTarget(:final int orderId):
       router.push(AppRoutes.orderTrackingPath(orderId));
+    case C2cParcelTarget(:final int parcelId):
+      router.push(AppRoutes.c2cParcelPath(parcelId));
     case ParcelsTarget():
       router.go(AppRoutes.parcels);
     case SubscriptionsTarget():
@@ -31,7 +33,7 @@ void openNotificationTarget(
 /// The icon a notification row shows for its target.
 IconData notificationTargetIcon(NotificationTarget target) => switch (target) {
   OrderTarget() => Icons.receipt_long_rounded,
-  ParcelsTarget() => Icons.inventory_2_rounded,
+  ParcelsTarget() || C2cParcelTarget() => Icons.inventory_2_rounded,
   SubscriptionsTarget() => Icons.star_rounded,
   InboxTarget() => Icons.notifications_rounded,
 };

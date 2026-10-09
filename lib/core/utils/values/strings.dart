@@ -468,15 +468,6 @@ abstract class Strings {
   static const String _sendParcelSizeLabel = 'send_parcel_size_label';
   static String get sendParcelSizeLabel => _sendParcelSizeLabel.tr;
 
-  static const String _sendParcelSizeSmall = 'send_parcel_size_small';
-  static String get sendParcelSizeSmall => _sendParcelSizeSmall.tr;
-
-  static const String _sendParcelSizeMedium = 'send_parcel_size_medium';
-  static String get sendParcelSizeMedium => _sendParcelSizeMedium.tr;
-
-  static const String _sendParcelSizeLarge = 'send_parcel_size_large';
-  static String get sendParcelSizeLarge => _sendParcelSizeLarge.tr;
-
   static const String _sendParcelWeightLabel = 'send_parcel_weight_label';
   static String get sendParcelWeightLabel => _sendParcelWeightLabel.tr;
 
@@ -536,8 +527,555 @@ abstract class Strings {
   static const String _sendParcelConfirmButton = 'send_parcel_confirm_button';
   static String get sendParcelConfirmButton => _sendParcelConfirmButton.tr;
 
-  static const String _sendParcelConfirmSoon = 'send_parcel_confirm_soon';
-  static String get sendParcelConfirmSoon => _sendParcelConfirmSoon.tr;
+  // --- Door-to-door parcels ---
+  static const String _sendParcelCategoryDocuments =
+      'send_parcel_category_documents';
+  static String get sendParcelCategoryDocuments =>
+      _sendParcelCategoryDocuments.tr;
+
+  static const String _sendParcelCategorySmall = 'send_parcel_category_small';
+  static String get sendParcelCategorySmall => _sendParcelCategorySmall.tr;
+
+  static const String _sendParcelCategoryMedium = 'send_parcel_category_medium';
+  static String get sendParcelCategoryMedium => _sendParcelCategoryMedium.tr;
+
+  static const String _sendParcelCategoryLarge = 'send_parcel_category_large';
+  static String get sendParcelCategoryLarge => _sendParcelCategoryLarge.tr;
+
+  static const String _sendParcelCategoryFragile =
+      'send_parcel_category_fragile';
+  static String get sendParcelCategoryFragile => _sendParcelCategoryFragile.tr;
+
+  static const String _sendParcelCategoryOther = 'send_parcel_category_other';
+  static String get sendParcelCategoryOther => _sendParcelCategoryOther.tr;
+
+  static const String _sendParcelEta = 'send_parcel_eta';
+
+  /// `{minutes}` in the translation are replaced.
+  static String sendParcelEta(String minutes) =>
+      _sendParcelEta.tr.replaceFirst('{minutes}', minutes);
+
+  static const String _parcelsMyC2cButton = 'parcels_my_c2c_button';
+  static String get parcelsMyC2cButton => _parcelsMyC2cButton.tr;
+
+  static const String _createParcelTitle = 'create_parcel_title';
+  static String get createParcelTitle => _createParcelTitle.tr;
+
+  static const String _createParcelSenderSection =
+      'create_parcel_sender_section';
+  static String get createParcelSenderSection => _createParcelSenderSection.tr;
+
+  static const String _createParcelRecipientSection =
+      'create_parcel_recipient_section';
+  static String get createParcelRecipientSection =>
+      _createParcelRecipientSection.tr;
+
+  static const String _createParcelNameLabel = 'create_parcel_name_label';
+  static String get createParcelNameLabel => _createParcelNameLabel.tr;
+
+  static const String _createParcelPhoneLabel = 'create_parcel_phone_label';
+  static String get createParcelPhoneLabel => _createParcelPhoneLabel.tr;
+
+  static const String _createParcelAddressLabel = 'create_parcel_address_label';
+  static String get createParcelAddressLabel => _createParcelAddressLabel.tr;
+
+  static const String _createParcelAddressHint = 'create_parcel_address_hint';
+  static String get createParcelAddressHint => _createParcelAddressHint.tr;
+
+  static const String _createParcelBuildingLabel =
+      'create_parcel_building_label';
+  static String get createParcelBuildingLabel => _createParcelBuildingLabel.tr;
+
+  static const String _createParcelFloorLabel = 'create_parcel_floor_label';
+  static String get createParcelFloorLabel => _createParcelFloorLabel.tr;
+
+  static const String _createParcelApartmentLabel =
+      'create_parcel_apartment_label';
+  static String get createParcelApartmentLabel =>
+      _createParcelApartmentLabel.tr;
+
+  static const String _createParcelNotesLabel = 'create_parcel_notes_label';
+  static String get createParcelNotesLabel => _createParcelNotesLabel.tr;
+
+  static const String _createParcelItemSection = 'create_parcel_item_section';
+  static String get createParcelItemSection => _createParcelItemSection.tr;
+
+  static const String _createParcelItemTitleLabel =
+      'create_parcel_item_title_label';
+  static String get createParcelItemTitleLabel =>
+      _createParcelItemTitleLabel.tr;
+
+  static const String _createParcelItemTitleHint =
+      'create_parcel_item_title_hint';
+  static String get createParcelItemTitleHint => _createParcelItemTitleHint.tr;
+
+  static const String _createParcelDescriptionLabel =
+      'create_parcel_description_label';
+  static String get createParcelDescriptionLabel =>
+      _createParcelDescriptionLabel.tr;
+
+  static const String _createParcelDeclaredValueLabel =
+      'create_parcel_declared_value_label';
+  static String get createParcelDeclaredValueLabel =>
+      _createParcelDeclaredValueLabel.tr;
+
+  static const String _createParcelPickupInstructionsLabel =
+      'create_parcel_pickup_instructions_label';
+  static String get createParcelPickupInstructionsLabel =>
+      _createParcelPickupInstructionsLabel.tr;
+
+  static const String _createParcelDeliveryInstructionsLabel =
+      'create_parcel_delivery_instructions_label';
+  static String get createParcelDeliveryInstructionsLabel =>
+      _createParcelDeliveryInstructionsLabel.tr;
+
+  static const String _createParcelPaymentSection =
+      'create_parcel_payment_section';
+  static String get createParcelPaymentSection =>
+      _createParcelPaymentSection.tr;
+
+  static const String _createParcelPaymentSender =
+      'create_parcel_payment_sender';
+  static String get createParcelPaymentSender => _createParcelPaymentSender.tr;
+
+  static const String _createParcelPaymentRecipient =
+      'create_parcel_payment_recipient';
+  static String get createParcelPaymentRecipient =>
+      _createParcelPaymentRecipient.tr;
+
+  static const String _createParcelPhotosSection =
+      'create_parcel_photos_section';
+  static String get createParcelPhotosSection => _createParcelPhotosSection.tr;
+
+  static const String _createParcelPhotosHint = 'create_parcel_photos_hint';
+  static String get createParcelPhotosHint => _createParcelPhotosHint.tr;
+
+  static const String _createParcelTakePhoto = 'create_parcel_take_photo';
+  static String get createParcelTakePhoto => _createParcelTakePhoto.tr;
+
+  static const String _createParcelChoosePhotos = 'create_parcel_choose_photos';
+  static String get createParcelChoosePhotos => _createParcelChoosePhotos.tr;
+
+  static const String _createParcelPhotosRequired =
+      'create_parcel_photos_required';
+  static String get createParcelPhotosRequired =>
+      _createParcelPhotosRequired.tr;
+
+  static const String _createParcelPhotoTooLarge =
+      'create_parcel_photo_too_large';
+  static String get createParcelPhotoTooLarge => _createParcelPhotoTooLarge.tr;
+
+  static const String _createParcelPhotoUnsupported =
+      'create_parcel_photo_unsupported';
+  static String get createParcelPhotoUnsupported =>
+      _createParcelPhotoUnsupported.tr;
+
+  static const String _createParcelAcknowledge = 'create_parcel_acknowledge';
+  static String get createParcelAcknowledge => _createParcelAcknowledge.tr;
+
+  static const String _createParcelAcknowledgeRequired =
+      'create_parcel_acknowledge_required';
+  static String get createParcelAcknowledgeRequired =>
+      _createParcelAcknowledgeRequired.tr;
+
+  static const String _createParcelSubmit = 'create_parcel_submit';
+  static String get createParcelSubmit => _createParcelSubmit.tr;
+
+  static const String _createParcelPriceChangedTitle =
+      'create_parcel_price_changed_title';
+  static String get createParcelPriceChangedTitle =>
+      _createParcelPriceChangedTitle.tr;
+
+  static const String _createParcelPriceChangedMessage =
+      'create_parcel_price_changed_message';
+
+  /// `{price}` in the translation are replaced.
+  static String createParcelPriceChangedMessage(String price) =>
+      _createParcelPriceChangedMessage.tr.replaceFirst('{price}', price);
+
+  static const String _createParcelCreated = 'create_parcel_created';
+  static String get createParcelCreated => _createParcelCreated.tr;
+
+  static const String _createParcelTripSummary = 'create_parcel_trip_summary';
+
+  /// `{km}`, `{category}`, `{weight}` in the translation are replaced.
+  static String createParcelTripSummary(
+    String km,
+    String category,
+    String weight,
+  ) => _createParcelTripSummary.tr
+      .replaceFirst('{km}', km)
+      .replaceFirst('{category}', category)
+      .replaceFirst('{weight}', weight);
+
+  static const String _c2cErrorStaleVersion = 'c2c_error_stale_version';
+  static String get c2cErrorStaleVersion => _c2cErrorStaleVersion.tr;
+
+  static const String _c2cErrorRequestInProgress =
+      'c2c_error_request_in_progress';
+  static String get c2cErrorRequestInProgress => _c2cErrorRequestInProgress.tr;
+
+  static const String _c2cErrorIdempotencyConflict =
+      'c2c_error_idempotency_conflict';
+  static String get c2cErrorIdempotencyConflict =>
+      _c2cErrorIdempotencyConflict.tr;
+
+  static const String _c2cErrorCancelAfterPickup =
+      'c2c_error_cancel_after_pickup';
+  static String get c2cErrorCancelAfterPickup => _c2cErrorCancelAfterPickup.tr;
+
+  static const String _c2cErrorOtpNotAvailable = 'c2c_error_otp_not_available';
+  static String get c2cErrorOtpNotAvailable => _c2cErrorOtpNotAvailable.tr;
+
+  static const String _c2cParcelsTitle = 'c2c_parcels_title';
+  static String get c2cParcelsTitle => _c2cParcelsTitle.tr;
+
+  static const String _c2cParcelsTabSent = 'c2c_parcels_tab_sent';
+  static String get c2cParcelsTabSent => _c2cParcelsTabSent.tr;
+
+  static const String _c2cParcelsTabReceived = 'c2c_parcels_tab_received';
+  static String get c2cParcelsTabReceived => _c2cParcelsTabReceived.tr;
+
+  static const String _c2cParcelsEmptySent = 'c2c_parcels_empty_sent';
+  static String get c2cParcelsEmptySent => _c2cParcelsEmptySent.tr;
+
+  static const String _c2cParcelsEmptyReceived = 'c2c_parcels_empty_received';
+  static String get c2cParcelsEmptyReceived => _c2cParcelsEmptyReceived.tr;
+
+  static const String _c2cParcelTo = 'c2c_parcel_to';
+
+  /// `{name}` in the translation are replaced.
+  static String c2cParcelTo(String name) =>
+      _c2cParcelTo.tr.replaceFirst('{name}', name);
+
+  static const String _c2cParcelFrom = 'c2c_parcel_from';
+
+  /// `{name}` in the translation are replaced.
+  static String c2cParcelFrom(String name) =>
+      _c2cParcelFrom.tr.replaceFirst('{name}', name);
+
+  static const String _c2cStatusQuoted = 'c2c_status_quoted';
+  static String get c2cStatusQuoted => _c2cStatusQuoted.tr;
+
+  static const String _c2cStatusQuotedDesc = 'c2c_status_quoted_desc';
+  static String get c2cStatusQuotedDesc => _c2cStatusQuotedDesc.tr;
+
+  static const String _c2cStatusPendingPayment = 'c2c_status_pending_payment';
+  static String get c2cStatusPendingPayment => _c2cStatusPendingPayment.tr;
+
+  static const String _c2cStatusPendingPaymentDesc =
+      'c2c_status_pending_payment_desc';
+  static String get c2cStatusPendingPaymentDesc =>
+      _c2cStatusPendingPaymentDesc.tr;
+
+  static const String _c2cStatusPendingDispatch = 'c2c_status_pending_dispatch';
+  static String get c2cStatusPendingDispatch => _c2cStatusPendingDispatch.tr;
+
+  static const String _c2cStatusPendingDispatchDesc =
+      'c2c_status_pending_dispatch_desc';
+  static String get c2cStatusPendingDispatchDesc =>
+      _c2cStatusPendingDispatchDesc.tr;
+
+  static const String _c2cStatusDispatching = 'c2c_status_dispatching';
+  static String get c2cStatusDispatching => _c2cStatusDispatching.tr;
+
+  static const String _c2cStatusDispatchingDesc = 'c2c_status_dispatching_desc';
+  static String get c2cStatusDispatchingDesc => _c2cStatusDispatchingDesc.tr;
+
+  static const String _c2cStatusAssignmentFailed =
+      'c2c_status_assignment_failed';
+  static String get c2cStatusAssignmentFailed => _c2cStatusAssignmentFailed.tr;
+
+  static const String _c2cStatusAssignmentFailedDesc =
+      'c2c_status_assignment_failed_desc';
+  static String get c2cStatusAssignmentFailedDesc =>
+      _c2cStatusAssignmentFailedDesc.tr;
+
+  static const String _c2cStatusDriverAssigned = 'c2c_status_driver_assigned';
+  static String get c2cStatusDriverAssigned => _c2cStatusDriverAssigned.tr;
+
+  static const String _c2cStatusDriverAssignedDesc =
+      'c2c_status_driver_assigned_desc';
+  static String get c2cStatusDriverAssignedDesc =>
+      _c2cStatusDriverAssignedDesc.tr;
+
+  static const String _c2cStatusDriverAccepted = 'c2c_status_driver_accepted';
+  static String get c2cStatusDriverAccepted => _c2cStatusDriverAccepted.tr;
+
+  static const String _c2cStatusDriverAcceptedDesc =
+      'c2c_status_driver_accepted_desc';
+  static String get c2cStatusDriverAcceptedDesc =>
+      _c2cStatusDriverAcceptedDesc.tr;
+
+  static const String _c2cStatusDriverAtPickup = 'c2c_status_driver_at_pickup';
+  static String get c2cStatusDriverAtPickup => _c2cStatusDriverAtPickup.tr;
+
+  static const String _c2cStatusDriverAtPickupDesc =
+      'c2c_status_driver_at_pickup_desc';
+  static String get c2cStatusDriverAtPickupDesc =>
+      _c2cStatusDriverAtPickupDesc.tr;
+
+  static const String _c2cStatusPickedUp = 'c2c_status_picked_up';
+  static String get c2cStatusPickedUp => _c2cStatusPickedUp.tr;
+
+  static const String _c2cStatusPickedUpDesc = 'c2c_status_picked_up_desc';
+  static String get c2cStatusPickedUpDesc => _c2cStatusPickedUpDesc.tr;
+
+  static const String _c2cStatusOutForDelivery = 'c2c_status_out_for_delivery';
+  static String get c2cStatusOutForDelivery => _c2cStatusOutForDelivery.tr;
+
+  static const String _c2cStatusOutForDeliveryDesc =
+      'c2c_status_out_for_delivery_desc';
+  static String get c2cStatusOutForDeliveryDesc =>
+      _c2cStatusOutForDeliveryDesc.tr;
+
+  static const String _c2cStatusDelivered = 'c2c_status_delivered';
+  static String get c2cStatusDelivered => _c2cStatusDelivered.tr;
+
+  static const String _c2cStatusDeliveredDesc = 'c2c_status_delivered_desc';
+  static String get c2cStatusDeliveredDesc => _c2cStatusDeliveredDesc.tr;
+
+  static const String _c2cStatusFailedDelivery = 'c2c_status_failed_delivery';
+  static String get c2cStatusFailedDelivery => _c2cStatusFailedDelivery.tr;
+
+  static const String _c2cStatusFailedDeliveryDesc =
+      'c2c_status_failed_delivery_desc';
+  static String get c2cStatusFailedDeliveryDesc =>
+      _c2cStatusFailedDeliveryDesc.tr;
+
+  static const String _c2cStatusReturningToSender =
+      'c2c_status_returning_to_sender';
+  static String get c2cStatusReturningToSender =>
+      _c2cStatusReturningToSender.tr;
+
+  static const String _c2cStatusReturningToSenderDesc =
+      'c2c_status_returning_to_sender_desc';
+  static String get c2cStatusReturningToSenderDesc =>
+      _c2cStatusReturningToSenderDesc.tr;
+
+  static const String _c2cStatusReturnedToSender =
+      'c2c_status_returned_to_sender';
+  static String get c2cStatusReturnedToSender => _c2cStatusReturnedToSender.tr;
+
+  static const String _c2cStatusReturnedToSenderDesc =
+      'c2c_status_returned_to_sender_desc';
+  static String get c2cStatusReturnedToSenderDesc =>
+      _c2cStatusReturnedToSenderDesc.tr;
+
+  static const String _c2cStatusCancelled = 'c2c_status_cancelled';
+  static String get c2cStatusCancelled => _c2cStatusCancelled.tr;
+
+  static const String _c2cStatusCancelledDesc = 'c2c_status_cancelled_desc';
+  static String get c2cStatusCancelledDesc => _c2cStatusCancelledDesc.tr;
+
+  static const String _c2cStatusUnknown = 'c2c_status_unknown';
+  static String get c2cStatusUnknown => _c2cStatusUnknown.tr;
+
+  static const String _c2cStatusUnknownDesc = 'c2c_status_unknown_desc';
+  static String get c2cStatusUnknownDesc => _c2cStatusUnknownDesc.tr;
+
+  static const String _c2cTrackingTitle = 'c2c_tracking_title';
+  static String get c2cTrackingTitle => _c2cTrackingTitle.tr;
+
+  static const String _c2cTrackingEta = 'c2c_tracking_eta';
+
+  /// `{minutes}` in the translation are replaced.
+  static String c2cTrackingEta(String minutes) =>
+      _c2cTrackingEta.tr.replaceFirst('{minutes}', minutes);
+
+  static const String _c2cTrackingRoleSender = 'c2c_tracking_role_sender';
+  static String get c2cTrackingRoleSender => _c2cTrackingRoleSender.tr;
+
+  static const String _c2cTrackingRoleRecipient = 'c2c_tracking_role_recipient';
+  static String get c2cTrackingRoleRecipient => _c2cTrackingRoleRecipient.tr;
+
+  static const String _c2cTrackingDriver = 'c2c_tracking_driver';
+  static String get c2cTrackingDriver => _c2cTrackingDriver.tr;
+
+  static const String _c2cTrackingDriverLive = 'c2c_tracking_driver_live';
+  static String get c2cTrackingDriverLive => _c2cTrackingDriverLive.tr;
+
+  static const String _c2cTrackingCancelButton = 'c2c_tracking_cancel_button';
+  static String get c2cTrackingCancelButton => _c2cTrackingCancelButton.tr;
+
+  static const String _c2cTrackingRetryButton = 'c2c_tracking_retry_button';
+  static String get c2cTrackingRetryButton => _c2cTrackingRetryButton.tr;
+
+  static const String _c2cTrackingOtpButton = 'c2c_tracking_otp_button';
+  static String get c2cTrackingOtpButton => _c2cTrackingOtpButton.tr;
+
+  static const String _c2cTrackingReturnOtpButton =
+      'c2c_tracking_return_otp_button';
+  static String get c2cTrackingReturnOtpButton =>
+      _c2cTrackingReturnOtpButton.tr;
+
+  static const String _c2cTrackingSupportButton = 'c2c_tracking_support_button';
+  static String get c2cTrackingSupportButton => _c2cTrackingSupportButton.tr;
+
+  static const String _c2cTrackingOtpTitle = 'c2c_tracking_otp_title';
+  static String get c2cTrackingOtpTitle => _c2cTrackingOtpTitle.tr;
+
+  static const String _c2cTrackingReturnOtpTitle =
+      'c2c_tracking_return_otp_title';
+  static String get c2cTrackingReturnOtpTitle => _c2cTrackingReturnOtpTitle.tr;
+
+  static const String _c2cTrackingOtpHintDelivery =
+      'c2c_tracking_otp_hint_delivery';
+  static String get c2cTrackingOtpHintDelivery =>
+      _c2cTrackingOtpHintDelivery.tr;
+
+  static const String _c2cTrackingOtpHintReturn =
+      'c2c_tracking_otp_hint_return';
+  static String get c2cTrackingOtpHintReturn => _c2cTrackingOtpHintReturn.tr;
+
+  static const String _c2cTrackingOtpExpires = 'c2c_tracking_otp_expires';
+
+  /// `{time}` in the translation are replaced.
+  static String c2cTrackingOtpExpires(String time) =>
+      _c2cTrackingOtpExpires.tr.replaceFirst('{time}', time);
+
+  static const String _c2cTrackingOtpNew = 'c2c_tracking_otp_new';
+  static String get c2cTrackingOtpNew => _c2cTrackingOtpNew.tr;
+
+  static const String _c2cTrackingCancelTitle = 'c2c_tracking_cancel_title';
+  static String get c2cTrackingCancelTitle => _c2cTrackingCancelTitle.tr;
+
+  static const String _c2cTrackingReasonLabel = 'c2c_tracking_reason_label';
+  static String get c2cTrackingReasonLabel => _c2cTrackingReasonLabel.tr;
+
+  static const String _c2cTrackingNoteHint = 'c2c_tracking_note_hint';
+  static String get c2cTrackingNoteHint => _c2cTrackingNoteHint.tr;
+
+  static const String _c2cTrackingCancelConfirm = 'c2c_tracking_cancel_confirm';
+  static String get c2cTrackingCancelConfirm => _c2cTrackingCancelConfirm.tr;
+
+  static const String _c2cTrackingCancelled = 'c2c_tracking_cancelled';
+  static String get c2cTrackingCancelled => _c2cTrackingCancelled.tr;
+
+  static const String _c2cTrackingRetried = 'c2c_tracking_retried';
+  static String get c2cTrackingRetried => _c2cTrackingRetried.tr;
+
+  static const String _c2cTrackingSupportTitle = 'c2c_tracking_support_title';
+  static String get c2cTrackingSupportTitle => _c2cTrackingSupportTitle.tr;
+
+  static const String _c2cTrackingSupportDescription =
+      'c2c_tracking_support_description';
+  static String get c2cTrackingSupportDescription =>
+      _c2cTrackingSupportDescription.tr;
+
+  static const String _c2cTrackingSupportTooShort =
+      'c2c_tracking_support_too_short';
+  static String get c2cTrackingSupportTooShort =>
+      _c2cTrackingSupportTooShort.tr;
+
+  static const String _c2cTrackingSupportSend = 'c2c_tracking_support_send';
+  static String get c2cTrackingSupportSend => _c2cTrackingSupportSend.tr;
+
+  static const String _c2cTrackingSupportSent = 'c2c_tracking_support_sent';
+  static String get c2cTrackingSupportSent => _c2cTrackingSupportSent.tr;
+
+  static const String _c2cTrackingDetailsTitle = 'c2c_tracking_details_title';
+  static String get c2cTrackingDetailsTitle => _c2cTrackingDetailsTitle.tr;
+
+  static const String _c2cTrackingSender = 'c2c_tracking_sender';
+  static String get c2cTrackingSender => _c2cTrackingSender.tr;
+
+  static const String _c2cTrackingRecipient = 'c2c_tracking_recipient';
+  static String get c2cTrackingRecipient => _c2cTrackingRecipient.tr;
+
+  static const String _c2cTrackingDescription = 'c2c_tracking_description';
+  static String get c2cTrackingDescription => _c2cTrackingDescription.tr;
+
+  static const String _c2cTrackingDeclaredValue = 'c2c_tracking_declared_value';
+  static String get c2cTrackingDeclaredValue => _c2cTrackingDeclaredValue.tr;
+
+  static const String _c2cTrackingPickupInstructions =
+      'c2c_tracking_pickup_instructions';
+  static String get c2cTrackingPickupInstructions =>
+      _c2cTrackingPickupInstructions.tr;
+
+  static const String _c2cTrackingDeliveryInstructions =
+      'c2c_tracking_delivery_instructions';
+  static String get c2cTrackingDeliveryInstructions =>
+      _c2cTrackingDeliveryInstructions.tr;
+
+  static const String _c2cTrackingWeight = 'c2c_tracking_weight';
+
+  /// `{kg}` in the translation are replaced.
+  static String c2cTrackingWeight(String kg) =>
+      _c2cTrackingWeight.tr.replaceFirst('{kg}', kg);
+
+  static const String _c2cTrackingPhotos = 'c2c_tracking_photos';
+
+  /// `{count}` in the translation are replaced.
+  static String c2cTrackingPhotos(String count) =>
+      _c2cTrackingPhotos.tr.replaceFirst('{count}', count);
+
+  static const String _c2cTrackingPayment = 'c2c_tracking_payment';
+  static String get c2cTrackingPayment => _c2cTrackingPayment.tr;
+
+  static const String _c2cTrackingTotal = 'c2c_tracking_total';
+  static String get c2cTrackingTotal => _c2cTrackingTotal.tr;
+
+  static const String _c2cTrackingTimelineTitle = 'c2c_tracking_timeline_title';
+  static String get c2cTrackingTimelineTitle => _c2cTrackingTimelineTitle.tr;
+
+  static const String _c2cTrackingPickupMarker = 'c2c_tracking_pickup_marker';
+  static String get c2cTrackingPickupMarker => _c2cTrackingPickupMarker.tr;
+
+  static const String _c2cTrackingDropoffMarker = 'c2c_tracking_dropoff_marker';
+  static String get c2cTrackingDropoffMarker => _c2cTrackingDropoffMarker.tr;
+
+  static const String _c2cCancelReasonSenderCancelled =
+      'c2c_cancel_reason_sender_cancelled';
+  static String get c2cCancelReasonSenderCancelled =>
+      _c2cCancelReasonSenderCancelled.tr;
+
+  static const String _c2cCancelReasonWrongAddress =
+      'c2c_cancel_reason_wrong_address';
+  static String get c2cCancelReasonWrongAddress =>
+      _c2cCancelReasonWrongAddress.tr;
+
+  static const String _c2cCancelReasonOther = 'c2c_cancel_reason_other';
+  static String get c2cCancelReasonOther => _c2cCancelReasonOther.tr;
+
+  static const String _c2cSupportReasonSenderUnreachable =
+      'c2c_support_reason_sender_unreachable';
+  static String get c2cSupportReasonSenderUnreachable =>
+      _c2cSupportReasonSenderUnreachable.tr;
+
+  static const String _c2cSupportReasonRecipientUnreachable =
+      'c2c_support_reason_recipient_unreachable';
+  static String get c2cSupportReasonRecipientUnreachable =>
+      _c2cSupportReasonRecipientUnreachable.tr;
+
+  static const String _c2cSupportReasonWrongAddress =
+      'c2c_support_reason_wrong_address';
+  static String get c2cSupportReasonWrongAddress =>
+      _c2cSupportReasonWrongAddress.tr;
+
+  static const String _c2cSupportReasonParcelDamaged =
+      'c2c_support_reason_parcel_damaged';
+  static String get c2cSupportReasonParcelDamaged =>
+      _c2cSupportReasonParcelDamaged.tr;
+
+  static const String _c2cSupportReasonOther = 'c2c_support_reason_other';
+  static String get c2cSupportReasonOther => _c2cSupportReasonOther.tr;
+
+  static const String _c2cHeroBadge = 'c2c_hero_badge';
+  static String get c2cHeroBadge => _c2cHeroBadge.tr;
+
+  static const String _c2cHeroTitle = 'c2c_hero_title';
+  static String get c2cHeroTitle => _c2cHeroTitle.tr;
+
+  static const String _c2cHeroSubtitle = 'c2c_hero_subtitle';
+  static String get c2cHeroSubtitle => _c2cHeroSubtitle.tr;
+
+  static const String _c2cHeroButton = 'c2c_hero_button';
+  static String get c2cHeroButton => _c2cHeroButton.tr;
+
+  static const String _c2cHeroMyParcels = 'c2c_hero_my_parcels';
+  static String get c2cHeroMyParcels => _c2cHeroMyParcels.tr;
 
   // --- Restaurants ---
   static const String _restaurantsTitle = 'restaurants_title';

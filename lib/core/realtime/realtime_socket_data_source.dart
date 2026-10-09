@@ -43,6 +43,9 @@ abstract class RealtimeSocketDataSource {
   /// Fires on every established connection, the first one included.
   Stream<void> get connectionEstablished;
 
+  /// Whether a connection is established right now.
+  bool get isConnected;
+
   Future<void> connect();
 
   Future<void> disconnect();
@@ -86,6 +89,9 @@ class PusherSocketDataSource implements RealtimeSocketDataSource {
 
   @override
   Stream<void> get connectionEstablished => _established.stream;
+
+  @override
+  bool get isConnected => _connected;
 
   @override
   Future<void> connect() async {

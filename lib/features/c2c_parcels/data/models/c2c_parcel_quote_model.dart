@@ -2,13 +2,13 @@ import '../../../../core/api/json_readers.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/c2c_parcel_quote.dart';
 
-/// `POST /customer/c2c-parcels/quote` → `{ "data": { quote_token,
-/// base_total_fee, subscription_discount, total_fee, distance_km,
-/// applied_subscription: { remaining_deliveries, … } | null, … } }`.
+/// `POST /customer/c2c-parcels/quote` → `{ "data": { distance_km,
+/// total_fee, currency, estimated_delivery_minutes, quote_token,
+/// quote_expires_at, … } }`, plus `base_total_fee`, `subscription_discount`
+/// and `applied_subscription` once a parcel plan applies.
 ///
-/// The API guide names the fields but not the envelope, so a body without
-/// the `data` wrapper is read too, and amounts may arrive as decimal
-/// strings.
+/// A body without the `data` wrapper is read too, and amounts may arrive as
+/// decimal strings.
 class C2cParcelQuoteModel extends C2cParcelQuote {
   const C2cParcelQuoteModel({
     super.quoteToken,
@@ -17,6 +17,7 @@ class C2cParcelQuoteModel extends C2cParcelQuote {
     required super.totalFee,
     required super.currency,
     super.distanceKm,
+    super.estimatedDeliveryMinutes,
     super.expiresAt,
     super.appliedSubscription,
   });
@@ -46,7 +47,12 @@ class C2cParcelQuoteModel extends C2cParcelQuote {
       totalFee: total,
       currency: jsonString(data['currency']) ?? 'SAR',
       distanceKm: jsonDouble(data['distance_km']),
-      expiresAt: DateTime.tryParse(jsonString(data['expires_at']) ?? ''),
+      estimatedDeliveryMinutes: jsonInt(data['estimated_delivery_minutes']),
+      expiresAt: DateTime.tryParse(
+        jsonString(data['quote_expires_at']) ??
+            jsonString(data['expires_at']) ??
+            '',
+      ),
       appliedSubscription: applied,
     );
   }

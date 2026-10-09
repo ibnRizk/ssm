@@ -1,4 +1,5 @@
 import '../api/json_readers.dart';
+import '../location/geo_point.dart';
 import 'realtime_event.dart';
 
 /// Builds a [RealtimeEvent] from one socket frame, or null for anything the
@@ -39,8 +40,46 @@ RealtimeEvent? parseRealtimeEvent({
       return orderId == null ? null : DriverLocationUpdated(orderId);
     case 'ssm.notification.created':
       return NotificationCreated(unreadCount: jsonInt(body['unread_count']));
+    case 'parcel.created' ||
+        'parcel.status_changed' ||
+        'parcel.driver_assigned' ||
+        'parcel.cancelled' ||
+        'parcel.failed_delivery' ||
+        'parcel.return_started' ||
+        'parcel.returned_to_sender' ||
+        'parcel.delivered':
+      final int? parcelId = _parcelId(body, channelName);
+      if (parcelId == null) return null;
+      return ParcelStatusChanged(
+        parcelId,
+        status: jsonString(body['status']),
+        statusVersion: jsonInt(body['status_version']),
+      );
+    case 'parcel.driver_location_updated':
+      final int? parcelId = _parcelId(body, channelName);
+      final double? latitude = jsonDouble(body['latitude']);
+      final double? longitude = jsonDouble(body['longitude']);
+      if (parcelId == null || latitude == null || longitude == null) {
+        return null;
+      }
+      return ParcelDriverLocationUpdated(
+        parcelId,
+        location: GeoPoint(latitude: latitude, longitude: longitude),
+        heading: jsonDouble(body['heading']),
+        recordedAt: DateTime.tryParse(jsonString(body['recorded_at']) ?? ''),
+      );
   }
   return null;
+}
+
+/// `parcel_id`, else the id in a `private-c2c-parcel.{id}` (or
+/// `….{id}.tracking`) channel name.
+int? _parcelId(Map<String, dynamic> body, String? channelName) {
+  final int? id = jsonInt(body['parcel_id']);
+  if (id != null) return id;
+  const String prefix = 'private-c2c-parcel.';
+  if (channelName == null || !channelName.startsWith(prefix)) return null;
+  return int.tryParse(channelName.substring(prefix.length).split('.').first);
 }
 
 int? _orderId(Map<String, dynamic> body, String? channelName) {

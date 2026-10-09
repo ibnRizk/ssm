@@ -38,10 +38,17 @@ import '../../features/notifications/presentation/widgets/notification_hub_liste
 import '../../features/orders/presentation/cubit/orders_cubit.dart';
 import '../../features/orders/presentation/cubit/reorder_cubit.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
+import '../../features/c2c_parcels/presentation/cubit/c2c_parcel_tracking_cubit.dart';
+import '../../features/c2c_parcels/presentation/cubit/c2c_parcels_list_cubit.dart';
+import '../../features/c2c_parcels/presentation/cubit/create_parcel_cubit.dart';
+import '../../features/c2c_parcels/presentation/cubit/send_parcel_cubit.dart';
+import '../../features/c2c_parcels/presentation/screens/c2c_parcel_tracking_screen.dart';
+import '../../features/c2c_parcels/presentation/screens/c2c_parcels_screen.dart';
+import '../../features/c2c_parcels/presentation/screens/create_parcel_screen.dart';
+import '../../features/c2c_parcels/presentation/screens/send_parcel_screen.dart';
+import '../../features/c2c_parcels/domain/entities/c2c_parcel.dart';
 import '../../features/parcels/presentation/cubit/parcels_cubit.dart';
-import '../../features/parcels/presentation/cubit/send_parcel_cubit.dart';
 import '../../features/parcels/presentation/screens/parcels_screen.dart';
-import '../../features/parcels/presentation/screens/send_parcel_screen.dart';
 import '../../features/pharmacy/presentation/cubit/pharmacy_order_cubit.dart';
 import '../../features/pharmacy/presentation/screens/pharmacy_order_screen.dart';
 import '../../features/promotions/presentation/cubit/promotions_cubit.dart';
@@ -67,6 +74,10 @@ abstract class AppRoutes {
   static const String orders = '/orders';
   static const String parcels = '/parcels';
   static const String sendParcel = '/send-parcel';
+  static const String createParcel = '/send-parcel/details';
+  static const String c2cParcels = '/c2c-parcels';
+  static const String c2cParcel = '/c2c-parcel/:parcelId';
+  static String c2cParcelPath(int parcelId) => '/c2c-parcel/$parcelId';
   static const String subscriptions = '/subscriptions';
   static const String profile = '/profile';
   static const String photoViewer = '/photo-viewer';
@@ -96,6 +107,9 @@ abstract class AppRoutes {
   static const String ordersName = 'orders';
   static const String parcelsName = 'parcels';
   static const String sendParcelName = 'sendParcel';
+  static const String createParcelName = 'createParcel';
+  static const String c2cParcelsName = 'c2cParcels';
+  static const String c2cParcelName = 'c2cParcel';
   static const String subscriptionsName = 'subscriptions';
   static const String profileName = 'profile';
   static const String photoViewerName = 'photoViewer';
@@ -441,7 +455,8 @@ abstract class AppRoutes {
         ),
       ),
 
-      // Pushed from the Parcels tab, outside the shell like `loyalty`.
+      // Door-to-door parcels — pushed from Home's banner or the Parcels
+      // tab, outside the shell like `loyalty`.
       GoRoute(
         path: sendParcel,
         name: sendParcelName,
@@ -449,6 +464,50 @@ abstract class AppRoutes {
           create: (_) => ServiceLocator.instance<SendParcelCubit>(),
           child: const SendParcelScreen(),
         ),
+      ),
+      // The details step; needs the accepted quote from `sendParcel`.
+      // Reached any other way, there's no price to book — back to step one.
+      GoRoute(
+        path: createParcel,
+        name: createParcelName,
+        redirect: (_, GoRouterState state) =>
+            state.extra is CreateParcelArgs ? null : sendParcel,
+        builder: (_, GoRouterState state) => BlocProvider<CreateParcelCubit>(
+          create: (_) => ServiceLocator.instance<CreateParcelCubit>(
+            param1: state.extra! as CreateParcelArgs,
+          ),
+          child: const CreateParcelScreen(),
+        ),
+      ),
+      GoRoute(
+        path: c2cParcels,
+        name: c2cParcelsName,
+        builder: (_, __) => C2cParcelsScreen(
+          createList: (C2cParcelBox box) =>
+              ServiceLocator.instance<C2cParcelsListCubit>(param1: box),
+        ),
+      ),
+      // Top level rather than under `c2cParcels`, so opening a parcel from
+      // a push or the create flow doesn't stack the list beneath it.
+      GoRoute(
+        path: c2cParcel,
+        name: c2cParcelName,
+        builder: (_, GoRouterState state) {
+          final int? parcelId = int.tryParse(
+            state.pathParameters['parcelId'] ?? '',
+          );
+          if (parcelId == null) {
+            return Scaffold(
+              body: Center(child: Text('No route found for ${state.uri}')),
+            );
+          }
+          return BlocProvider<C2cParcelTrackingCubit>(
+            create: (_) => ServiceLocator.instance<C2cParcelTrackingCubit>(
+              param1: parcelId,
+            )..load(),
+            child: const C2cParcelTrackingScreen(),
+          );
+        },
       ),
 
       // Pushed from the Account tab, outside the shell like `loyalty`.

@@ -17,14 +17,18 @@ import '../../../../core/widgets/simple_app_bar.dart';
 import '../../domain/entities/c2c_parcel_quote.dart';
 import '../cubit/send_parcel_cubit.dart';
 import '../cubit/send_parcel_state.dart';
+import '../../../../config/routes/app_routes.dart';
+import '../cubit/create_parcel_cubit.dart';
+import '../utils/c2c_parcel_labels.dart';
+import '../widgets/parcel_category_selector.dart';
 import '../widgets/parcel_point_field.dart';
 import '../widgets/parcel_quote_summary.dart';
-import '../widgets/parcel_size_selector.dart';
 
-/// Pushed from the Parcels tab. Prices a door-to-door parcel: both ends,
-/// size, weight and whether it's fragile; the server applies the
-/// customer's parcel plan when one fits. Expects a [SendParcelCubit] above
-/// it (provided at the route).
+/// Pushed from Home or the Parcels tab. Prices a door-to-door parcel: both
+/// ends, category, weight and whether it's fragile; the server applies the
+/// customer's parcel plan when one fits. The accepted price moves on to
+/// [CreateParcelArgs] and the details step. Expects a [SendParcelCubit]
+/// above it (provided at the route).
 ///
 /// Stateful only to own the form key and the text controllers.
 class SendParcelScreen extends StatefulWidget {
@@ -102,7 +106,7 @@ class _SendParcelScreenState extends State<SendParcelScreen> {
                   SizedBox(height: AppSpacing.lg.h),
                   LabeledField(
                     label: Strings.sendParcelSizeLabel,
-                    child: const _SizeSelector(),
+                    child: const _CategorySelector(),
                   ),
                   SizedBox(height: AppSpacing.lg.h),
                   LabeledField(
@@ -169,17 +173,18 @@ class _SendParcelScreenState extends State<SendParcelScreen> {
   }
 }
 
-class _SizeSelector extends StatelessWidget {
-  const _SizeSelector();
+class _CategorySelector extends StatelessWidget {
+  const _CategorySelector();
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<SendParcelCubit, SendParcelState, ParcelSize>(
-      selector: (SendParcelState state) => state.size,
-      builder: (BuildContext context, ParcelSize size) => ParcelSizeSelector(
-        selected: size,
-        onChanged: context.read<SendParcelCubit>().setSize,
-      ),
+    return BlocSelector<SendParcelCubit, SendParcelState, ParcelCategory>(
+      selector: (SendParcelState state) => state.category,
+      builder: (BuildContext context, ParcelCategory category) =>
+          ParcelCategorySelector(
+            selected: category,
+            onChanged: context.read<SendParcelCubit>().setCategory,
+          ),
     );
   }
 }
@@ -219,9 +224,15 @@ class _QuoteResult extends StatelessWidget {
     return BlocSelector<SendParcelCubit, SendParcelState, QuoteStatus>(
       selector: (SendParcelState state) => state.quote,
       builder: (BuildContext context, QuoteStatus quote) => switch (quote) {
-        QuoteReady(:final quote) => ParcelQuoteSummary(quote: quote),
+        QuoteReady(:final quote, :final request) => ParcelQuoteSummary(
+          quote: quote,
+          onConfirm: () => context.push(
+            AppRoutes.createParcel,
+            extra: CreateParcelArgs(request: request, quote: quote),
+          ),
+        ),
         QuoteFailed(:final failure) => ErrorText(
-          message: failure.userMessage,
+          message: failure.c2cMessage,
           margin: EdgeInsets.zero,
           onRetry: onRetry,
         ),

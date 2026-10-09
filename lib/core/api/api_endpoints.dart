@@ -93,6 +93,22 @@ abstract class ApiEndpoints {
       '$c2cParcels/subscription-plans';
   static const String c2cParcelSubscriptions = '$c2cParcels/subscriptions';
 
+  /// Parcels sent to the customer (matched by account or verified phone).
+  static const String c2cParcelsReceived = '$c2cParcels/recipient';
+  static String c2cParcel(int parcelId) => '$c2cParcels/$parcelId';
+  static String c2cParcelTracking(int parcelId) =>
+      '${c2cParcel(parcelId)}/tracking';
+  static String c2cParcelCancel(int parcelId) =>
+      '${c2cParcel(parcelId)}/cancel';
+  static String c2cParcelRetryDispatch(int parcelId) =>
+      '${c2cParcel(parcelId)}/retry-dispatch';
+
+  /// The delivery code — or, while returning, the sender's return code.
+  static String c2cParcelOtpRequest(int parcelId) =>
+      '${c2cParcel(parcelId)}/delivery-otp/request';
+  static String c2cParcelSupport(int parcelId) =>
+      '${c2cParcel(parcelId)}/support';
+
   // --- Zones ---
   static const String zoneList = '$_v1/zone/list';
 

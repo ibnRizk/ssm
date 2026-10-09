@@ -55,7 +55,7 @@ class OrderTrackingCubit extends Cubit<OrderTrackingState> {
   bool _concernsThisOrder(RealtimeEvent event) => switch (event) {
     OrderRealtimeEvent(orderId: final int id) => id == orderId,
     RealtimeReconnected() => true,
-    NotificationCreated() => false,
+    NotificationCreated() || ParcelRealtimeEvent() => false,
   };
 
   Timer? _timer;

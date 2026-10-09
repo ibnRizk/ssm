@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/utils/failure_message.dart';
 import '../../../../core/widgets/error_text.dart';
+import '../../../c2c_parcels/presentation/widgets/c2c_hero_banner.dart';
 import '../../../promotions/presentation/cubit/promotions_cubit.dart';
 import '../../../promotions/presentation/widgets/featured_slider_widget.dart';
 import '../cubit/home_cubit.dart';
@@ -45,6 +48,11 @@ class HomeScreen extends StatelessWidget {
               const HomeHeader(),
               SizedBox(height: AppSpacing.lg.h),
               const HomeSearchField(),
+              SizedBox(height: AppSpacing.lg.h),
+              C2cHeroBanner(
+                onSend: () => context.push(AppRoutes.sendParcel),
+                onMyParcels: () => context.push(AppRoutes.c2cParcels),
+              ),
               SizedBox(height: AppSpacing.lg.h),
               // Owns its gap below, so the layout closes up when it hides.
               FeaturedSliderWidget(bottomSpacing: AppSpacing.xl.h),

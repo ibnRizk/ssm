@@ -10,7 +10,7 @@ enum ParcelEnd { pickup, dropoff }
 class SendParcelState extends Equatable {
   final GeoPoint? pickup;
   final GeoPoint? dropoff;
-  final ParcelSize size;
+  final ParcelCategory category;
   final bool isFragile;
 
   /// The end whose GPS position is being read; null when idle.
@@ -25,7 +25,7 @@ class SendParcelState extends Equatable {
   const SendParcelState({
     this.pickup,
     this.dropoff,
-    this.size = ParcelSize.medium,
+    this.category = ParcelCategory.medium,
     this.isFragile = false,
     this.locating,
     this.quote = const QuoteIdle(),
@@ -40,7 +40,7 @@ class SendParcelState extends Equatable {
   SendParcelState copyWith({
     GeoPoint? pickup,
     GeoPoint? dropoff,
-    ParcelSize? size,
+    ParcelCategory? category,
     bool? isFragile,
     ParcelEnd? Function()? locating,
     QuoteStatus? quote,
@@ -48,7 +48,7 @@ class SendParcelState extends Equatable {
   }) => SendParcelState(
     pickup: pickup ?? this.pickup,
     dropoff: dropoff ?? this.dropoff,
-    size: size ?? this.size,
+    category: category ?? this.category,
     isFragile: isFragile ?? this.isFragile,
     locating: locating == null ? this.locating : locating(),
     quote: quote ?? this.quote,
@@ -59,7 +59,7 @@ class SendParcelState extends Equatable {
   List<Object?> get props => [
     pickup,
     dropoff,
-    size,
+    category,
     isFragile,
     locating,
     quote,
@@ -85,13 +85,15 @@ final class QuoteLoading extends QuoteStatus {
   const QuoteLoading();
 }
 
+/// [quote] is the price of [request] — what the create step books.
 final class QuoteReady extends QuoteStatus {
   final C2cParcelQuote quote;
+  final C2cQuoteRequest request;
 
-  const QuoteReady(this.quote);
+  const QuoteReady(this.quote, this.request);
 
   @override
-  List<Object?> get props => [quote];
+  List<Object?> get props => [quote, request];
 }
 
 /// E.g. 422 for a parcel beyond the allowed distance or weight, with the

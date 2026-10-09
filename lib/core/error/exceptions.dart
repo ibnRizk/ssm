@@ -22,12 +22,18 @@ class ServerException extends AppException {
   @override
   final String? message;
 
-  const ServerException({this.message});
+  /// See [ServerFailure.code].
+  final String? code;
+
+  const ServerException({this.message, this.code});
 
   @override
   Failure toFailure() {
-    return ServerFailure(message: message);
+    return ServerFailure(message: message, code: code);
   }
+
+  @override
+  List<Object?> get props => [message, code];
 }
 
 class FetchDataException extends AppException {
