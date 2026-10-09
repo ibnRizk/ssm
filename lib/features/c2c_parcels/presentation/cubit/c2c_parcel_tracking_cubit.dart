@@ -24,17 +24,21 @@ typedef C2cPeriodicTimerFactory =
 ///   `….tracking` move the map directly. The tracking channel is only
 ///   watched while the viewer may see the driver.
 /// * **Polling fallback** — every `polling_interval_seconds` (15 s until
-///   the server says), `/tracking` is polled, but only while the socket is
-///   down. Stops once the parcel is final.
+///   the server says), `/tracking` is polled while the socket is down. A
+///   connected socket doesn't prove this parcel's channel was authorized,
+///   so the parcel is still synced at least every
+///   [connectedPollInterval]. Stops once the parcel is final.
 /// * **Commands** — cancel, retry dispatch and support send the
 ///   `status_version` the customer saw as `expected_version`, with one
-///   Idempotency-Key per attempt, reused while its outcome is unknown.
+///   Idempotency-Key per attempt, reused while its outcome is unknown and
+///   the request is the same.
 class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
   final int parcelId;
   final C2cParcelsRepository repository;
   final RealtimeRepository realtime;
   final C2cPeriodicTimerFactory _periodicTimer;
   final String Function() newIdempotencyKey;
+  final DateTime Function() now;
 
   C2cParcelTrackingCubit({
     required this.parcelId,
@@ -42,6 +46,7 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
     required this.realtime,
     C2cPeriodicTimerFactory periodicTimer = Timer.periodic,
     this.newIdempotencyKey = uuidV4,
+    this.now = DateTime.now,
   }) : _periodicTimer = periodicTimer,
        super(const C2cTrackingLoading()) {
     realtime.watchParcel(parcelId);
@@ -49,6 +54,10 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
   }
 
   static const Duration defaultPollInterval = Duration(seconds: 15);
+
+  /// While the socket is up, the longest the parcel goes unsynced — in
+  /// case its channel's authorization failed and no event will ever come.
+  static const Duration connectedPollInterval = Duration(seconds: 60);
 
   /// The API guide's floor for a sane poll; anything faster is clamped.
   static const Duration _minPollInterval = Duration(seconds: 5);
@@ -60,9 +69,16 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
   bool _watchingTracking = false;
   bool _refreshing = false;
 
+  /// A refresh was asked for while one was in flight — run once more.
+  bool _refreshAgain = false;
+
+  /// When the parcel was last known to be current: a successful read, or
+  /// an event for it on the socket.
+  DateTime? _lastSync;
+
   /// The key of a command whose outcome is unknown, with what it was for —
   /// see [_keyFor].
-  (C2cCommand, int, String)? _pendingCommand;
+  (C2cCommand, int, Object?, String)? _pendingCommand;
 
   /// Details and live view, concurrently. Without the details there's
   /// nothing to show; without the live view, the details stand in.
@@ -79,6 +95,7 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
     details.fold((Failure failure) => emit(C2cTrackingError(failure)), (
       C2cParcelDetails parcel,
     ) {
+      _lastSync = now();
       emit(
         C2cTrackingLoaded(
           details: parcel,
@@ -90,46 +107,67 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
   }
 
   /// Re-reads both — after a status event, a command, or pull-to-refresh.
-  /// Skipped while one is already in flight.
+  /// A call made while one is in flight runs once more after it, so an
+  /// event that lands mid-request is never lost.
   Future<void> refresh() async {
-    if (_refreshing || state is! C2cTrackingLoaded) return;
+    if (state is! C2cTrackingLoaded) return;
+    if (_refreshing) {
+      _refreshAgain = true;
+      return;
+    }
     _refreshing = true;
     try {
-      final (
-        Either<Failure, C2cParcelDetails> details,
-        Either<Failure, C2cParcelTracking> tracking,
-      ) = await (
-        repository.getParcelDetails(parcelId),
-        repository.getTracking(parcelId),
-      ).wait;
-      final C2cParcelTrackingState current = state;
-      if (isClosed || current is! C2cTrackingLoaded) return;
-      final C2cParcelDetails? fresh = details.fold(
-        (_) => null,
-        (C2cParcelDetails d) => d,
-      );
-      emit(
-        current.copyWith(
-          // Never step back to an older version than the one shown.
-          details:
-              fresh != null &&
-                  fresh.statusVersion >= current.details.statusVersion
-              ? fresh
-              : null,
-          tracking: tracking.fold((_) => null, (C2cParcelTracking t) => t),
-          otp: _otpStillUseful(fresh ?? current.details) ? null : _otpIdle,
-        ),
-      );
-      _afterChange();
+      do {
+        _refreshAgain = false;
+        await _refreshOnce();
+      } while (_refreshAgain && !isClosed);
     } finally {
       _refreshing = false;
     }
   }
 
+  Future<void> _refreshOnce() async {
+    final (
+      Either<Failure, C2cParcelDetails> details,
+      Either<Failure, C2cParcelTracking> tracking,
+    ) = await (
+      repository.getParcelDetails(parcelId),
+      repository.getTracking(parcelId),
+    ).wait;
+    final C2cParcelTrackingState current = state;
+    if (isClosed || current is! C2cTrackingLoaded) return;
+    final C2cParcelDetails? fresh = details.fold(
+      (_) => null,
+      (C2cParcelDetails d) => d,
+    );
+    if (fresh != null) _lastSync = now();
+    // Never step back to an older version than the one shown.
+    final bool useFresh =
+        fresh != null && fresh.statusVersion >= current.details.statusVersion;
+    final C2cParcelDetails shown = useFresh ? fresh : current.details;
+    // A code belongs to the stage it was issued in: a delivery code is void
+    // once the parcel turns back to the sender.
+    final bool stageChanged = shown.status != current.details.status;
+    emit(
+      current.copyWith(
+        details: useFresh ? fresh : null,
+        tracking: tracking.fold((_) => null, (C2cParcelTracking t) => t),
+        otp: stageChanged || !_otpStillUseful(shown) ? _otpIdle : null,
+      ),
+    );
+    _afterChange();
+  }
+
   /// The polling fallback: the live view only, and the details too when
   /// it reveals a newer status.
   Future<void> _poll() async {
-    if (_refreshing || realtime.isConnected) return;
+    if (_refreshing) return;
+    final DateTime? last = _lastSync;
+    if (realtime.isConnected &&
+        last != null &&
+        now().difference(last) < connectedPollInterval) {
+      return;
+    }
     final C2cParcelTrackingState before = state;
     if (before is! C2cTrackingLoaded) return;
     final Either<Failure, C2cParcelTracking> result = await repository
@@ -137,6 +175,7 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
     final C2cParcelTrackingState current = state;
     if (isClosed || current is! C2cTrackingLoaded) return;
     await result.fold((_) async {}, (C2cParcelTracking tracking) async {
+      _lastSync = now();
       if (tracking.statusVersion > current.details.statusVersion) {
         await refresh();
       } else {
@@ -151,6 +190,8 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
     switch (event) {
       case ParcelStatusChanged(:final int parcelId, :final int? statusVersion)
           when parcelId == this.parcelId:
+        // The channel works; this parcel is being followed.
+        _lastSync = now();
         // Already showing this version (e.g. after our own command).
         if (current is C2cTrackingLoaded &&
             statusVersion != null &&
@@ -165,9 +206,18 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
             :final recordedAt,
           )
           when parcelId == this.parcelId:
+        _lastSync = now();
         if (current is! C2cTrackingLoaded) return;
         final C2cParcelTracking? tracking = current.tracking;
         if (tracking == null || tracking.isTerminal) return;
+        // The socket doesn't guarantee order: never move the driver back
+        // to an older position.
+        final DateTime? shownAt = tracking.driverLocation?.recordedAt;
+        if (shownAt != null &&
+            recordedAt != null &&
+            !recordedAt.isAfter(shownAt)) {
+          return;
+        }
         emit(
           current.copyWith(
             tracking: tracking.withDriverLocation(
@@ -192,21 +242,24 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
   // --- Commands ---
 
   /// Sender only, before pickup.
-  Future<void> cancel(C2cCancelReason reason, {String? note}) =>
-      _runCommand(C2cCommand.cancel, (C2cParcelDetails parcel) {
-        if (!parcel.canCancel) return null;
-        return (String key) => repository.cancelParcel(
-          parcelId,
-          reason: reason,
-          note: note,
-          expectedVersion: parcel.statusVersion,
-          idempotencyKey: key,
-        );
-      });
+  Future<void> cancel(C2cCancelReason reason, {String? note}) => _runCommand(
+    C2cCommand.cancel,
+    (reason, note?.trim() ?? ''),
+    (C2cParcelDetails parcel) {
+      if (!parcel.canCancel) return null;
+      return (String key) => repository.cancelParcel(
+        parcelId,
+        reason: reason,
+        note: note,
+        expectedVersion: parcel.statusVersion,
+        idempotencyKey: key,
+      );
+    },
+  );
 
   /// Sender only, after no driver could be found.
   Future<void> retryDispatch() =>
-      _runCommand(C2cCommand.retryDispatch, (C2cParcelDetails parcel) {
+      _runCommand(C2cCommand.retryDispatch, null, (C2cParcelDetails parcel) {
         if (!parcel.canRetryDispatch) return null;
         return (String key) => repository.retryDispatch(
           parcelId,
@@ -215,23 +268,29 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
         );
       });
 
-  Future<void> openSupportCase(C2cSupportReason reason, String description) =>
-      _runCommand(C2cCommand.support, (C2cParcelDetails parcel) {
-        final String text = description.trim();
-        if (!parcel.canOpenSupportCase || text.length < 5) return null;
-        return (String key) => repository.openSupportCase(
-          parcelId,
-          reason: reason,
-          description: text,
-          idempotencyKey: key,
-        );
-      });
+  Future<void> openSupportCase(C2cSupportReason reason, String description) {
+    final String text = description.trim();
+    return _runCommand(C2cCommand.support, (reason, text), (
+      C2cParcelDetails parcel,
+    ) {
+      if (!parcel.canOpenSupportCase || text.length < 5) return null;
+      return (String key) => repository.openSupportCase(
+        parcelId,
+        reason: reason,
+        description: text,
+        idempotencyKey: key,
+      );
+    });
+  }
 
   /// Runs [build]'s request unless it declines (returns null) or another
-  /// command is running. Success re-reads the parcel; a `stale_version`
-  /// refusal re-reads it too, so the customer sees why.
+  /// command is running. [body] identifies what is sent, so a retry reuses
+  /// the key only for the very same request. Success re-reads the parcel;
+  /// so does any refusal, since the server's view then differs from the
+  /// one shown.
   Future<void> _runCommand(
     C2cCommand command,
+    Object? body,
     Future<Either<Failure, Unit>> Function(String key)? Function(
       C2cParcelDetails parcel,
     )
@@ -248,7 +307,7 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
     );
     if (send == null) return;
 
-    final String key = _keyFor(command, version);
+    final String key = _keyFor(command, version, body);
     emit(current.copyWith(command: C2cCommandInProgress(command)));
     final Either<Failure, Unit> result = await send(key);
     if (!result.fold(_outcomeUnknown, (_) => false)) _pendingCommand = null;
@@ -264,21 +323,26 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
       ),
     );
     final bool reread = result.fold(
-      (Failure failure) => _isStale(failure),
+      _isRefusal,
       (_) => command != C2cCommand.support,
     );
     if (reread) await refresh();
   }
 
-  /// The same command at the same version reuses the key of an attempt
-  /// whose outcome is unknown; anything else gets a new one.
-  String _keyFor(C2cCommand command, int version) {
-    final (C2cCommand, int, String)? pending = _pendingCommand;
-    if (pending != null && pending.$1 == command && pending.$2 == version) {
-      return pending.$3;
+  /// The same request (command, version and body) reuses the key of an
+  /// attempt whose outcome is unknown; anything else gets a new one — a
+  /// changed body under the old key would be refused as
+  /// `idempotency_conflict`.
+  String _keyFor(C2cCommand command, int version, Object? body) {
+    final (C2cCommand, int, Object?, String)? pending = _pendingCommand;
+    if (pending != null &&
+        pending.$1 == command &&
+        pending.$2 == version &&
+        pending.$3 == body) {
+      return pending.$4;
     }
     final String key = newIdempotencyKey();
-    _pendingCommand = (command, version, key);
+    _pendingCommand = (command, version, body, key);
     return key;
   }
 
@@ -301,12 +365,18 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
         current.otp is OtpLoading) {
       return;
     }
+    final C2cParcelStatus askedAt = current.details.status;
     emit(current.copyWith(otp: const OtpLoading()));
     final Either<Failure, C2cParcelOtp> result = await repository.requestOtp(
       parcelId,
     );
     final C2cParcelTrackingState latest = state;
     if (isClosed || latest is! C2cTrackingLoaded) return;
+    // The parcel changed stage meanwhile: the code is for the stage it left.
+    if (latest.details.status != askedAt) {
+      emit(latest.copyWith(otp: _otpIdle));
+      return;
+    }
     emit(
       latest.copyWith(
         otp: result.fold<DeliveryOtpState>(
@@ -389,9 +459,15 @@ class C2cParcelTrackingCubit extends Cubit<C2cParcelTrackingState> {
   static bool _otpStillUseful(C2cParcelDetails parcel) =>
       parcel.status.allowsDeliveryOtp || parcel.status.allowsReturnOtp;
 
-  static bool _isStale(Failure failure) =>
-      failure is ConflictFailure &&
-      failure.code == C2cParcelErrorCode.staleVersion;
+  /// The server refused on purpose (it sent a code), so its view of the
+  /// parcel differs from the one shown — `stale_version`, a status that no
+  /// longer allows the command, and the like.
+  static bool _isRefusal(Failure failure) => switch (failure) {
+    ConflictFailure(:final String? code) =>
+      code != null && code != C2cParcelErrorCode.requestInProgress,
+    ServerFailure(:final String? code) => code != null,
+    _ => false,
+  };
 
   /// The command may or may not have gone through — keep the key.
   static bool _outcomeUnknown(Failure failure) => switch (failure) {

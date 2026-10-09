@@ -89,6 +89,15 @@ void main() {
       expect(result, const NotFoundException(message: 'Cart item not found'));
     });
 
+    test('413 from the proxy is a coded refusal, not an unknown outcome', () {
+      final AppException result = mapDioException(
+        _badResponse(413, '<html>413 Request Entity Too Large</html>'),
+      );
+
+      expect(result, isA<ServerException>());
+      expect((result as ServerException).code, payloadTooLargeCode);
+    });
+
     test('401 wrong credentials maps to UnauthorizedException', () {
       final AppException result = mapDioException(
         _badResponse(401, <String, dynamic>{

@@ -87,8 +87,13 @@ enum C2cViewerRole {
   sender,
   recipient;
 
-  static C2cViewerRole fromWire(String? value) =>
-      value == 'recipient' ? recipient : sender;
+  /// A missing or unknown role reads as [recipient], the one with fewer
+  /// rights, so a malformed response never unlocks sender-only details or
+  /// commands.
+  static C2cViewerRole fromWire(String? value) => switch (value) {
+    'sender' => sender,
+    _ => recipient,
+  };
 }
 
 /// Why a parcel was cancelled, sent as `reason_code`.

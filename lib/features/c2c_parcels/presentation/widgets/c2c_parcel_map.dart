@@ -10,7 +10,9 @@ import '../../../../core/utils/values/strings.dart';
 
 /// Pickup, drop-off and the driver's live position. A new driver position
 /// glides from the previous one instead of jumping, and the camera keeps
-/// every point in view as points appear.
+/// every point in view as points appear. The parent should rebuild it only
+/// when [driver] (or an end) changes — see the tracking screen's map
+/// selector.
 class C2cParcelMap extends StatefulWidget {
   /// Null for a recipient (the server hides it).
   final GeoPoint? pickup;
@@ -37,6 +39,13 @@ class _C2cParcelMapState extends State<C2cParcelMap>
   /// Which points the camera last framed — reframed when that set changes.
   String? _framed;
 
+  /// Each marker move crosses the platform channel, so the glide is drawn
+  /// in steps of this length (~12 per glide) rather than on every vsync.
+  static const Duration _glideStep = Duration(milliseconds: 100);
+
+  /// When, into the current glide, the marker was last moved.
+  Duration _lastStep = Duration.zero;
+
   /// Panning the map must not scroll the page around it.
   static final Set<Factory<OneSequenceGestureRecognizer>> _gestures =
       <Factory<OneSequenceGestureRecognizer>>{
@@ -51,9 +60,16 @@ class _C2cParcelMapState extends State<C2cParcelMap>
     _glide = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
-    );
+    )..addListener(_onGlideTick);
     final GeoPoint? driver = widget.driver;
     if (driver != null) _from = _to = _latLng(driver);
+  }
+
+  void _onGlideTick() {
+    final Duration elapsed = _glide.lastElapsedDuration ?? Duration.zero;
+    if (!_glide.isCompleted && elapsed - _lastStep < _glideStep) return;
+    _lastStep = elapsed;
+    setState(() {});
   }
 
   @override
@@ -66,6 +82,7 @@ class _C2cParcelMapState extends State<C2cParcelMap>
       // Start the next glide from wherever the marker is now.
       _from = _driverPosition ?? _latLng(driver);
       _to = _latLng(driver);
+      _lastStep = Duration.zero;
       _glide.forward(from: 0);
     }
     _frameIfNeeded();
@@ -172,27 +189,24 @@ class _C2cParcelMapState extends State<C2cParcelMap>
       borderRadius: BorderRadius.circular(AppRadius.lg.r),
       child: SizedBox(
         height: 220.h,
-        // Each glide frame hands the map an updated marker set; the plugin
-        // only moves the marker that changed.
-        child: AnimatedBuilder(
-          animation: _glide,
-          builder: (BuildContext context, _) => GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: points.isEmpty ? _fallbackCenter : points.first,
-              zoom: 13,
-            ),
-            onMapCreated: (GoogleMapController controller) {
-              _controller = controller;
-              _frameIfNeeded();
-            },
-            markers: _markers(),
-            gestureRecognizers: _gestures,
-            myLocationEnabled: false,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            mapToolbarEnabled: false,
-            compassEnabled: false,
+        // Each glide step ([_onGlideTick]) hands the map an updated marker
+        // set; the plugin only moves the marker that changed.
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: points.isEmpty ? _fallbackCenter : points.first,
+            zoom: 13,
           ),
+          onMapCreated: (GoogleMapController controller) {
+            _controller = controller;
+            _frameIfNeeded();
+          },
+          markers: _markers(),
+          gestureRecognizers: _gestures,
+          myLocationEnabled: false,
+          myLocationButtonEnabled: false,
+          zoomControlsEnabled: false,
+          mapToolbarEnabled: false,
+          compassEnabled: false,
         ),
       ),
     );

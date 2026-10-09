@@ -112,6 +112,13 @@ final class PriceChanged extends CreateParcelNotice {
   List<Object?> get props => [quote];
 }
 
+/// An earlier attempt whose answer was lost did create the parcel: the
+/// server refused the changed form under its key (`idempotency_conflict`).
+/// The customer should look in Sent rather than send again.
+final class MaybeAlreadySent extends CreateParcelNotice {
+  const MaybeAlreadySent();
+}
+
 /// Picking photos, re-quoting or creating failed.
 final class CreateFailed extends CreateParcelNotice {
   final Failure failure;

@@ -5,6 +5,10 @@ import '../error/exceptions.dart';
 import '../utils/values/strings.dart';
 import 'status_code.dart';
 
+/// The code a 413 carries — the request was refused before reaching the
+/// app, so nothing was created and a retry needs a smaller body.
+const String payloadTooLargeCode = 'payload_too_large';
+
 /// Maps a failed Dio call to the app's typed exceptions.
 ///
 /// Status codes follow the backend contract in
@@ -35,6 +39,10 @@ AppException mapDioException(DioException error) {
       );
     case StatusCode.tooManyRequests:
       return TooManyRequestsException(message: apiErrorMessage(data));
+    case StatusCode.payloadTooLarge:
+      // Usually the proxy's HTML page, before the app ever saw the request;
+      // `userMessage` words it.
+      return const ServerException(code: payloadTooLargeCode);
     case StatusCode.unProcessableContent:
       if (data is Map<String, dynamic>) {
         return ServerException(

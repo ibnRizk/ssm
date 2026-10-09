@@ -76,6 +76,7 @@ void main() {
   late List<_ManualTimer> timers;
   late C2cParcelTrackingCubit cubit;
   late int keys;
+  late DateTime clock;
 
   C2cParcelDetails details = _parcel();
   C2cParcelTracking tracking = _tracking();
@@ -83,6 +84,7 @@ void main() {
   setUp(() {
     details = _parcel();
     tracking = _tracking();
+    clock = DateTime.utc(2026, 10, 9, 12);
     repository = FakeC2cParcelsRepository()
       ..onDetails = (() async => Right(details))
       ..onTracking = (() async => Right(tracking));
@@ -99,6 +101,7 @@ void main() {
         return timer;
       },
       newIdempotencyKey: () => 'key-${++keys}',
+      now: () => clock,
     );
   });
 
@@ -262,6 +265,51 @@ void main() {
       expect(repository.detailsCalls, before + 1);
     });
 
+    test('a status event during a refresh is not lost', () async {
+      await cubit.load();
+      final Completer<Either<Failure, C2cParcelDetails>> inFlightRead =
+          Completer<Either<Failure, C2cParcelDetails>>();
+      repository.onDetails = () => inFlightRead.future;
+      final Future<void> inFlight = cubit.refresh();
+
+      // The parcel moves on after the in-flight read was already answered.
+      realtime.emit(const ParcelStatusChanged(_id, statusVersion: 5));
+      repository.onDetails = () async =>
+          Right(_parcel(status: C2cParcelStatus.driverAccepted, version: 5));
+      inFlightRead.complete(Right(_parcel()));
+      await inFlight;
+
+      expect(loaded().details.status, C2cParcelStatus.driverAccepted);
+    });
+
+    test('an older driver position never moves the driver back', () async {
+      details = _parcel(status: C2cParcelStatus.outForDelivery);
+      tracking = _tracking(status: C2cParcelStatus.outForDelivery);
+      await cubit.load();
+      final DateTime at = DateTime.utc(2026, 10, 9, 12, 0, 10);
+
+      realtime
+        ..emit(
+          ParcelDriverLocationUpdated(
+            _id,
+            location: const GeoPoint(latitude: 30.05, longitude: 31.24),
+            recordedAt: at,
+          ),
+        )
+        ..emit(
+          ParcelDriverLocationUpdated(
+            _id,
+            location: const GeoPoint(latitude: 30.01, longitude: 31.20),
+            recordedAt: at.subtract(const Duration(seconds: 5)),
+          ),
+        );
+
+      expect(
+        loaded().tracking!.driverLocation!.point,
+        const GeoPoint(latitude: 30.05, longitude: 31.24),
+      );
+    });
+
     test('a stale refetch never steps back a version', () async {
       details = _parcel(status: C2cParcelStatus.pickedUp, version: 7);
       await cubit.load();
@@ -287,6 +335,37 @@ void main() {
       liveTimer().fire();
       await pumpEventQueue();
       expect(repository.trackingCalls, before + 1);
+    });
+
+    test('a connected socket still syncs a quiet parcel every minute', () async {
+      // Its channel's authorization may have failed: no event would come.
+      await cubit.load();
+      realtime.connected = true;
+      final int before = repository.trackingCalls;
+
+      clock = clock.add(const Duration(seconds: 30));
+      liveTimer().fire();
+      await pumpEventQueue();
+      expect(repository.trackingCalls, before);
+
+      clock = clock.add(const Duration(seconds: 31));
+      liveTimer().fire();
+      await pumpEventQueue();
+      expect(repository.trackingCalls, before + 1);
+    });
+
+    test('an event for the parcel proves the channel works', () async {
+      await cubit.load();
+      realtime.connected = true;
+      final int before = repository.trackingCalls;
+
+      clock = clock.add(const Duration(seconds: 40));
+      realtime.emit(const ParcelStatusChanged(_id, statusVersion: 3));
+      clock = clock.add(const Duration(seconds: 30));
+      liveTimer().fire();
+      await pumpEventQueue();
+
+      expect(repository.trackingCalls, before);
     });
 
     test('a poll that reveals a newer status refetches the details', () async {
@@ -373,6 +452,52 @@ void main() {
       await cubit.cancel(C2cCancelReason.senderCancelled);
 
       expect(repository.commands.map((c) => c.$3), <String>['key-1', 'key-1']);
+    });
+
+    test('a retry with a different reason gets a new key', () async {
+      // The old key with a changed body would be an idempotency_conflict.
+      await cubit.load();
+      repository.onCommand = () async => const Left(NetworkFailure());
+      await cubit.cancel(C2cCancelReason.wrongAddress);
+      cubit.clearCommand();
+
+      await cubit.cancel(C2cCancelReason.other);
+
+      expect(repository.commands.map((c) => c.$3), <String>['key-1', 'key-2']);
+    });
+
+    test('a lost support case is retried with the same key', () async {
+      await cubit.load();
+      repository.onCommand = () async => const Left(NetworkFailure());
+      await cubit.openSupportCase(C2cSupportReason.other, 'Driver is late');
+      cubit.clearCommand();
+
+      await cubit.openSupportCase(C2cSupportReason.other, ' Driver is late ');
+
+      expect(repository.commands.map((c) => c.$3), <String>['key-1', 'key-1']);
+    });
+
+    test('any refusal re-reads the parcel, not only stale_version', () async {
+      await cubit.load();
+      repository.onCommand = () async => const Left(
+        ServerFailure(code: C2cParcelErrorCode.cancelNotAllowedAfterPickup),
+      );
+      details = _parcel(status: C2cParcelStatus.pickedUp, version: 6);
+
+      await cubit.cancel(C2cCancelReason.senderCancelled);
+
+      expect(loaded().details.status, C2cParcelStatus.pickedUp);
+      expect(loaded().details.canCancel, isFalse);
+    });
+
+    test('a lost answer does not re-read', () async {
+      await cubit.load();
+      repository.onCommand = () async => const Left(NetworkFailure());
+      final int before = repository.detailsCalls;
+
+      await cubit.cancel(C2cCancelReason.senderCancelled);
+
+      expect(repository.detailsCalls, before);
     });
 
     test('a refused command frees its key', () async {
@@ -465,6 +590,40 @@ void main() {
 
       details = _parcel(status: C2cParcelStatus.delivered, version: 9);
       await cubit.refresh();
+
+      expect(loaded().otp, const OtpIdle());
+    });
+
+    test('a delivery code is dropped once the parcel turns back', () async {
+      details = _parcel(status: C2cParcelStatus.outForDelivery, version: 8);
+      await cubit.load();
+      repository.onOtp = () async => const Right(
+        C2cParcelOtp(code: '482913', purpose: C2cOtpPurpose.delivery),
+      );
+      await cubit.requestOtp();
+
+      details = _parcel(status: C2cParcelStatus.returningToSender, version: 9);
+      await cubit.refresh();
+
+      expect(loaded().otp, const OtpIdle());
+    });
+
+    test('a code answered after the stage changed is not shown', () async {
+      details = _parcel(status: C2cParcelStatus.outForDelivery, version: 8);
+      await cubit.load();
+      final Completer<Either<Failure, C2cParcelOtp>> answer =
+          Completer<Either<Failure, C2cParcelOtp>>();
+      repository.onOtp = () => answer.future;
+      final Future<void> asked = cubit.requestOtp();
+
+      details = _parcel(status: C2cParcelStatus.returningToSender, version: 9);
+      await cubit.refresh();
+      answer.complete(
+        const Right(
+          C2cParcelOtp(code: '482913', purpose: C2cOtpPurpose.delivery),
+        ),
+      );
+      await asked;
 
       expect(loaded().otp, const OtpIdle());
     });

@@ -21,13 +21,16 @@ abstract class DioConsumer {
     Map<String, String>? headers,
   });
 
-  /// [headers] are added to this request only.
+  /// [headers] are added to this request only. [sendTimeout] bounds how
+  /// long the body may take to upload — set it for multipart uploads, which
+  /// otherwise only the connect and receive timeouts cover.
   Future<dynamic> post(
     String path, {
     FormData? formData,
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
     Map<String, String>? headers,
+    Duration? sendTimeout,
   });
 
   Future<dynamic> put(
@@ -140,6 +143,7 @@ class DioConsumerImpl implements DioConsumer {
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
     Map<String, String>? headers,
+    Duration? sendTimeout,
   }) => _request(
     'POST',
     path,
@@ -147,7 +151,9 @@ class DioConsumerImpl implements DioConsumer {
       path,
       queryParameters: queryParameters,
       data: formData ?? body,
-      options: headers == null ? null : Options(headers: headers),
+      options: headers == null && sendTimeout == null
+          ? null
+          : Options(headers: headers, sendTimeout: sendTimeout),
     ),
     details: 'formData: ${formData?.toPrint}, body: $body',
   );

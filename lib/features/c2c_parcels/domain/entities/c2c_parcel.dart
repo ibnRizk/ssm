@@ -37,6 +37,22 @@ class C2cParcelSummary extends Equatable {
     this.createdAt,
   });
 
+  /// The same row at a later stage.
+  C2cParcelSummary withStatus(C2cParcelStatus status, int statusVersion) =>
+      C2cParcelSummary(
+        id: id,
+        reference: reference,
+        viewerRole: viewerRole,
+        status: status,
+        statusVersion: statusVersion,
+        title: title,
+        counterpartName: counterpartName,
+        destinationAddress: destinationAddress,
+        totalFee: totalFee,
+        currency: currency,
+        createdAt: createdAt,
+      );
+
   @override
   List<Object?> get props => [
     id,

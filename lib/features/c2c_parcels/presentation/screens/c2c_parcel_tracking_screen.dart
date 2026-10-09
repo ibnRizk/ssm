@@ -67,7 +67,8 @@ class _C2cParcelTrackingScreenState extends State<C2cParcelTrackingScreen> {
       body: SafeArea(
         child: _CommandResultListener(
           child: BlocBuilder<C2cParcelTrackingCubit, C2cParcelTrackingState>(
-            // Commands and codes rebuild only their own widgets.
+            // Commands and codes rebuild only their own widgets, and so does
+            // a moving driver: only the map follows it (see [_LiveMap]).
             buildWhen:
                 (
                   C2cParcelTrackingState previous,
@@ -77,7 +78,11 @@ class _C2cParcelTrackingScreenState extends State<C2cParcelTrackingScreen> {
                     (previous is C2cTrackingLoaded &&
                         current is C2cTrackingLoaded &&
                         (previous.details != current.details ||
-                            previous.tracking != current.tracking)),
+                            (previous.tracking != current.tracking &&
+                                !_onlyDriverMoved(
+                                  previous.tracking,
+                                  current.tracking,
+                                )))),
             builder: (BuildContext context, C2cParcelTrackingState state) =>
                 switch (state) {
                   C2cTrackingLoading() => const Center(
@@ -94,6 +99,20 @@ class _C2cParcelTrackingScreenState extends State<C2cParcelTrackingScreen> {
         ),
       ),
     );
+  }
+
+  /// Equal except for a driver who moved and is still on the map. Their
+  /// appearing or vanishing does rebuild — the driver card shows it.
+  static bool _onlyDriverMoved(
+    C2cParcelTracking? previous,
+    C2cParcelTracking? current,
+  ) {
+    final C2cDriverLocation? moved = current?.driverLocation;
+    return previous != null &&
+        current != null &&
+        previous.driverLocation != null &&
+        moved != null &&
+        previous.withDriverLocation(moved) == current;
   }
 }
 
@@ -137,11 +156,7 @@ class _TrackingContent extends StatelessWidget {
             ),
             if (pickup != null || dropoff != null) ...<Widget>[
               SizedBox(height: AppSpacing.md.h),
-              C2cParcelMap(
-                pickup: pickup,
-                dropoff: dropoff,
-                driver: driverPoint,
-              ),
+              _LiveMap(pickup: pickup, dropoff: dropoff),
             ],
             if (driver != null) ...<Widget>[
               SizedBox(height: AppSpacing.md.h),
@@ -156,6 +171,30 @@ class _TrackingContent extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The map, rebuilt on its own as the driver moves — the rest of the
+/// screen stays as it is.
+class _LiveMap extends StatelessWidget {
+  final GeoPoint? pickup;
+  final GeoPoint? dropoff;
+
+  const _LiveMap({required this.pickup, required this.dropoff});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      C2cParcelTrackingCubit,
+      C2cParcelTrackingState,
+      GeoPoint?
+    >(
+      selector: (C2cParcelTrackingState state) => state is C2cTrackingLoaded
+          ? state.tracking?.driverLocation?.point
+          : null,
+      builder: (BuildContext context, GeoPoint? driver) =>
+          C2cParcelMap(pickup: pickup, dropoff: dropoff, driver: driver),
     );
   }
 }
@@ -201,11 +240,15 @@ class _CommandResultListener extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<C2cParcelTrackingCubit, C2cParcelTrackingState>(
+      // Only when the command status itself changes: an unrelated emit
+      // before [clearCommand] must not announce the same result twice.
       listenWhen:
           (C2cParcelTrackingState previous, C2cParcelTrackingState current) =>
               current is C2cTrackingLoaded &&
               (current.command is C2cCommandDone ||
-                  current.command is C2cCommandFailed),
+                  current.command is C2cCommandFailed) &&
+              (previous is! C2cTrackingLoaded ||
+                  previous.command != current.command),
       listener: (BuildContext context, C2cParcelTrackingState state) {
         final C2cParcelTrackingCubit cubit = context
             .read<C2cParcelTrackingCubit>();

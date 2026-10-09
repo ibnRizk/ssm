@@ -1,3 +1,4 @@
+import '../api/api_error_mapper.dart';
 import '../error/failures.dart';
 import 'values/strings.dart';
 
@@ -13,6 +14,7 @@ extension FailureMessage on Failure {
     ZoneUnavailableFailure() => Strings.zoneUnavailable,
     // The platform's message is technical and not localized.
     MediaPickerFailure() => Strings.mediaPickerFailed,
+    ServerFailure(code: payloadTooLargeCode) => Strings.payloadTooLarge,
     LocationFailure(:final reason) => switch (reason) {
       LocationFailureReason.serviceDisabled => Strings.locationServiceDisabled,
       LocationFailureReason.permissionDenied =>

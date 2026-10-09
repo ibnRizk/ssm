@@ -97,6 +97,63 @@ void main() {
     expect(loaded().loadMore, const LoadMoreFailed(NetworkFailure()));
   });
 
+  test('scrolling never retries a failed next page by itself', () async {
+    repository.onPage = (_, _, int offset) async =>
+        Right(_page(<int>[1], offset: offset));
+    await cubit.load();
+    repository.onPage = (_, _, _) async => const Left(NetworkFailure());
+    await cubit.loadMore();
+    final int before = repository.pages.length;
+
+    cubit
+      ..loadMoreOnScroll()
+      ..loadMoreOnScroll();
+    await pumpEventQueue();
+
+    expect(repository.pages, hasLength(before));
+  });
+
+  test('the retry button still retries a failed next page', () async {
+    repository.onPage = (_, _, int offset) async =>
+        Right(_page(<int>[1], offset: offset));
+    await cubit.load();
+    repository.onPage = (_, _, _) async => const Left(NetworkFailure());
+    await cubit.loadMore();
+    final int before = repository.pages.length;
+
+    await cubit.loadMore();
+
+    expect(repository.pages, hasLength(before + 1));
+  });
+
+  test('re-reading one parcel keeps every page loaded', () async {
+    repository.onPage = (_, _, int offset) async => Right(
+      offset == 1 ? _page(<int>[1, 2], offset: 1) : _page(<int>[3], offset: 2),
+    );
+    await cubit.load();
+    await cubit.loadMore();
+    repository.onDetails = () async => const Right(
+      C2cParcelDetails(
+        id: 3,
+        reference: 'C2C-3',
+        viewerRole: C2cViewerRole.recipient,
+        status: C2cParcelStatus.delivered,
+        statusVersion: 9,
+        item: C2cParcelItem(),
+        sender: C2cParty(),
+        recipient: C2cParty(),
+      ),
+    );
+    final int pagesBefore = repository.pages.length;
+
+    await cubit.refreshParcel(3);
+
+    expect(repository.pages, hasLength(pagesBefore));
+    expect(loaded().parcels.map((C2cParcelSummary p) => p.id), <int>[1, 2, 3]);
+    expect(loaded().parcels.last.status, C2cParcelStatus.delivered);
+    expect(loaded().page, 2);
+  });
+
   test('no next page after the last', () async {
     repository.onPage = (_, _, int offset) async =>
         Right(_page(<int>[1], offset: offset, total: 1));

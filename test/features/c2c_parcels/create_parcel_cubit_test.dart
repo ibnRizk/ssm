@@ -174,6 +174,32 @@ void main() {
       expect(repository.creates.map((c) => c.$2), <String>['key-1', 'key-1']);
     });
 
+    test('a form changed after a lost answer still reuses the key', () async {
+      // If the first attempt landed, the server must see the same key —
+      // a new one would create a second parcel.
+      await withPhoto();
+      repository.onCreate = (_, _) async => const Left(NetworkFailure());
+      await cubit.submit(_form);
+
+      repository.onCreate = (_, _) async => const Right(_created);
+      cubit.setPaymentMethod(C2cPaymentMethod.cashByRecipient);
+      await cubit.submit(_form);
+
+      expect(repository.creates.map((c) => c.$2), <String>['key-1', 'key-1']);
+    });
+
+    test('idempotency_conflict says the parcel may already be sent', () async {
+      await withPhoto();
+      repository.onCreate = (_, _) async => const Left(
+        ConflictFailure(code: C2cParcelErrorCode.idempotencyConflict),
+      );
+
+      await cubit.submit(_form);
+
+      expect(cubit.state.notice, const MaybeAlreadySent());
+      expect(cubit.state.submitting, isFalse);
+    });
+
     test('request_in_progress keeps the key too', () async {
       await withPhoto();
       repository.onCreate = (_, _) async => const Left(

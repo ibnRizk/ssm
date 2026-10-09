@@ -63,6 +63,10 @@ class C2cParcelsRemoteDataSourceImpl implements C2cParcelsRemoteDataSource {
     idempotencyHeader: key,
   };
 
+  /// Up to five 5 MB photos on a slow mobile link; past this the upload
+  /// fails as a timeout (outcome unknown, so the retry reuses the key).
+  static const Duration uploadTimeout = Duration(seconds: 90);
+
   /// Body as in the API guide's example: coordinates and weight as numbers.
   /// A blank title is left out rather than sent empty.
   @override
@@ -93,6 +97,7 @@ class C2cParcelsRemoteDataSourceImpl implements C2cParcelsRemoteDataSource {
       ApiEndpoints.c2cParcels,
       formData: await C2cParcelForm(draft).toFormData(),
       headers: _idempotent(idempotencyKey),
+      sendTimeout: uploadTimeout,
     ),
   );
 
@@ -114,6 +119,7 @@ class C2cParcelsRemoteDataSourceImpl implements C2cParcelsRemoteDataSource {
         'status': ?status,
       },
     ),
+    box: box,
     limit: limit,
     offset: offset,
   );

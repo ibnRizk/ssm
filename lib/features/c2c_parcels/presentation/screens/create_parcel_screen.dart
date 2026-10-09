@@ -10,6 +10,7 @@ import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/money_format.dart';
+import '../../../../core/utils/number_input.dart';
 import '../../../../core/utils/validator.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -96,9 +97,8 @@ class _CreateParcelScreenState extends State<CreateParcelScreen> {
         recipientNotes: _recipient.notes.text,
         title: _title.text,
         description: _description.text,
-        declaredValue: double.tryParse(
-          _declaredValue.text.trim().replaceAll(',', '.'),
-        ),
+        // The validator has already refused text that isn't an amount.
+        declaredValue: NumberInput.parseAmount(_declaredValue.text),
         pickupInstructions: _pickupInstructions.text,
         deliveryInstructions: _deliveryInstructions.text,
         prohibitedItemsAcknowledged: _acknowledged,
@@ -187,10 +187,17 @@ class _CreateParcelScreenState extends State<CreateParcelScreen> {
                           ),
                           inputFormatters: <TextInputFormatter>[
                             FilteringTextInputFormatter.allow(
-                              RegExp(r'[0-9.,]'),
+                              NumberInput.amountCharacters,
                             ),
                           ],
                           style: inputStyle,
+                          // Optional, but what's typed must be an amount —
+                          // never silently dropped or misread.
+                          validator: (String? value) =>
+                              (value ?? '').trim().isEmpty ||
+                                  NumberInput.parseAmount(value!) != null
+                              ? null
+                              : Strings.createParcelDeclaredValueInvalid,
                         ),
                       ),
                       SizedBox(height: AppSpacing.md.h),
@@ -473,6 +480,12 @@ class _CreateFeedbackListener extends StatelessWidget {
                 showAppSnackBar(
                   context: context,
                   message: Strings.createParcelPhotosRequired,
+                  type: ToastType.warning,
+                );
+              case MaybeAlreadySent():
+                showAppSnackBar(
+                  context: context,
+                  message: Strings.createParcelMaybeSent,
                   type: ToastType.warning,
                 );
               case CreateFailed(:final failure):

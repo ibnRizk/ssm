@@ -13,6 +13,7 @@ class FakeDioConsumer implements DioConsumer {
   Map<String, dynamic>? lastQuery;
   Map<String, String>? lastHeaders;
   FormData? lastFormData;
+  Duration? lastSendTimeout;
 
   FakeDioConsumer({this.response});
 
@@ -48,14 +49,18 @@ class FakeDioConsumer implements DioConsumer {
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParameters,
     Map<String, String>? headers,
-  }) => _record(
-    'POST',
-    path,
-    body: body,
-    query: queryParameters,
-    formData: formData,
-    headers: headers,
-  );
+    Duration? sendTimeout,
+  }) {
+    lastSendTimeout = sendTimeout;
+    return _record(
+      'POST',
+      path,
+      body: body,
+      query: queryParameters,
+      formData: formData,
+      headers: headers,
+    );
+  }
 
   @override
   Future<dynamic> put(

@@ -83,10 +83,11 @@ class CreateParcelCubit extends Cubit<CreateParcelState> {
     this.now = DateTime.now,
   }) : super(CreateParcelState(request: request, quote: quote));
 
-  /// The last create attempt whose outcome is unknown, with its key — sent
-  /// again unchanged, it must reuse the key so the server replays instead
-  /// of creating a second parcel.
-  (C2cParcelDraft, String)? _attempt;
+  /// The key of a create attempt whose outcome is unknown. Kept for the
+  /// next attempt even if the form changed meanwhile: if the first one
+  /// landed, the server replays it (same body) or answers
+  /// `idempotency_conflict` (changed body) — never a second parcel.
+  String? _pendingKey;
 
   Future<void> pickPhotos(C2cPhotoSource source) async {
     if (state.isBusy || !state.canAddPhotos) return;
@@ -155,18 +156,12 @@ class CreateParcelCubit extends Cubit<CreateParcelState> {
     }
 
     final C2cParcelDraft draft = _draftFrom(form);
-    final String key = switch (_attempt) {
-      (final C2cParcelDraft previous, final String key)
-          when previous == draft =>
-        key,
-      _ => newIdempotencyKey(),
-    };
-    _attempt = (draft, key);
+    final String key = _pendingKey ??= newIdempotencyKey();
 
     emit(state.copyWith(submitting: true));
     final Either<Failure, C2cParcelDetails> result = await repository
         .createParcel(draft, idempotencyKey: key);
-    if (!result.fold(_outcomeUnknown, (_) => false)) _attempt = null;
+    if (!result.fold(_outcomeUnknown, (_) => false)) _pendingKey = null;
     if (isClosed) return;
 
     await result.fold(
@@ -174,6 +169,8 @@ class CreateParcelCubit extends Cubit<CreateParcelState> {
         emit(state.copyWith(submitting: false));
         if (_isStalePrice(failure)) {
           await _requote();
+        } else if (_isIdempotencyConflict(failure)) {
+          emit(state.copyWith(notice: const MaybeAlreadySent()));
         } else {
           emit(state.copyWith(notice: CreateFailed(failure)));
         }
@@ -241,6 +238,10 @@ class CreateParcelCubit extends Cubit<CreateParcelState> {
           code == C2cParcelErrorCode.quoteExpired,
     _ => false,
   };
+
+  static bool _isIdempotencyConflict(Failure failure) =>
+      failure is ConflictFailure &&
+      failure.code == C2cParcelErrorCode.idempotencyConflict;
 
   /// The parcel may or may not exist — keep the key for the retry.
   static bool _outcomeUnknown(Failure failure) => switch (failure) {

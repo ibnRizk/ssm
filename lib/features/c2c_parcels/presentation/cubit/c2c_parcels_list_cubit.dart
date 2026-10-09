@@ -53,6 +53,38 @@ class C2cParcelsListCubit extends Cubit<C2cParcelsListState> {
     );
   }
 
+  /// For the scroll trigger: no automatic retry after a failure — scrolling
+  /// would fire one request per scroll event. The footer's button retries.
+  void loadMoreOnScroll() {
+    final C2cParcelsListState current = state;
+    if (current is C2cParcelsListLoaded && current.loadMore is LoadMoreFailed) {
+      return;
+    }
+    loadMore();
+  }
+
+  /// Re-reads one row — after its tracking screen closes — in place, so
+  /// the pages already loaded and the scroll position stay. A row whose
+  /// read fails, or that moved back a version, is left as it was.
+  Future<void> refreshParcel(int parcelId) async {
+    final Either<Failure, C2cParcelDetails> result = await repository
+        .getParcelDetails(parcelId);
+    final C2cParcelsListState current = state;
+    if (isClosed || current is! C2cParcelsListLoaded) return;
+    result.fold((_) {}, (C2cParcelDetails parcel) {
+      emit(
+        current.copyWith(
+          parcels: <C2cParcelSummary>[
+            for (final C2cParcelSummary row in current.parcels)
+              row.id == parcelId && parcel.statusVersion > row.statusVersion
+                  ? row.withStatus(parcel.status, parcel.statusVersion)
+                  : row,
+          ],
+        ),
+      );
+    });
+  }
+
   Future<void> loadMore() async {
     final C2cParcelsListState current = state;
     if (current is! C2cParcelsListLoaded ||

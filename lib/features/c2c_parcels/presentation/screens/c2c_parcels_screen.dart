@@ -114,8 +114,9 @@ class _ParcelList extends StatelessWidget {
   Future<void> _open(BuildContext context, C2cParcelSummary parcel) async {
     final C2cParcelsListCubit cubit = context.read<C2cParcelsListCubit>();
     await context.push(AppRoutes.c2cParcelPath(parcel.id));
-    // Its status may have moved on while it was open.
-    if (!cubit.isClosed) await cubit.load();
+    // Its status may have moved on while it was open. Only its row is
+    // re-read, so the pages loaded and the scroll position stay.
+    if (!cubit.isClosed) await cubit.refreshParcel(parcel.id);
   }
 
   @override
@@ -136,8 +137,9 @@ class _ParcelList extends StatelessWidget {
                 child: NotificationListener<ScrollNotification>(
                   // Fetch the next page a little before the end.
                   onNotification: (ScrollNotification n) {
-                    if (n.metrics.extentAfter < 300) {
-                      context.read<C2cParcelsListCubit>().loadMore();
+                    if (n.metrics.axis == Axis.vertical &&
+                        n.metrics.extentAfter < 300) {
+                      context.read<C2cParcelsListCubit>().loadMoreOnScroll();
                     }
                     return false;
                   },

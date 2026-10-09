@@ -44,6 +44,9 @@ abstract class Strings {
   static const String _requestCancelled = 'request_cancelled';
   static String get requestCancelled => _requestCancelled.tr;
 
+  static const String _payloadTooLarge = 'payload_too_large';
+  static String get payloadTooLarge => _payloadTooLarge.tr;
+
   static const String _noDataFound = 'no_data_found';
   static String get noDataFound => _noDataFound.tr;
 
@@ -619,6 +622,11 @@ abstract class Strings {
   static String get createParcelDeclaredValueLabel =>
       _createParcelDeclaredValueLabel.tr;
 
+  static const String _createParcelDeclaredValueInvalid =
+      'create_parcel_declared_value_invalid';
+  static String get createParcelDeclaredValueInvalid =>
+      _createParcelDeclaredValueInvalid.tr;
+
   static const String _createParcelPickupInstructionsLabel =
       'create_parcel_pickup_instructions_label';
   static String get createParcelPickupInstructionsLabel =>
@@ -695,6 +703,9 @@ abstract class Strings {
 
   static const String _createParcelCreated = 'create_parcel_created';
   static String get createParcelCreated => _createParcelCreated.tr;
+
+  static const String _createParcelMaybeSent = 'create_parcel_maybe_sent';
+  static String get createParcelMaybeSent => _createParcelMaybeSent.tr;
 
   static const String _createParcelTripSummary = 'create_parcel_trip_summary';
 

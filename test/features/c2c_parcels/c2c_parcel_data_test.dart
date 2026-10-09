@@ -156,6 +156,20 @@ void main() {
       expect(parcel.item.deliveryInstructions, 'Hand over only with the code');
     });
 
+    test('a missing or unknown role reads as recipient', () {
+      for (final Map<String, dynamic> json in <Map<String, dynamic>>[
+        _details()..['data'].remove('viewer_role'),
+        _details(role: 'admin'),
+      ]) {
+        final C2cParcelDetails parcel = C2cParcelModels.detailsFromJson(json);
+
+        expect(parcel.viewerRole, C2cViewerRole.recipient);
+        expect(parcel.declaredValue, isNull);
+        expect(parcel.pickupInstructions, isNull);
+        expect(parcel.canCancel, isFalse);
+      }
+    });
+
     test('without actions, the guide rules apply to role and status', () {
       final C2cParcelDetails sender = C2cParcelModels.detailsFromJson(
         _details(),
@@ -247,6 +261,7 @@ void main() {
           'limit': 15,
           'offset': 2,
         },
+        box: C2cParcelBox.sent,
         limit: 15,
         offset: 2,
       );
@@ -259,11 +274,28 @@ void main() {
     test('the last page has no more', () {
       final C2cParcelPage page = C2cParcelModels.pageFromJson(
         <String, dynamic>{'data': <dynamic>[], 'total_size': 30},
+        box: C2cParcelBox.sent,
         limit: 15,
         offset: 2,
       );
 
       expect(page.hasMore, isFalse);
+    });
+
+    test("a row's role is the one its box implies", () {
+      final C2cParcelPage page = C2cParcelModels.pageFromJson(
+        <String, dynamic>{
+          'data': <dynamic>[
+            // Even a row that claims otherwise.
+            <String, dynamic>{'id': 12, 'viewer_role': 'sender'},
+          ],
+        },
+        box: C2cParcelBox.received,
+        limit: 15,
+        offset: 1,
+      );
+
+      expect(page.parcels.single.viewerRole, C2cViewerRole.recipient);
     });
   });
 
@@ -437,6 +469,17 @@ void main() {
       });
       expect(consumer.lastFormData, isNotNull);
       expect(parcel.id, 12);
+    });
+
+    test('create bounds the photo upload with a send timeout', () async {
+      consumer.response = _details();
+
+      await remote.createParcel(_draft(), idempotencyKey: 'key-1');
+
+      expect(
+        consumer.lastSendTimeout,
+        C2cParcelsRemoteDataSourceImpl.uploadTimeout,
+      );
     });
 
     test('cancel sends the reason, note and expected_version', () async {

@@ -11,16 +11,22 @@ import '../../domain/entities/c2c_parcel_status.dart';
 /// screens can do without is left null rather than failing the response.
 abstract final class C2cParcelModels {
   /// `GET /`, `GET /recipient` → `{ data: [...], total_size, limit,
-  /// offset }`. Throws [ServerException] without a `data` list.
+  /// offset }`. Throws [ServerException] without a `data` list. The viewer's
+  /// role on every row is the one [box] implies.
   static C2cParcelPage pageFromJson(
     dynamic json, {
+    required C2cParcelBox box,
     required int limit,
     required int offset,
   }) {
     final dynamic list = json is Map ? json['data'] : null;
     if (list is! List) throw const ServerException();
+    final C2cViewerRole role = switch (box) {
+      C2cParcelBox.sent => C2cViewerRole.sender,
+      C2cParcelBox.received => C2cViewerRole.recipient,
+    };
     final List<C2cParcelSummary> parcels = list
-        .map(_summaryFromJson)
+        .map((dynamic row) => _summaryFromJson(row, role))
         .whereType<C2cParcelSummary>()
         .toList(growable: false);
     return C2cParcelPage(
@@ -31,14 +37,14 @@ abstract final class C2cParcelModels {
     );
   }
 
-  static C2cParcelSummary? _summaryFromJson(dynamic json) {
+  static C2cParcelSummary? _summaryFromJson(dynamic json, C2cViewerRole role) {
     if (json is! Map) return null;
     final int? id = jsonInt(json['id']);
     if (id == null) return null;
     return C2cParcelSummary(
       id: id,
       reference: jsonString(json['reference']) ?? '#$id',
-      viewerRole: C2cViewerRole.fromWire(jsonString(json['viewer_role'])),
+      viewerRole: role,
       status: C2cParcelStatus.fromWire(jsonString(json['status'])),
       statusVersion: jsonInt(json['status_version']) ?? 0,
       title: jsonString(json['title']),
