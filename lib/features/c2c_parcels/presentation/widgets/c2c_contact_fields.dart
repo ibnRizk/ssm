@@ -13,32 +13,28 @@ import '../../../../core/widgets/phone_field.dart';
 /// The text controllers of one side (sender or recipient). Owned and
 /// disposed by the screen's State.
 class C2cContactControllers {
-  final TextEditingController name = TextEditingController();
-  final TextEditingController phone = TextEditingController();
+  /// Null on an [C2cContactControllers.addressOnly] side.
+  final TextEditingController? name;
+  final TextEditingController? phone;
   final TextEditingController address = TextEditingController();
-  final TextEditingController building = TextEditingController();
-  final TextEditingController floor = TextEditingController();
-  final TextEditingController apartment = TextEditingController();
-  final TextEditingController notes = TextEditingController();
+
+  C2cContactControllers()
+    : name = TextEditingController(),
+      phone = TextEditingController();
+
+  /// For the sender, whose name and phone are the signed-in customer's.
+  C2cContactControllers.addressOnly() : name = null, phone = null;
 
   void dispose() {
-    for (final TextEditingController c in <TextEditingController>[
-      name,
-      phone,
-      address,
-      building,
-      floor,
-      apartment,
-      notes,
-    ]) {
-      c.dispose();
-    }
+    name?.dispose();
+    phone?.dispose();
+    address.dispose();
   }
 }
 
-/// One side of the parcel: name, phone, the address in words (the pin was
-/// set on the quote step), and the optional building / floor / apartment
-/// and notes.
+/// One side of the parcel: the address in words, building and apartment
+/// included (the pin was set on the quote step), and the name and phone
+/// when [controllers] has them.
 class C2cContactFields extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -72,22 +68,27 @@ class C2cContactFields extends StatelessWidget {
             ],
           ),
           SizedBox(height: AppSpacing.md.h),
-          LabeledField(
-            label: Strings.createParcelNameLabel,
-            child: TextFormField(
-              controller: controllers.name,
-              textInputAction: TextInputAction.next,
-              textCapitalization: TextCapitalization.words,
-              style: inputStyle,
-              validator: _required,
+          if ((controllers.name, controllers.phone) case (
+            final TextEditingController name,
+            final TextEditingController phone,
+          )) ...<Widget>[
+            LabeledField(
+              label: Strings.createParcelNameLabel,
+              child: TextFormField(
+                controller: name,
+                textInputAction: TextInputAction.next,
+                textCapitalization: TextCapitalization.words,
+                style: inputStyle,
+                validator: _required,
+              ),
             ),
-          ),
-          SizedBox(height: AppSpacing.md.h),
-          LabeledField(
-            label: Strings.createParcelPhoneLabel,
-            child: PhoneField(controller: controllers.phone),
-          ),
-          SizedBox(height: AppSpacing.md.h),
+            SizedBox(height: AppSpacing.md.h),
+            LabeledField(
+              label: Strings.createParcelPhoneLabel,
+              child: PhoneField(controller: phone),
+            ),
+            SizedBox(height: AppSpacing.md.h),
+          ],
           LabeledField(
             label: Strings.createParcelAddressLabel,
             child: TextFormField(
@@ -103,64 +104,7 @@ class C2cContactFields extends StatelessWidget {
               validator: _required,
             ),
           ),
-          SizedBox(height: AppSpacing.md.h),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: _ShortField(
-                  label: Strings.createParcelBuildingLabel,
-                  controller: controllers.building,
-                ),
-              ),
-              SizedBox(width: AppSpacing.sm.w),
-              Expanded(
-                child: _ShortField(
-                  label: Strings.createParcelFloorLabel,
-                  controller: controllers.floor,
-                ),
-              ),
-              SizedBox(width: AppSpacing.sm.w),
-              Expanded(
-                child: _ShortField(
-                  label: Strings.createParcelApartmentLabel,
-                  controller: controllers.apartment,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: AppSpacing.md.h),
-          LabeledField(
-            label: Strings.createParcelNotesLabel,
-            child: TextFormField(
-              controller: controllers.notes,
-              textInputAction: TextInputAction.next,
-              maxLength: 500,
-              style: inputStyle,
-              decoration: const InputDecoration(counterText: ''),
-            ),
-          ),
         ],
-      ),
-    );
-  }
-}
-
-class _ShortField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-
-  const _ShortField({required this.label, required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return LabeledField(
-      label: label,
-      child: TextFormField(
-        controller: controller,
-        textInputAction: TextInputAction.next,
-        maxLength: 20,
-        style: AppTextStyles.bodyLarge(color: context.colors.textPrimary),
-        decoration: const InputDecoration(counterText: ''),
       ),
     );
   }

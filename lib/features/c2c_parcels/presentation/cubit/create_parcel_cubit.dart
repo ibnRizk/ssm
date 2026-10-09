@@ -4,11 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/utils/saudi_phone.dart';
 import '../../../../core/utils/uuid.dart';
+import '../../../account/domain/entities/customer_profile.dart';
+import '../../../account/domain/repos/account_repository.dart';
 import '../../domain/entities/c2c_parcel.dart';
 import '../../domain/entities/c2c_parcel_draft.dart';
 import '../../domain/entities/c2c_parcel_quote.dart';
 import '../../domain/entities/c2c_parcel_status.dart';
 import '../../domain/repos/c2c_parcels_repository.dart';
+import '../utils/c2c_parcel_labels.dart';
 import 'create_parcel_state.dart';
 
 /// What the quote step hands the create step: the priced request and its
@@ -21,66 +24,52 @@ class CreateParcelArgs {
 }
 
 /// The contact and parcel details the form collects — everything in a
-/// [C2cParcelDraft] except what the cubit holds (photos, payment, quote).
+/// [C2cParcelDraft] except what the cubit holds (photos, payment, quote),
+/// the sender's name and phone, which are the signed-in customer's, and
+/// the title, which is the parcel's type.
 class CreateParcelForm {
-  final String senderName;
-  final String senderPhone;
+  /// Building and apartment are written into the address itself.
   final String senderAddress;
-  final String? senderBuilding;
-  final String? senderFloor;
-  final String? senderApartment;
-  final String? senderNotes;
   final String recipientName;
   final String recipientPhone;
   final String recipientAddress;
-  final String? recipientBuilding;
-  final String? recipientFloor;
-  final String? recipientApartment;
-  final String? recipientNotes;
-  final String title;
-  final String? description;
   final double? declaredValue;
-  final String? pickupInstructions;
-  final String? deliveryInstructions;
+
+  /// The one free-text note for the driver.
+  final String? driverNotes;
   final bool prohibitedItemsAcknowledged;
 
   const CreateParcelForm({
-    required this.senderName,
-    required this.senderPhone,
     required this.senderAddress,
     required this.recipientName,
     required this.recipientPhone,
     required this.recipientAddress,
-    required this.title,
     required this.prohibitedItemsAcknowledged,
-    this.senderBuilding,
-    this.senderFloor,
-    this.senderApartment,
-    this.senderNotes,
-    this.recipientBuilding,
-    this.recipientFloor,
-    this.recipientApartment,
-    this.recipientNotes,
-    this.description,
     this.declaredValue,
-    this.pickupInstructions,
-    this.deliveryInstructions,
+    this.driverNotes,
   });
 }
 
 /// Screen-scoped (provided at the create route with the accepted quote).
-/// Collects photos and sends the parcel at the quoted price.
+/// Collects photos and sends the parcel at the quoted price, from the
+/// signed-in customer.
 class CreateParcelCubit extends Cubit<CreateParcelState> {
   final C2cParcelsRepository repository;
+  final AccountRepository accountRepository;
   final String Function() newIdempotencyKey;
   final DateTime Function() now;
 
+  /// The parcel's title, from its type — the localized label by default.
+  final String Function(ParcelCategory) titleFor;
+
   CreateParcelCubit({
     required this.repository,
+    required this.accountRepository,
     required C2cQuoteRequest request,
     required C2cParcelQuote quote,
     this.newIdempotencyKey = uuidV4,
     this.now = DateTime.now,
+    this.titleFor = _categoryLabel,
   }) : super(CreateParcelState(request: request, quote: quote));
 
   /// The key of a create attempt whose outcome is unknown. Kept for the
@@ -88,6 +77,10 @@ class CreateParcelCubit extends Cubit<CreateParcelState> {
   /// landed, the server replays it (same body) or answers
   /// `idempotency_conflict` (changed body) — never a second parcel.
   String? _pendingKey;
+
+  /// The sender's identity, fetched on the first send and kept so a retry
+  /// sends the same body under the same key.
+  CustomerProfile? _sender;
 
   Future<void> pickPhotos(C2cPhotoSource source) async {
     if (state.isBusy || !state.canAddPhotos) return;
@@ -155,10 +148,13 @@ class CreateParcelCubit extends Cubit<CreateParcelState> {
       return;
     }
 
-    final C2cParcelDraft draft = _draftFrom(form);
+    emit(state.copyWith(submitting: true));
+    final CustomerProfile? sender = _sender ??= await _fetchSender();
+    if (sender == null) return;
+
+    final C2cParcelDraft draft = _draftFrom(form, sender);
     final String key = _pendingKey ??= newIdempotencyKey();
 
-    emit(state.copyWith(submitting: true));
     final Either<Failure, C2cParcelDetails> result = await repository
         .createParcel(draft, idempotencyKey: key);
     if (!result.fold(_outcomeUnknown, (_) => false)) _pendingKey = null;
@@ -199,38 +195,49 @@ class CreateParcelCubit extends Cubit<CreateParcelState> {
     );
   }
 
-  C2cParcelDraft _draftFrom(CreateParcelForm form) => C2cParcelDraft(
+  /// The signed-in customer, or null after reporting why it couldn't be
+  /// read (the send is then dropped, nothing reached the server).
+  Future<CustomerProfile?> _fetchSender() async {
+    final Either<Failure, CustomerProfile> result = await accountRepository
+        .getProfile();
+    if (isClosed) return null;
+    return result.fold((Failure failure) {
+      emit(state.copyWith(submitting: false, notice: CreateFailed(failure)));
+      return null;
+    }, (CustomerProfile profile) => profile);
+  }
+
+  /// The required title is the chosen type's name (e.g. "مستندات").
+  /// Building, floor and apartment live in each address, and the driver's
+  /// note goes out as `pickup_instructions`; the fields the form no longer
+  /// asks for stay null, which the request leaves out.
+  C2cParcelDraft _draftFrom(
+    CreateParcelForm form,
+    CustomerProfile sender,
+  ) => C2cParcelDraft(
     request: state.request,
     sender: C2cContact(
-      name: form.senderName.trim(),
-      phone: SaudiPhone.toE164(form.senderPhone),
+      name: sender.name.trim(),
+      phone: SaudiPhone.toE164(sender.phone),
       address: form.senderAddress.trim(),
       location: state.request.sender,
-      building: form.senderBuilding,
-      floor: form.senderFloor,
-      apartment: form.senderApartment,
-      notes: form.senderNotes,
     ),
     recipient: C2cContact(
       name: form.recipientName.trim(),
       phone: SaudiPhone.toE164(form.recipientPhone),
       address: form.recipientAddress.trim(),
       location: state.request.recipient,
-      building: form.recipientBuilding,
-      floor: form.recipientFloor,
-      apartment: form.recipientApartment,
-      notes: form.recipientNotes,
     ),
-    title: form.title.trim(),
-    description: form.description,
+    title: titleFor(state.request.category),
     declaredValue: form.declaredValue,
-    pickupInstructions: form.pickupInstructions,
-    deliveryInstructions: form.deliveryInstructions,
+    pickupInstructions: form.driverNotes,
     paymentMethod: state.paymentMethod,
     photos: state.photos,
     prohibitedItemsAcknowledged: form.prohibitedItemsAcknowledged,
     quoteToken: state.quote.quoteToken,
   );
+
+  static String _categoryLabel(ParcelCategory category) => category.label;
 
   static bool _isStalePrice(Failure failure) => switch (failure) {
     ConflictFailure(:final String? code) =>

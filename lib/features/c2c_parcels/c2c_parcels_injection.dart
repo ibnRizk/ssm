@@ -25,6 +25,7 @@ Future<void> initC2cParcelsFeatureInjection() async {
       .registerFactoryParam<CreateParcelCubit, CreateParcelArgs, void>(
         (CreateParcelArgs args, _) => CreateParcelCubit(
           repository: ServiceLocator.instance(),
+          accountRepository: ServiceLocator.instance(),
           request: args.request,
           quote: args.quote,
         ),

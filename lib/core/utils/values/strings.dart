@@ -480,12 +480,6 @@ abstract class Strings {
   static const String _sendParcelWeightInvalid = 'send_parcel_weight_invalid';
   static String get sendParcelWeightInvalid => _sendParcelWeightInvalid.tr;
 
-  static const String _sendParcelContentLabel = 'send_parcel_content_label';
-  static String get sendParcelContentLabel => _sendParcelContentLabel.tr;
-
-  static const String _sendParcelContentHint = 'send_parcel_content_hint';
-  static String get sendParcelContentHint => _sendParcelContentHint.tr;
-
   static const String _sendParcelFragile = 'send_parcel_fragile';
   static String get sendParcelFragile => _sendParcelFragile.tr;
 
@@ -585,37 +579,14 @@ abstract class Strings {
   static const String _createParcelAddressHint = 'create_parcel_address_hint';
   static String get createParcelAddressHint => _createParcelAddressHint.tr;
 
-  static const String _createParcelBuildingLabel =
-      'create_parcel_building_label';
-  static String get createParcelBuildingLabel => _createParcelBuildingLabel.tr;
-
-  static const String _createParcelFloorLabel = 'create_parcel_floor_label';
-  static String get createParcelFloorLabel => _createParcelFloorLabel.tr;
-
-  static const String _createParcelApartmentLabel =
-      'create_parcel_apartment_label';
-  static String get createParcelApartmentLabel =>
-      _createParcelApartmentLabel.tr;
-
   static const String _createParcelNotesLabel = 'create_parcel_notes_label';
   static String get createParcelNotesLabel => _createParcelNotesLabel.tr;
 
   static const String _createParcelItemSection = 'create_parcel_item_section';
   static String get createParcelItemSection => _createParcelItemSection.tr;
 
-  static const String _createParcelItemTitleLabel =
-      'create_parcel_item_title_label';
-  static String get createParcelItemTitleLabel =>
-      _createParcelItemTitleLabel.tr;
-
-  static const String _createParcelItemTitleHint =
-      'create_parcel_item_title_hint';
-  static String get createParcelItemTitleHint => _createParcelItemTitleHint.tr;
-
-  static const String _createParcelDescriptionLabel =
-      'create_parcel_description_label';
-  static String get createParcelDescriptionLabel =>
-      _createParcelDescriptionLabel.tr;
+  static const String _createParcelMoreDetails = 'create_parcel_more_details';
+  static String get createParcelMoreDetails => _createParcelMoreDetails.tr;
 
   static const String _createParcelDeclaredValueLabel =
       'create_parcel_declared_value_label';
@@ -626,16 +597,6 @@ abstract class Strings {
       'create_parcel_declared_value_invalid';
   static String get createParcelDeclaredValueInvalid =>
       _createParcelDeclaredValueInvalid.tr;
-
-  static const String _createParcelPickupInstructionsLabel =
-      'create_parcel_pickup_instructions_label';
-  static String get createParcelPickupInstructionsLabel =>
-      _createParcelPickupInstructionsLabel.tr;
-
-  static const String _createParcelDeliveryInstructionsLabel =
-      'create_parcel_delivery_instructions_label';
-  static String get createParcelDeliveryInstructionsLabel =>
-      _createParcelDeliveryInstructionsLabel.tr;
 
   static const String _createParcelPaymentSection =
       'create_parcel_payment_section';

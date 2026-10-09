@@ -2,13 +2,14 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ssm/core/error/failures.dart';
 import 'package:ssm/core/location/geo_point.dart';
+import 'package:ssm/features/account/domain/entities/customer_profile.dart';
+import 'package:ssm/features/account/domain/repos/account_repository.dart';
 import 'package:ssm/features/c2c_parcels/domain/entities/c2c_parcel.dart';
 import 'package:ssm/features/c2c_parcels/domain/entities/c2c_parcel_draft.dart';
 import 'package:ssm/features/c2c_parcels/domain/entities/c2c_parcel_quote.dart';
 import 'package:ssm/features/c2c_parcels/domain/entities/c2c_parcel_status.dart';
 import 'package:ssm/features/c2c_parcels/presentation/cubit/create_parcel_cubit.dart';
 import 'package:ssm/features/c2c_parcels/presentation/cubit/create_parcel_state.dart';
-
 import 'fake_c2c_parcels_repository.dart';
 
 final DateTime _now = DateTime.utc(2026, 10, 8, 12);
@@ -19,7 +20,6 @@ const C2cQuoteRequest _request = C2cQuoteRequest(
   category: ParcelCategory.medium,
   weightKg: 3,
   isFragile: false,
-  title: 'Gift',
 );
 
 C2cParcelQuote _quote({String token = 'tok-1', double total = 14.8}) =>
@@ -50,33 +50,58 @@ const C2cParcelDetails _created = C2cParcelDetails(
 );
 
 const CreateParcelForm _form = CreateParcelForm(
-  senderName: 'Sara',
-  senderPhone: '0500000001',
-  senderAddress: '12 Tahrir St',
+  senderAddress: '12 Tahrir St, building 4, apt 7',
   recipientName: 'Rami',
   recipientPhone: '0500000002',
   recipientAddress: '5 Zamalek St',
-  title: 'Gift',
+  driverNotes: 'Ring twice',
   prohibitedItemsAcknowledged: true,
 );
 
+const CustomerProfile _profile = CustomerProfile(
+  name: ' Sara ',
+  phone: '+966500000001',
+);
+
+class _FakeAccountRepository implements AccountRepository {
+  Either<Failure, CustomerProfile> answer = const Right(_profile);
+  int calls = 0;
+
+  @override
+  Future<Either<Failure, CustomerProfile>> getProfile() async {
+    calls++;
+    return answer;
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updateProfile(ProfileUpdate update) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, Unit>> deleteAccount() => throw UnimplementedError();
+}
+
 void main() {
   late FakeC2cParcelsRepository repository;
+  late _FakeAccountRepository accounts;
   late CreateParcelCubit cubit;
   late int keys;
   late DateTime now;
 
   CreateParcelCubit build(C2cParcelQuote quote) => CreateParcelCubit(
     repository: repository,
+    accountRepository: accounts,
     request: _request,
     quote: quote,
     newIdempotencyKey: () => 'key-${++keys}',
     now: () => now,
+    titleFor: (ParcelCategory category) => 'type:${category.name}',
   );
 
   setUp(() {
     repository = FakeC2cParcelsRepository()
       ..onPick = ((_, _) async => const Right(<C2cParcelPhoto>[_photo]));
+    accounts = _FakeAccountRepository();
     keys = 0;
     now = _now;
     cubit = build(_quote());
@@ -161,6 +186,60 @@ void main() {
       expect(draft.quoteToken, 'tok-1');
       expect(draft.photos, <C2cParcelPhoto>[_photo]);
       expect(cubit.state.created, _created);
+    });
+
+    test('the sender is the signed-in customer', () async {
+      await withPhoto();
+      repository.onCreate = (_, _) async => const Right(_created);
+
+      await cubit.submit(_form);
+
+      final C2cContact sender = repository.creates.single.$1.sender;
+      expect(sender.name, 'Sara');
+      expect(sender.phone, '+966500000001');
+      expect(sender.address, '12 Tahrir St, building 4, apt 7');
+    });
+
+    test('the driver note goes out as the pickup instructions', () async {
+      await withPhoto();
+      repository.onCreate = (_, _) async => const Right(_created);
+
+      await cubit.submit(_form);
+
+      final C2cParcelDraft draft = repository.creates.single.$1;
+      expect(draft.pickupInstructions, 'Ring twice');
+      expect(draft.description, isNull);
+      expect(draft.deliveryInstructions, isNull);
+    });
+
+    test('the title is the chosen parcel type', () async {
+      await withPhoto();
+      repository.onCreate = (_, _) async => const Right(_created);
+
+      await cubit.submit(_form);
+
+      expect(repository.creates.single.$1.title, 'type:medium');
+    });
+
+    test('an unreadable profile is reported and nothing is sent', () async {
+      await withPhoto();
+      accounts.answer = const Left(NetworkFailure());
+
+      await cubit.submit(_form);
+
+      expect(repository.creates, isEmpty);
+      expect(cubit.state.notice, const CreateFailed(NetworkFailure()));
+      expect(cubit.state.submitting, isFalse);
+    });
+
+    test('the profile is read once across retries', () async {
+      await withPhoto();
+      repository.onCreate = (_, _) async => const Left(NetworkFailure());
+      await cubit.submit(_form);
+
+      await cubit.submit(_form);
+
+      expect(accounts.calls, 1);
     });
 
     test('a lost answer is retried with the same key', () async {

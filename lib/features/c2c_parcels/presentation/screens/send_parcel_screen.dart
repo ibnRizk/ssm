@@ -41,19 +41,16 @@ class SendParcelScreen extends StatefulWidget {
 class _SendParcelScreenState extends State<SendParcelScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late final TextEditingController _weightController;
-  late final TextEditingController _contentController;
 
   @override
   void initState() {
     super.initState();
     _weightController = TextEditingController();
-    _contentController = TextEditingController();
   }
 
   @override
   void dispose() {
     _weightController.dispose();
-    _contentController.dispose();
     super.dispose();
   }
 
@@ -66,7 +63,6 @@ class _SendParcelScreenState extends State<SendParcelScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     context.read<SendParcelCubit>().requestQuote(
       weightKg: _parseWeight(_weightController.text)!,
-      title: _contentController.text,
     );
   }
 
@@ -130,22 +126,6 @@ class _SendParcelScreenState extends State<SendParcelScreen> {
                           (_parseWeight(value) ?? 0) > 0
                           ? null
                           : Strings.sendParcelWeightInvalid,
-                    ),
-                  ),
-                  SizedBox(height: AppSpacing.lg.h),
-                  LabeledField(
-                    label: Strings.sendParcelContentLabel,
-                    child: TextFormField(
-                      controller: _contentController,
-                      textInputAction: TextInputAction.done,
-                      maxLength: 100,
-                      style: inputStyle,
-                      decoration: InputDecoration(
-                        hintText: Strings.sendParcelContentHint,
-                        counterText: '',
-                      ),
-                      onChanged: (_) =>
-                          context.read<SendParcelCubit>().inputsChanged(),
                     ),
                   ),
                   SizedBox(height: AppSpacing.sm.h),
