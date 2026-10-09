@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/realtime/realtime_event.dart';
+import '../../../../core/realtime/realtime_repository.dart';
 import '../../../catalog/domain/entities/catalog_page.dart';
 import '../../domain/entities/order_list_entry.dart';
 import '../../domain/repos/orders_repository.dart';
@@ -13,7 +17,28 @@ import 'orders_state.dart';
 class OrdersCubit extends Cubit<OrdersState> {
   final OrdersRepository repository;
 
-  OrdersCubit({required this.repository}) : super(const OrdersState());
+  /// With [realtime], both lists reload when the server reports an order
+  /// changed (its status, or a driver taking it) — a running order moves
+  /// to the past list the moment it's delivered.
+  OrdersCubit({required this.repository, RealtimeRepository? realtime})
+    : super(const OrdersState()) {
+    _realtimeSub = realtime?.events
+        .where(
+          (RealtimeEvent e) =>
+              e is OrderStatusChanged ||
+              e is DriverAssigned ||
+              e is RealtimeReconnected,
+        )
+        .listen((_) => load());
+  }
+
+  StreamSubscription<RealtimeEvent>? _realtimeSub;
+
+  @override
+  Future<void> close() async {
+    await _realtimeSub?.cancel();
+    return super.close();
+  }
 
   /// Per list, bumped by every first-page load. An answer for an older
   /// generation — a page of the list as it was before a refresh — is

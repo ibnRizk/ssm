@@ -14,6 +14,7 @@ Future<void> initOrderTrackingFeatureInjection() async {
     (int orderId, _) => OrderTrackingCubit(
       orderId: orderId,
       repository: ServiceLocator.instance(),
+      realtime: ServiceLocator.instance(),
     ),
   );
 

@@ -7,10 +7,12 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../../../notifications/presentation/widgets/notification_bell_button.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
 
-/// Greeting + question on the start side, avatar on the end side. The order
+/// Greeting + question on the start side; the notifications bell and the
+/// avatar on the end side. The order
 /// is deliberate: [Row] lays children start-to-end, and under the app's RTL
 /// Arabic layout "start" is the right edge — so text-first/avatar-last is
 /// what puts the avatar on the physical left without hardcoding a side.
@@ -49,6 +51,8 @@ class HomeHeader extends StatelessWidget {
           ),
         ),
         SizedBox(width: AppSpacing.sm.w),
+        const NotificationBellButton(),
+        SizedBox(width: AppSpacing.xs.w),
         Container(
           width: 44.r,
           height: 44.r,

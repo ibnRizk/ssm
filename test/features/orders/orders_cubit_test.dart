@@ -8,6 +8,9 @@ import 'package:ssm/features/orders/domain/repos/orders_repository.dart';
 import 'package:ssm/features/orders/presentation/cubit/orders_cubit.dart';
 import 'package:ssm/features/orders/presentation/cubit/orders_state.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ssm/core/realtime/realtime_event.dart';
+
+import '../../helpers/fake_realtime_repository.dart';
 
 typedef _Result = Either<Failure, CatalogPage<OrderListEntry>>;
 
@@ -323,5 +326,48 @@ void main() {
     expect(cubit.state.filter, OrdersFilter.current);
     expect(cubit.state.running, before.running);
     expect(cubit.state.past, before.past);
+  });
+
+  group('realtime', () {
+    late FakeRealtimeRepository realtime;
+
+    setUp(() async {
+      realtime = FakeRealtimeRepository();
+      await cubit.close();
+      cubit = OrdersCubit(repository: repository, realtime: realtime);
+    });
+
+    test('an order status change reloads both lists', () async {
+      await loadBoth();
+      final int before = repository.requests.length;
+
+      realtime.emit(const OrderStatusChanged(1, statusVersion: 3));
+
+      expect(repository.requests.length, before + 2);
+      expect(
+        repository.requests.skip(before).map((_Request r) => r.page),
+        <int>[1, 1],
+      );
+    });
+
+    test('a driver assignment reloads both lists', () async {
+      await loadBoth();
+      final int before = repository.requests.length;
+
+      realtime.emit(const DriverAssigned(1));
+
+      expect(repository.requests.length, before + 2);
+    });
+
+    test('driver location and notification events are ignored', () async {
+      await loadBoth();
+      final int before = repository.requests.length;
+
+      realtime
+        ..emit(const DriverLocationUpdated(1))
+        ..emit(const NotificationCreated());
+
+      expect(repository.requests.length, before);
+    });
   });
 }

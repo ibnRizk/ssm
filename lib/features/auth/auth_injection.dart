@@ -12,7 +12,10 @@ import 'presentation/cubit/forgot_password_cubit.dart';
 Future<void> initAuthFeatureInjection() async {
   /// Cubits
   ServiceLocator.instance.registerFactory<AuthCubit>(
-    () => AuthCubit(repository: ServiceLocator.instance()),
+    () => AuthCubit(
+      repository: ServiceLocator.instance(),
+      push: ServiceLocator.instance(),
+    ),
   );
   ServiceLocator.instance.registerFactory<ForgotPasswordCubit>(
     () => ForgotPasswordCubit(repository: ServiceLocator.instance()),

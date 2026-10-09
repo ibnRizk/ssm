@@ -776,8 +776,7 @@ abstract class Strings {
 
   static const String _orderTrackingBrowseStores =
       'order_tracking_browse_stores';
-  static String get orderTrackingBrowseStores =>
-      _orderTrackingBrowseStores.tr;
+  static String get orderTrackingBrowseStores => _orderTrackingBrowseStores.tr;
 
   static const String _orderTrackingStale = 'order_tracking_stale';
   static String get orderTrackingStale => _orderTrackingStale.tr;
@@ -1398,4 +1397,47 @@ abstract class Strings {
 
   static const String _passwordsDoNotMatch = 'passwords_do_not_match';
   static String get passwordsDoNotMatch => _passwordsDoNotMatch.tr;
+
+  // --- Notifications ---
+  static const String _notificationsTitle = 'notifications_title';
+  static String get notificationsTitle => _notificationsTitle.tr;
+
+  /// The bell's tooltip / screen-reader label.
+  static const String _notificationsOpen = 'notifications_open';
+  static String get notificationsOpen => _notificationsOpen.tr;
+
+  static const String _notificationsMarkAllRead = 'notifications_mark_all_read';
+  static String get notificationsMarkAllRead => _notificationsMarkAllRead.tr;
+
+  static const String _notificationsMarkAllFailed =
+      'notifications_mark_all_failed';
+  static String get notificationsMarkAllFailed =>
+      _notificationsMarkAllFailed.tr;
+
+  static const String _notificationsEmptyTitle = 'notifications_empty_title';
+  static String get notificationsEmptyTitle => _notificationsEmptyTitle.tr;
+
+  static const String _notificationsEmptyMessage =
+      'notifications_empty_message';
+  static String get notificationsEmptyMessage => _notificationsEmptyMessage.tr;
+
+  /// Screen-reader hint on an unread row (the dot is visual only).
+  static const String _notificationsUnread = 'notifications_unread';
+  static String get notificationsUnread => _notificationsUnread.tr;
+
+  static const String _notificationsTimeNow = 'notifications_time_now';
+  static String get notificationsTimeNow => _notificationsTimeNow.tr;
+
+  static const String _notificationsTimeMinutes = 'notifications_time_minutes';
+  static String notificationsTimeMinutes(int minutes) =>
+      _notificationsTimeMinutes.tr.replaceFirst('{n}', '$minutes');
+
+  static const String _notificationsTimeHours = 'notifications_time_hours';
+  static String notificationsTimeHours(int hours) =>
+      _notificationsTimeHours.tr.replaceFirst('{n}', '$hours');
+
+  static const String _notificationsTimeYesterday =
+      'notifications_time_yesterday';
+  static String get notificationsTimeYesterday =>
+      _notificationsTimeYesterday.tr;
 }

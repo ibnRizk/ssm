@@ -4,6 +4,8 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/realtime/realtime_event.dart';
+import '../../../../core/realtime/realtime_repository.dart';
 import '../../domain/entities/order_status.dart';
 import '../../domain/entities/order_tracking.dart';
 import '../../domain/repos/order_tracking_repository.dart';
@@ -24,15 +26,37 @@ class OrderTrackingCubit extends Cubit<OrderTrackingState> {
   final Duration pollInterval;
   final PeriodicTimerFactory _periodicTimer;
 
+  /// With [realtime], the screen also refreshes the moment the server
+  /// reports a change to this order (status, driver, driver location),
+  /// instead of waiting for the next poll. Polling stays as the fallback
+  /// for when the socket is down or unconfigured.
   OrderTrackingCubit({
     required this.orderId,
     required this.repository,
+    RealtimeRepository? realtime,
     this.pollInterval = defaultPollInterval,
     PeriodicTimerFactory periodicTimer = Timer.periodic,
-  }) : _periodicTimer = periodicTimer,
-       super(const OrderTrackingLoading());
+  }) : _realtime = realtime,
+       _periodicTimer = periodicTimer,
+       super(const OrderTrackingLoading()) {
+    if (realtime == null) return;
+    // Driver location frames only come on the order's own channel.
+    realtime.watchOrder(orderId);
+    _realtimeSub = realtime.events
+        .where(_concernsThisOrder)
+        .listen((_) => refresh());
+  }
 
   static const Duration defaultPollInterval = Duration(seconds: 15);
+
+  final RealtimeRepository? _realtime;
+  StreamSubscription<RealtimeEvent>? _realtimeSub;
+
+  bool _concernsThisOrder(RealtimeEvent event) => switch (event) {
+    OrderRealtimeEvent(orderId: final int id) => id == orderId,
+    RealtimeReconnected() => true,
+    NotificationCreated() => false,
+  };
 
   Timer? _timer;
   bool _refreshing = false;
@@ -239,8 +263,10 @@ class OrderTrackingCubit extends Cubit<OrderTrackingState> {
   }
 
   @override
-  Future<void> close() {
+  Future<void> close() async {
     _timer?.cancel();
+    await _realtimeSub?.cancel();
+    _realtime?.unwatchOrder(orderId);
     return super.close();
   }
 }

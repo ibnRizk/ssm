@@ -8,6 +8,9 @@ import 'package:ssm/features/order_tracking/domain/repos/order_tracking_reposito
 import 'package:ssm/features/order_tracking/presentation/cubit/order_tracking_cubit.dart';
 import 'package:ssm/features/order_tracking/presentation/cubit/order_tracking_state.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ssm/core/realtime/realtime_event.dart';
+
+import '../../helpers/fake_realtime_repository.dart';
 
 class _FakeRepository implements OrderTrackingRepository {
   Either<Failure, OrderSummary> summary = const Right<Failure, OrderSummary>(
@@ -592,6 +595,73 @@ void main() {
 
       expect(loaded().status, OrderStatus.delivered);
       expect(loaded().otp, const OtpIdle());
+    });
+  });
+
+  group('realtime', () {
+    late FakeRealtimeRepository realtime;
+
+    setUp(() async {
+      realtime = FakeRealtimeRepository();
+      await cubit.close();
+      cubit = OrderTrackingCubit(
+        orderId: 9,
+        repository: repository,
+        realtime: realtime,
+        periodicTimer: (Duration interval, void Function(Timer) onTick) {
+          final _FakeTimer timer = _FakeTimer(onTick);
+          timers.add(timer);
+          return timer;
+        },
+      );
+    });
+
+    test("watches its order's channel until closed", () async {
+      expect(realtime.watched, <int>[9]);
+
+      await cubit.close();
+
+      expect(realtime.unwatched, <int>[9]);
+    });
+
+    test('a status change for this order refreshes at once', () async {
+      await cubit.load();
+      final int before = repository.trackingCalls;
+
+      realtime.emit(const OrderStatusChanged(9, statusVersion: 2));
+      await _settle();
+
+      expect(repository.trackingCalls, before + 1);
+    });
+
+    test('a driver location update refreshes at once', () async {
+      await cubit.load();
+      final int before = repository.trackingCalls;
+
+      realtime.emit(const DriverLocationUpdated(9));
+      await _settle();
+
+      expect(repository.trackingCalls, before + 1);
+    });
+
+    test("another order's events are ignored", () async {
+      await cubit.load();
+      final int before = repository.trackingCalls;
+
+      realtime.emit(const OrderStatusChanged(10, statusVersion: 2));
+      await _settle();
+
+      expect(repository.trackingCalls, before);
+    });
+
+    test('a reconnect catches up', () async {
+      await cubit.load();
+      final int before = repository.trackingCalls;
+
+      realtime.emit(const RealtimeReconnected());
+      await _settle();
+
+      expect(repository.trackingCalls, before + 1);
     });
   });
 }

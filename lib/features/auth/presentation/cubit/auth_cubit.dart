@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/push/push_repository.dart';
 import '../../../../core/utils/saudi_phone.dart';
 import '../../../../core/utils/string_extension.dart';
 import '../../domain/entities/login_credentials.dart';
@@ -14,7 +17,19 @@ import 'auth_state.dart';
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository repository;
 
-  AuthCubit({required this.repository}) : super(const AuthInitial());
+  /// Unregisters this device from push on [logout]. Optional so the sign-in
+  /// screens, which never log out, don't need it.
+  final PushRepository? push;
+
+  /// How long logout waits for the push unregistration before signing out
+  /// anyway — an offline customer must still be able to log out.
+  final Duration unregisterTimeout;
+
+  AuthCubit({
+    required this.repository,
+    this.push,
+    this.unregisterTimeout = const Duration(seconds: 5),
+  }) : super(const AuthInitial());
 
   Future<void> login({required String phone, required String password}) =>
       _submit(
@@ -39,9 +54,18 @@ class AuthCubit extends Cubit<AuthState> {
     ),
   );
 
-  /// Purely local — the customer API has no logout endpoint.
-  Future<void> logout() =>
-      _submit(repository.logout, onSuccess: const AuthUnauthenticated());
+  /// The customer API has no logout endpoint. Its contract instead: stop
+  /// pushes with `remove-fcm-token` — while the bearer token still works —
+  /// then drop the session locally. The first step is best-effort; a
+  /// failure or timeout there never blocks signing out.
+  Future<void> logout() => _submit(() async {
+    try {
+      await push?.unregisterDevice().timeout(unregisterTimeout);
+    } on TimeoutException {
+      // Offline or slow: the next sign-in on any device re-registers it.
+    }
+    return repository.logout();
+  }, onSuccess: const AuthUnauthenticated());
 
   Future<void> _submit(
     Future<Either<Failure, Unit>> Function() request, {

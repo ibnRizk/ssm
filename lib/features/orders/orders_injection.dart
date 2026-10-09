@@ -11,7 +11,10 @@ import 'presentation/cubit/reorder_cubit.dart';
 Future<void> initOrdersFeatureInjection() async {
   /// Cubits
   ServiceLocator.instance.registerFactory<OrdersCubit>(
-    () => OrdersCubit(repository: ServiceLocator.instance()),
+    () => OrdersCubit(
+      repository: ServiceLocator.instance(),
+      realtime: ServiceLocator.instance(),
+    ),
   );
   ServiceLocator.instance.registerFactory<ReorderCubit>(
     () => ReorderCubit(

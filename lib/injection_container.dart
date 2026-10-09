@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'config/env/app_env.dart';
 import 'config/locale/app_localizations.dart';
 import 'config/locale/locale_cubit.dart';
 import 'core/api/app_interceptors.dart';
@@ -19,6 +20,14 @@ import 'core/api/dio_consumer.dart';
 import 'core/location/device_location_data_source.dart';
 import 'core/location/location_repository.dart';
 import 'core/location/location_repository_impl.dart';
+import 'core/push/local_notification_presenter.dart';
+import 'core/push/push_messaging_data_source.dart';
+import 'core/push/push_repository.dart';
+import 'core/push/push_repository_impl.dart';
+import 'core/push/push_token_remote_data_source.dart';
+import 'core/realtime/realtime_repository.dart';
+import 'core/realtime/realtime_repository_impl.dart';
+import 'core/realtime/realtime_socket_data_source.dart';
 import 'core/services/local_storage/app_secure_storage.dart';
 import 'core/services/local_storage/app_shared_preferences.dart';
 import 'core/theme/app_colors.dart';
@@ -39,6 +48,7 @@ import 'features/parcels/parcels_injection.dart';
 import 'features/pharmacy/pharmacy_injection.dart';
 import 'features/promotions/promotions_injection.dart';
 import 'features/loyalty/loyalty_injection.dart';
+import 'features/notifications/notifications_injection.dart';
 import 'features/restaurants/restaurants_injection.dart';
 import 'features/splash/splash_injection.dart';
 import 'features/subscriptions/subscriptions_injection.dart';
@@ -65,6 +75,8 @@ abstract class ServiceLocator {
     _injectDioConsumer();
     _injectLocation();
     _injectZone();
+    _injectPush();
+    _injectRealtime();
     await _injectAppConfig();
     injectAppColors(AppColors.light);
     injectRoutesStackSingleton(<String>[]);
@@ -88,6 +100,7 @@ abstract class ServiceLocator {
     await initPromotionsFeatureInjection();
     await initRestaurantsFeatureInjection();
     await initSubscriptionsFeatureInjection();
+    await initNotificationsFeatureInjection();
     // Register new features here.
   }
 
@@ -143,6 +156,54 @@ abstract class ServiceLocator {
         remote: instance(),
         location: instance(),
         preferences: instance(),
+      ),
+    );
+  }
+
+  /// FCM + local banners and the device-token API — shared by auth (logout
+  /// unregisters) and notifications (registers, routes taps). Singletons:
+  /// the repository owns the one foreground-push subscription.
+  static void _injectPush() {
+    instance.registerLazySingleton<LocalNotificationPresenter>(
+      () => LocalNotificationPresenter(),
+    );
+    instance.registerLazySingleton<PushMessagingDataSource>(
+      () => FirebasePushMessagingDataSource(presenter: instance()),
+    );
+    instance.registerLazySingleton<PushTokenRemoteDataSource>(
+      () => PushTokenRemoteDataSourceImpl(consumer: instance()),
+    );
+    instance.registerLazySingleton<PushRepository>(
+      () => PushRepositoryImpl(
+        messaging: instance(),
+        remote: instance(),
+        preferences: instance(),
+      ),
+    );
+  }
+
+  /// The Pusher-protocol socket — shared by notifications, orders and order
+  /// tracking. A singleton, so there's one socket per session. Without the
+  /// `PUSHER_*` values in `.env` the socket stays off and the app runs on
+  /// REST and polling alone.
+  static void _injectRealtime() {
+    instance.registerLazySingleton<RealtimeSocketDataSource>(
+      () => PusherSocketDataSource(
+        config: AppEnv.isRealtimeConfigured
+            ? RealtimeSocketConfig(
+                scheme: AppEnv.pusherScheme,
+                host: AppEnv.pusherHost,
+                port: AppEnv.pusherPort,
+                appKey: AppEnv.pusherAppKey,
+              )
+            : null,
+        consumer: instance(),
+      ),
+    );
+    instance.registerLazySingleton<RealtimeRepository>(
+      () => RealtimeRepositoryImpl(
+        socket: instance(),
+        customerId: customerIdFromProfile(instance()),
       ),
     );
   }

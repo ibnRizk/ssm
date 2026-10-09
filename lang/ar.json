@@ -360,5 +360,16 @@
   "invalid_name": "أدخل اسمك الكامل",
   "invalid_numbers": "أرقام فقط",
   "password_too_short": "كلمة المرور يجب ألا تقل عن 8 أحرف",
-  "passwords_do_not_match": "كلمتا المرور غير متطابقتين"
+  "passwords_do_not_match": "كلمتا المرور غير متطابقتين",
+  "notifications_title": "الإشعارات",
+  "notifications_open": "فتح الإشعارات",
+  "notifications_mark_all_read": "تحديد الكل كمقروء",
+  "notifications_mark_all_failed": "تعذّر تحديد الإشعارات كمقروءة. حاول مرة أخرى.",
+  "notifications_empty_title": "لا توجد إشعارات جديدة",
+  "notifications_empty_message": "ستظهر هنا تحديثات طلباتك وشحناتك والعروض.",
+  "notifications_unread": "غير مقروء",
+  "notifications_time_now": "الآن",
+  "notifications_time_minutes": "منذ {n} د",
+  "notifications_time_hours": "منذ {n} س",
+  "notifications_time_yesterday": "أمس"
 }

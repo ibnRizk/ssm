@@ -94,6 +94,16 @@ class MediaPickerFailure extends Failure {
   const MediaPickerFailure({this.message});
 }
 
+/// Push messaging isn't available on this build — Firebase isn't configured
+/// (no `google-services.json` / `GoogleService-Info.plist`) or failed to
+/// start. The app runs without push.
+class PushUnavailableFailure extends Failure {
+  @override
+  final String? message;
+
+  const PushUnavailableFailure({this.message});
+}
+
 /// The backend has no delivery zone to scope catalog calls to.
 class ZoneUnavailableFailure extends Failure {
   @override

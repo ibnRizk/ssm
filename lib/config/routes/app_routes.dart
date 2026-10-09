@@ -31,6 +31,10 @@ import '../../features/loyalty/presentation/cubit/loyalty_cubit.dart';
 import '../../features/loyalty/presentation/screens/loyalty_screen.dart';
 import '../../features/order_tracking/presentation/cubit/order_tracking_cubit.dart';
 import '../../features/order_tracking/presentation/screens/order_tracking_screen.dart';
+import '../../features/notifications/presentation/cubit/notification_hub_cubit.dart';
+import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/notifications/presentation/widgets/notification_hub_listener.dart';
 import '../../features/orders/presentation/cubit/orders_cubit.dart';
 import '../../features/orders/presentation/cubit/reorder_cubit.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
@@ -78,6 +82,7 @@ abstract class AppRoutes {
   static const String addresses = '/addresses';
   static const String addAddress = '/addresses/add';
   static const String helpSupport = '/help-support';
+  static const String notifications = '/notifications';
 
   // --- Names (for context.goNamed / context.pushNamed) ---
   static const String splashName = 'splash';
@@ -102,6 +107,7 @@ abstract class AppRoutes {
   static const String addressesName = 'addresses';
   static const String addAddressName = 'addAddress';
   static const String helpSupportName = 'helpSupport';
+  static const String notificationsName = 'notifications';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -149,9 +155,21 @@ abstract class AppRoutes {
       // details) as children of that branch's GoRoute; routes outside the
       // shell — auth, full-screen flows — belong at the top level, like
       // `photoViewer` below.
+      //
+      // The shell is also the signed-in session's boundary: its
+      // NotificationHubCubit registers push, connects realtime and keeps the
+      // unread badge for exactly as long as the shell is mounted. The
+      // provider sits at a fixed spot in the tree, so it's created once and
+      // survives tab switches and pushed routes.
       StatefulShellRoute.indexedStack(
         builder: (_, __, StatefulNavigationShell shell) =>
-            MainScaffold(navigationShell: shell),
+            BlocProvider<NotificationHubCubit>(
+              create: (_) =>
+                  ServiceLocator.instance<NotificationHubCubit>()..start(),
+              child: NotificationHubListener(
+                child: MainScaffold(navigationShell: shell),
+              ),
+            ),
         branches: <StatefulShellBranch>[
           StatefulShellBranch(
             routes: <RouteBase>[
@@ -463,6 +481,17 @@ abstract class AppRoutes {
             ),
           ),
         ],
+      ),
+      // Pushed from the bell in the home header, outside the shell like
+      // `loyalty`. Also opened by a tapped push that points nowhere more
+      // specific.
+      GoRoute(
+        path: notifications,
+        name: notificationsName,
+        builder: (_, __) => BlocProvider<NotificationsCubit>(
+          create: (_) => ServiceLocator.instance<NotificationsCubit>()..load(),
+          child: const NotificationsScreen(),
+        ),
       ),
       // Placeholder until its real screen exists.
       GoRoute(

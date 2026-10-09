@@ -33,6 +33,32 @@ abstract class ApiEndpoints {
   /// Refused with HTTP 203 (`on-going`) while an order is in progress.
   static const String removeAccount = '$_v1/customer/remove-account';
 
+  // --- Push (one device per customer) ---
+  /// A PUT with `cm_firebase_token` in the body, after sign-in.
+  static const String fcmToken = '$_v1/customer/cm-firebase-token';
+
+  /// Stops pushes to this device. There is no logout route: call this, then
+  /// drop the bearer token locally.
+  static const String removeFcmToken = '$_v1/customer/remove-fcm-token';
+
+  // --- Notifications inbox ---
+  /// Laravel resource pagination (`data`, `links`, `meta`); `per_page` 1-50,
+  /// `status` all|read|unread.
+  static const String notifications = '$_v1/customer/notifications';
+  static const String notificationsUnreadCount = '$notifications/unread-count';
+  static const String notificationsReadAll = '$notifications/read-all';
+
+  /// A PATCH.
+  static String notificationRead(String id) => '$notifications/$id/read';
+
+  // --- Realtime ---
+  /// Signs a private-channel subscription for the bearer token's customer.
+  /// The API guide writes it as `POST /broadcasting/auth` next to paths that
+  /// are all relative to `/api/v1`, so it's taken as relative too — if the
+  /// server registered `Broadcast::routes()` without the prefix, drop
+  /// `$_v1` here.
+  static const String broadcastingAuth = '$_v1/broadcasting/auth';
+
   // --- Loyalty ---
   static const String loyalty = '$_v1/customer/loyalty';
   static const String loyaltyHistory = '$_v1/customer/loyalty/history';

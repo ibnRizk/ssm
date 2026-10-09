@@ -9,6 +9,8 @@ import 'package:ssm/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:ssm/features/auth/presentation/cubit/auth_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../helpers/fake_push_repository.dart';
+
 class _FakeRepository implements AuthRepository {
   Either<Failure, Unit> result = const Right<Failure, Unit>(unit);
   final List<LoginCredentials> logins = <LoginCredentials>[];
@@ -203,6 +205,51 @@ void main() {
         password: 'secret123',
       );
       await expectation;
+    });
+  });
+
+  group('logout with push', () {
+    late FakePushRepository push;
+
+    setUp(() async {
+      push = FakePushRepository();
+      await cubit.close();
+      cubit = AuthCubit(
+        repository: repository,
+        push: push,
+        unregisterTimeout: Duration.zero,
+      );
+    });
+
+    test('unregisters the device before dropping the session', () async {
+      int logoutsWhenUnregistering = -1;
+      push.onUnregister = () =>
+          logoutsWhenUnregistering = repository.logoutCalls;
+
+      await cubit.logout();
+
+      expect(push.unregisterCalls, 1);
+      expect(logoutsWhenUnregistering, 0);
+      expect(repository.logoutCalls, 1);
+      expect(cubit.state, const AuthUnauthenticated());
+    });
+
+    test('still signs out when unregistering fails', () async {
+      push.unregister = Completer<Either<Failure, Unit>>()
+        ..complete(const Left<Failure, Unit>(NetworkFailure()));
+
+      await cubit.logout();
+
+      expect(cubit.state, const AuthUnauthenticated());
+    });
+
+    test('still signs out when unregistering never answers', () async {
+      push.unregister = Completer<Either<Failure, Unit>>();
+
+      await cubit.logout();
+
+      expect(repository.logoutCalls, 1);
+      expect(cubit.state, const AuthUnauthenticated());
     });
   });
 }

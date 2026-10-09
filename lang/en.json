@@ -360,5 +360,16 @@
   "invalid_name": "Enter your full name",
   "invalid_numbers": "Numbers only",
   "password_too_short": "Password must be at least 8 characters",
-  "passwords_do_not_match": "Passwords do not match"
+  "passwords_do_not_match": "Passwords do not match",
+  "notifications_title": "Notifications",
+  "notifications_open": "Open notifications",
+  "notifications_mark_all_read": "Mark all as read",
+  "notifications_mark_all_failed": "Couldn't mark your notifications as read. Try again.",
+  "notifications_empty_title": "You're all caught up",
+  "notifications_empty_message": "Order updates, parcel news and offers will show up here.",
+  "notifications_unread": "Unread",
+  "notifications_time_now": "Just now",
+  "notifications_time_minutes": "{n} min ago",
+  "notifications_time_hours": "{n} h ago",
+  "notifications_time_yesterday": "Yesterday"
 }
