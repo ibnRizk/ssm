@@ -1,7 +1,9 @@
 import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/api/dio_consumer.dart';
+import '../../domain/entities/active_subscription.dart';
 import '../models/active_subscription_model.dart';
 import '../models/delivery_zone_model.dart';
+import '../models/parcel_subscription_model.dart';
 import '../models/subscription_plan_model.dart';
 
 abstract class SubscriptionsRemoteDataSource {
@@ -12,6 +14,10 @@ abstract class SubscriptionsRemoteDataSource {
   Future<ActiveSubscriptionModel?> getCurrentSubscription();
 
   Future<void> createPurchaseIntent(int planId);
+
+  Future<List<SubscriptionPlanModel>> getParcelPlans(int zoneId);
+
+  Future<List<ActiveSubscription>> getParcelSubscriptions();
 }
 
 class SubscriptionsRemoteDataSourceImpl
@@ -47,4 +53,19 @@ class SubscriptionsRemoteDataSourceImpl
     ApiEndpoints.subscriptionPurchaseIntent,
     body: <String, dynamic>{'plan_id': planId},
   );
+
+  @override
+  Future<List<SubscriptionPlanModel>> getParcelPlans(int zoneId) async =>
+      SubscriptionPlanModel.listFromJson(
+        await consumer.get(
+          ApiEndpoints.c2cParcelSubscriptionPlans,
+          queryParameters: <String, dynamic>{'zone_id': zoneId},
+        ),
+      );
+
+  @override
+  Future<List<ActiveSubscription>> getParcelSubscriptions() async =>
+      ParcelSubscriptionModel.listFromJson(
+        await consumer.get(ApiEndpoints.c2cParcelSubscriptions),
+      );
 }

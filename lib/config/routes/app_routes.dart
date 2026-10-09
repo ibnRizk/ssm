@@ -39,7 +39,9 @@ import '../../features/orders/presentation/cubit/orders_cubit.dart';
 import '../../features/orders/presentation/cubit/reorder_cubit.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
 import '../../features/parcels/presentation/cubit/parcels_cubit.dart';
+import '../../features/parcels/presentation/cubit/send_parcel_cubit.dart';
 import '../../features/parcels/presentation/screens/parcels_screen.dart';
+import '../../features/parcels/presentation/screens/send_parcel_screen.dart';
 import '../../features/pharmacy/presentation/cubit/pharmacy_order_cubit.dart';
 import '../../features/pharmacy/presentation/screens/pharmacy_order_screen.dart';
 import '../../features/promotions/presentation/cubit/promotions_cubit.dart';
@@ -64,6 +66,7 @@ abstract class AppRoutes {
   static const String home = '/home';
   static const String orders = '/orders';
   static const String parcels = '/parcels';
+  static const String sendParcel = '/send-parcel';
   static const String subscriptions = '/subscriptions';
   static const String profile = '/profile';
   static const String photoViewer = '/photo-viewer';
@@ -92,6 +95,7 @@ abstract class AppRoutes {
   static const String homeName = 'home';
   static const String ordersName = 'orders';
   static const String parcelsName = 'parcels';
+  static const String sendParcelName = 'sendParcel';
   static const String subscriptionsName = 'subscriptions';
   static const String profileName = 'profile';
   static const String photoViewerName = 'photoViewer';
@@ -434,6 +438,16 @@ abstract class AppRoutes {
         builder: (_, __) => BlocProvider<LoyaltyCubit>(
           create: (_) => ServiceLocator.instance<LoyaltyCubit>()..load(),
           child: const LoyaltyScreen(),
+        ),
+      ),
+
+      // Pushed from the Parcels tab, outside the shell like `loyalty`.
+      GoRoute(
+        path: sendParcel,
+        name: sendParcelName,
+        builder: (_, __) => BlocProvider<SendParcelCubit>(
+          create: (_) => ServiceLocator.instance<SendParcelCubit>(),
+          child: const SendParcelScreen(),
         ),
       ),
 

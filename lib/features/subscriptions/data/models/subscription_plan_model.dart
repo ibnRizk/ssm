@@ -2,7 +2,9 @@ import '../../../../core/api/json_readers.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/subscription_plan.dart';
 
-/// One entry of `GET /customer/subscription-plans` → `{ "data": [...] }`.
+/// One entry of `GET /customer/subscription-plans` or
+/// `GET /customer/c2c-parcels/subscription-plans` → `{ "data": [...] }`.
+/// Only parcel plans carry the distance / weight limits.
 class SubscriptionPlanModel extends SubscriptionPlan {
   const SubscriptionPlanModel({
     required super.id,
@@ -11,6 +13,8 @@ class SubscriptionPlanModel extends SubscriptionPlan {
     required super.validityDays,
     required super.price,
     required super.currency,
+    super.maxDistanceKm,
+    super.maxWeightKg,
   });
 
   /// Null for an entry missing any field the card needs — a plan without a
@@ -37,6 +41,8 @@ class SubscriptionPlanModel extends SubscriptionPlan {
       validityDays: validity,
       price: price,
       currency: jsonString(json['currency']) ?? 'SAR',
+      maxDistanceKm: jsonDouble(json['max_distance_km']),
+      maxWeightKg: jsonDouble(json['max_weight_kg']),
     );
   }
 

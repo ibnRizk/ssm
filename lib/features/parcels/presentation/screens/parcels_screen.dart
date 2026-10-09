@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../config/routes/app_routes.dart';
 import '../../../../core/delivery_otp/delivery_otp.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/utils/failure_message.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../../../../core/widgets/app_outlined_button.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/delivery_otp_card.dart';
 import '../../../../core/widgets/error_text.dart';
@@ -85,12 +89,19 @@ class _ParcelsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppColors c = context.colors;
     final Parcel? target = Parcel.dropoffTarget(parcels);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         ParcelsHeader(
           newCount: parcels.where((Parcel p) => p.awaitsDropoffLocation).length,
+        ),
+        SizedBox(height: AppSpacing.lg.h),
+        AppOutlinedButton(
+          text: Strings.parcelsSendButton,
+          icon: Icon(Icons.local_shipping_outlined, color: c.secondary),
+          onPressed: () => context.push(AppRoutes.sendParcel),
         ),
         SizedBox(height: AppSpacing.lg.h),
         for (final Parcel parcel in parcels)

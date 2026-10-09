@@ -11,6 +11,11 @@ class SubscriptionPlan extends Equatable {
   /// ISO 4217 code as sent by the backend, e.g. `SAR`.
   final String currency;
 
+  /// Parcel plans only: the largest distance / weight a parcel may have to
+  /// be covered. Null when the plan sets no such limit.
+  final double? maxDistanceKm;
+  final double? maxWeightKg;
+
   const SubscriptionPlan({
     required this.id,
     required this.name,
@@ -18,6 +23,8 @@ class SubscriptionPlan extends Equatable {
     required this.validityDays,
     required this.price,
     required this.currency,
+    this.maxDistanceKm,
+    this.maxWeightKg,
   });
 
   /// The plan to highlight as "best value": the highest tier — most
@@ -45,5 +52,7 @@ class SubscriptionPlan extends Equatable {
     validityDays,
     price,
     currency,
+    maxDistanceKm,
+    maxWeightKg,
   ];
 }

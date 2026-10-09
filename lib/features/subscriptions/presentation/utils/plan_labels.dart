@@ -7,6 +7,12 @@ extension SubscriptionPlanLabels on SubscriptionPlan {
 
   String get currencyLabel => currencySymbol(currency);
 
-  String get summary =>
-      Strings.subscriptionsPlanSummary(deliveriesCount, validityDays);
+  /// Deliveries and validity, then a parcel plan's limits when it has any.
+  String get summary => <String>[
+    Strings.subscriptionsPlanSummary(deliveriesCount, validityDays),
+    if (maxDistanceKm case final double km)
+      Strings.subscriptionsPlanMaxDistance(formatAmount(km)),
+    if (maxWeightKg case final double kg)
+      Strings.subscriptionsPlanMaxWeight(formatAmount(kg)),
+  ].join(' · ');
 }

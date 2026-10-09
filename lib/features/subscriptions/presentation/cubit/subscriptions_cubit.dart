@@ -57,25 +57,33 @@ class SubscriptionsCubit extends Cubit<SubscriptionsState> {
         : zones.first.id;
     final bool sameZone =
         before != null && before.selectedZoneId == selectedZoneId;
+    // Parcel data is refreshed only once the customer has opened that side.
+    final PlansStatus? parcelPlans = before?.parcelPlans;
+    final bool parcelsOpened = parcelPlans != null;
 
     emit(
       SubscriptionsLoaded(
         zones: zones,
         selectedZoneId: selectedZoneId,
-        plans: selectedZoneId == null
-            ? const PlansLoaded(<SubscriptionPlan>[])
-            : sameZone
-            ? before.plans
-            : const PlansLoading(),
+        plans: _initialPlans(selectedZoneId, sameZone ? before.plans : null),
         // Keep the banner through a failed refresh of the current plan.
         current: currentResult.fold(
           (_) => before?.current,
           (ActiveSubscription? current) => current,
         ),
         purchase: before?.purchase ?? const PurchaseIdle(),
+        product: before?.product ?? SubscriptionProduct.delivery,
+        parcelPlans: parcelsOpened
+            ? _initialPlans(selectedZoneId, sameZone ? parcelPlans : null)
+            : null,
+        parcelSubscriptions:
+            before?.parcelSubscriptions ?? const <ActiveSubscription>[],
       ),
     );
-    if (selectedZoneId != null) await _loadPlans(selectedZoneId);
+    await Future.wait(<Future<void>>[
+      if (selectedZoneId != null) _loadPlans(selectedZoneId),
+      if (parcelsOpened) _loadParcels(selectedZoneId),
+    ]);
   }
 
   Future<void> selectZone(int zoneId) async {
@@ -83,8 +91,46 @@ class SubscriptionsCubit extends Cubit<SubscriptionsState> {
     if (current is! SubscriptionsLoaded || current.selectedZoneId == zoneId) {
       return;
     }
-    emit(current.copyWith(selectedZoneId: zoneId, plans: const PlansLoading()));
-    await _loadPlans(zoneId);
+    final bool parcelsOpened = current.parcelPlans != null;
+    emit(
+      current.copyWith(
+        selectedZoneId: zoneId,
+        plans: const PlansLoading(),
+        parcelPlans: parcelsOpened ? const PlansLoading() : null,
+      ),
+    );
+    await Future.wait(<Future<void>>[
+      _loadPlans(zoneId),
+      if (parcelsOpened) _loadParcelPlans(zoneId),
+    ]);
+  }
+
+  /// Switches between store-delivery and parcel plans. The parcel side is
+  /// fetched the first time it's opened.
+  Future<void> selectProduct(SubscriptionProduct product) async {
+    final SubscriptionsState current = state;
+    if (current is! SubscriptionsLoaded || current.product == product) return;
+    final bool firstOpen =
+        product == SubscriptionProduct.parcels && current.parcelPlans == null;
+    emit(
+      current.copyWith(
+        product: product,
+        parcelPlans: firstOpen
+            ? _initialPlans(current.selectedZoneId, null)
+            : null,
+      ),
+    );
+    if (firstOpen) await _loadParcels(current.selectedZoneId);
+  }
+
+  /// After a failed parcel plans load.
+  Future<void> retryParcelPlans() async {
+    final SubscriptionsState current = state;
+    if (current is! SubscriptionsLoaded) return;
+    final int? zoneId = current.selectedZoneId;
+    if (zoneId == null || current.parcelPlans == null) return;
+    emit(current.copyWith(parcelPlans: const PlansLoading()));
+    await _loadParcelPlans(zoneId);
   }
 
   /// After a failed plans load.
@@ -132,16 +178,52 @@ class SubscriptionsCubit extends Cubit<SubscriptionsState> {
     if (current is! SubscriptionsLoaded || current.selectedZoneId != zoneId) {
       return;
     }
-    emit(
-      current.copyWith(
-        plans: result.fold(
-          PlansError.new,
-          (List<SubscriptionPlan> plans) => PlansLoaded(
-            plans,
-            bestValueId: SubscriptionPlan.bestValueId(plans),
-          ),
-        ),
-      ),
+    emit(current.copyWith(plans: _plansStatus(result)));
+  }
+
+  Future<void> _loadParcels(int? zoneId) => Future.wait(<Future<void>>[
+    if (zoneId != null) _loadParcelPlans(zoneId),
+    _loadParcelSubscriptions(),
+  ]);
+
+  Future<void> _loadParcelPlans(int zoneId) async {
+    final Either<Failure, List<SubscriptionPlan>> result = await repository
+        .getParcelPlans(zoneId);
+    if (isClosed) return;
+    final SubscriptionsState current = state;
+    // The customer switched zones meanwhile — this answer is stale.
+    if (current is! SubscriptionsLoaded || current.selectedZoneId != zoneId) {
+      return;
+    }
+    emit(current.copyWith(parcelPlans: _plansStatus(result)));
+  }
+
+  /// A failure keeps the balances already shown.
+  Future<void> _loadParcelSubscriptions() async {
+    final Either<Failure, List<ActiveSubscription>> result = await repository
+        .getParcelSubscriptions();
+    if (isClosed) return;
+    final SubscriptionsState current = state;
+    if (current is! SubscriptionsLoaded) return;
+    result.fold(
+      (_) {},
+      (List<ActiveSubscription> subscriptions) =>
+          emit(current.copyWith(parcelSubscriptions: subscriptions)),
     );
   }
+
+  /// What a zone's plans show before (re)loading: nothing to load without a
+  /// zone, the [kept] plans on a same-zone refresh, else a spinner.
+  static PlansStatus _initialPlans(int? zoneId, PlansStatus? kept) =>
+      zoneId == null
+      ? const PlansLoaded(<SubscriptionPlan>[])
+      : kept ?? const PlansLoading();
+
+  static PlansStatus _plansStatus(
+    Either<Failure, List<SubscriptionPlan>> result,
+  ) => result.fold(
+    PlansError.new,
+    (List<SubscriptionPlan> plans) =>
+        PlansLoaded(plans, bestValueId: SubscriptionPlan.bestValueId(plans)),
+  );
 }

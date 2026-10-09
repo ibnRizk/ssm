@@ -31,6 +31,15 @@ final class SubscriptionsError extends SubscriptionsState {
   List<Object?> get props => [failure];
 }
 
+/// The two independent kinds of plan the screen offers.
+enum SubscriptionProduct {
+  /// Store-order delivery plans.
+  delivery,
+
+  /// Door-to-door (customer-to-customer) parcel plans.
+  parcels,
+}
+
 final class SubscriptionsLoaded extends SubscriptionsState {
   final List<DeliveryZone> zones;
 
@@ -46,12 +55,26 @@ final class SubscriptionsLoaded extends SubscriptionsState {
 
   final PurchaseStatus purchase;
 
+  /// Which kind of plan is on screen.
+  final SubscriptionProduct product;
+
+  /// Parcel plans of [selectedZoneId]. Null until the parcels side is first
+  /// opened — it's only fetched for customers who look at it.
+  final PlansStatus? parcelPlans;
+
+  /// Active parcel plans and their balances. Empty when there are none, or
+  /// they couldn't be fetched.
+  final List<ActiveSubscription> parcelSubscriptions;
+
   const SubscriptionsLoaded({
     required this.zones,
     required this.selectedZoneId,
     required this.plans,
     this.current,
     this.purchase = const PurchaseIdle(),
+    this.product = SubscriptionProduct.delivery,
+    this.parcelPlans,
+    this.parcelSubscriptions = const <ActiveSubscription>[],
   });
 
   DeliveryZone? get selectedZone {
@@ -65,16 +88,31 @@ final class SubscriptionsLoaded extends SubscriptionsState {
     int? selectedZoneId,
     PlansStatus? plans,
     PurchaseStatus? purchase,
+    SubscriptionProduct? product,
+    PlansStatus? parcelPlans,
+    List<ActiveSubscription>? parcelSubscriptions,
   }) => SubscriptionsLoaded(
     zones: zones,
     selectedZoneId: selectedZoneId ?? this.selectedZoneId,
     plans: plans ?? this.plans,
     current: current,
     purchase: purchase ?? this.purchase,
+    product: product ?? this.product,
+    parcelPlans: parcelPlans ?? this.parcelPlans,
+    parcelSubscriptions: parcelSubscriptions ?? this.parcelSubscriptions,
   );
 
   @override
-  List<Object?> get props => [zones, selectedZoneId, plans, current, purchase];
+  List<Object?> get props => [
+    zones,
+    selectedZoneId,
+    plans,
+    current,
+    purchase,
+    product,
+    parcelPlans,
+    parcelSubscriptions,
+  ];
 }
 
 // --- Plans of the selected zone ---

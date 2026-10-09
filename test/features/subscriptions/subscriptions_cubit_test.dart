@@ -84,6 +84,32 @@ class _FakeRepository implements SubscriptionsRepository {
     return purchase.future;
   }
 
+  final Map<int, Completer<Either<Failure, List<SubscriptionPlan>>>>
+  parcelPlans = <int, Completer<Either<Failure, List<SubscriptionPlan>>>>{};
+  Completer<Either<Failure, List<ActiveSubscription>>> parcelSubscriptions =
+      Completer<Either<Failure, List<ActiveSubscription>>>();
+  final List<int> parcelPlanRequests = <int>[];
+  int parcelSubscriptionsCalls = 0;
+
+  Completer<Either<Failure, List<SubscriptionPlan>>> parcelPlansFor(
+    int zoneId,
+  ) => parcelPlans.putIfAbsent(
+    zoneId,
+    () => Completer<Either<Failure, List<SubscriptionPlan>>>(),
+  );
+
+  @override
+  Future<Either<Failure, List<SubscriptionPlan>>> getParcelPlans(int zoneId) {
+    parcelPlanRequests.add(zoneId);
+    return parcelPlansFor(zoneId).future;
+  }
+
+  @override
+  Future<Either<Failure, List<ActiveSubscription>>> getParcelSubscriptions() {
+    parcelSubscriptionsCalls++;
+    return parcelSubscriptions.future;
+  }
+
   /// Answers the zones + current pair and resets them for a next load.
   void answerInit({
     Either<Failure, List<DeliveryZone>> zones = const Right(<DeliveryZone>[
@@ -268,6 +294,171 @@ void main() {
       await retry;
 
       expect(loaded().plans, const PlansLoaded(<SubscriptionPlan>[_monthly]));
+    });
+  });
+
+  group('selectProduct', () {
+    const SubscriptionPlan parcel30 = SubscriptionPlan(
+      id: 70,
+      name: 'Parcel 30',
+      deliveriesCount: 30,
+      validityDays: 30,
+      price: 50,
+      currency: 'SAR',
+      maxDistanceKm: 5,
+      maxWeightKg: 5,
+    );
+    const ActiveSubscription parcelBalance = ActiveSubscription(
+      id: 4,
+      deliveriesTotal: 30,
+      deliveriesRemaining: 29,
+    );
+
+    /// Opens the parcel side on Turbah and answers both parcel calls.
+    Future<void> openParcels() async {
+      final Future<void> open = cubit.selectProduct(
+        SubscriptionProduct.parcels,
+      );
+      repository
+          .parcelPlansFor(1)
+          .complete(const Right(<SubscriptionPlan>[parcel30]));
+      repository.parcelSubscriptions.complete(
+        const Right(<ActiveSubscription>[parcelBalance]),
+      );
+      await open;
+    }
+
+    test('the delivery side loads nothing parcel-related', () async {
+      await loadTurbah();
+
+      expect(repository.parcelPlanRequests, isEmpty);
+      expect(repository.parcelSubscriptionsCalls, 0);
+      expect(loaded().parcelPlans, isNull);
+    });
+
+    test('first open fetches the zone parcel plans and balances', () async {
+      await loadTurbah();
+
+      final Future<void> open = cubit.selectProduct(
+        SubscriptionProduct.parcels,
+      );
+      expect(loaded().product, SubscriptionProduct.parcels);
+      expect(loaded().parcelPlans, const PlansLoading());
+
+      repository
+          .parcelPlansFor(1)
+          .complete(const Right(<SubscriptionPlan>[parcel30]));
+      repository.parcelSubscriptions.complete(
+        const Right(<ActiveSubscription>[parcelBalance]),
+      );
+      await open;
+
+      expect(repository.parcelPlanRequests, <int>[1]);
+      expect(
+        loaded().parcelPlans,
+        const PlansLoaded(<SubscriptionPlan>[parcel30]),
+      );
+      expect(loaded().parcelSubscriptions, <ActiveSubscription>[parcelBalance]);
+    });
+
+    test('switching back and forth fetches only once', () async {
+      await loadTurbah();
+      await openParcels();
+
+      await cubit.selectProduct(SubscriptionProduct.delivery);
+      await cubit.selectProduct(SubscriptionProduct.parcels);
+
+      expect(repository.parcelPlanRequests, <int>[1]);
+      expect(repository.parcelSubscriptionsCalls, 1);
+    });
+
+    test('a zone change refetches the parcel plans once opened', () async {
+      await loadTurbah();
+      await openParcels();
+
+      final Future<void> select = cubit.selectZone(2);
+      expect(loaded().parcelPlans, const PlansLoading());
+      repository.plansFor(2).complete(const Right(<SubscriptionPlan>[]));
+      repository.parcelPlansFor(2).complete(const Right(<SubscriptionPlan>[]));
+      await select;
+
+      expect(repository.parcelPlanRequests, <int>[1, 2]);
+      expect(loaded().parcelPlans, const PlansLoaded(<SubscriptionPlan>[]));
+    });
+
+    test('a failed balance fetch keeps the plans', () async {
+      await loadTurbah();
+
+      final Future<void> open = cubit.selectProduct(
+        SubscriptionProduct.parcels,
+      );
+      repository
+          .parcelPlansFor(1)
+          .complete(const Right(<SubscriptionPlan>[parcel30]));
+      repository.parcelSubscriptions.complete(const Left(NetworkFailure()));
+      await open;
+
+      expect(loaded().parcelSubscriptions, isEmpty);
+      expect(
+        loaded().parcelPlans,
+        const PlansLoaded(<SubscriptionPlan>[parcel30]),
+      );
+    });
+
+    test('a failed parcel plans load can be retried', () async {
+      await loadTurbah();
+
+      final Future<void> open = cubit.selectProduct(
+        SubscriptionProduct.parcels,
+      );
+      repository.parcelPlansFor(1).complete(const Left(NetworkFailure()));
+      repository.parcelSubscriptions.complete(
+        const Right(<ActiveSubscription>[]),
+      );
+      await open;
+      expect(loaded().parcelPlans, const PlansError(NetworkFailure()));
+
+      repository.parcelPlans.remove(1);
+      final Future<void> retry = cubit.retryParcelPlans();
+      repository
+          .parcelPlansFor(1)
+          .complete(const Right(<SubscriptionPlan>[parcel30]));
+      await retry;
+
+      expect(
+        loaded().parcelPlans,
+        const PlansLoaded(<SubscriptionPlan>[parcel30]),
+      );
+    });
+
+    test('a refresh reloads the parcel side once opened', () async {
+      await loadTurbah();
+      await openParcels();
+
+      repository.resetInit();
+      repository.plans.remove(1);
+      repository.parcelPlans.remove(1);
+      repository.parcelSubscriptions =
+          Completer<Either<Failure, List<ActiveSubscription>>>();
+      final Future<void> refresh = cubit.load();
+      repository.answerInit();
+      await Future<void>.delayed(Duration.zero);
+      // Same zone: the parcel plans stay on screen while refreshing.
+      expect(
+        loaded().parcelPlans,
+        const PlansLoaded(<SubscriptionPlan>[parcel30]),
+      );
+      expect(loaded().product, SubscriptionProduct.parcels);
+      repository.plansFor(1).complete(const Right(<SubscriptionPlan>[]));
+      repository.parcelPlansFor(1).complete(const Right(<SubscriptionPlan>[]));
+      repository.parcelSubscriptions.complete(
+        const Right(<ActiveSubscription>[]),
+      );
+      await refresh;
+
+      expect(repository.parcelPlanRequests, <int>[1, 1]);
+      expect(repository.parcelSubscriptionsCalls, 2);
+      expect(loaded().parcelSubscriptions, isEmpty);
     });
   });
 

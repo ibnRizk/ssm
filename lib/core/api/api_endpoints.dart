@@ -80,6 +80,19 @@ abstract class ApiEndpoints {
   static String parcelDeliveryOtpRequest(int parcelId) =>
       '$parcels/$parcelId/delivery-otp/request';
 
+  // --- Customer-to-customer (door-to-door) parcels ---
+  static const String c2cParcels = '$_v1/customer/c2c-parcels';
+
+  /// Prices a parcel and applies the best eligible parcel plan; answers a
+  /// `quote_token` that holds the price for 15 minutes.
+  static const String c2cParcelQuote = '$c2cParcels/quote';
+
+  /// Takes the zone as the `zone_id` query parameter. Separate from
+  /// [subscriptionPlans] — parcel plans never cover store orders.
+  static const String c2cParcelSubscriptionPlans =
+      '$c2cParcels/subscription-plans';
+  static const String c2cParcelSubscriptions = '$c2cParcels/subscriptions';
+
   // --- Zones ---
   static const String zoneList = '$_v1/zone/list';
 

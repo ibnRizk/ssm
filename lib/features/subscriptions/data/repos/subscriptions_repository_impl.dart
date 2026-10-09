@@ -31,4 +31,12 @@ class SubscriptionsRepositoryImpl implements SubscriptionsRepository {
         await remote.createPurchaseIntent(planId);
         return unit;
       });
+
+  @override
+  Future<Either<Failure, List<SubscriptionPlan>>> getParcelPlans(int zoneId) =>
+      safeApiCall(() => remote.getParcelPlans(zoneId));
+
+  @override
+  Future<Either<Failure, List<ActiveSubscription>>> getParcelSubscriptions() =>
+      safeApiCall(remote.getParcelSubscriptions);
 }

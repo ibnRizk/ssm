@@ -11,7 +11,7 @@ import '../../domain/entities/subscription_plan.dart';
 import '../cubit/subscriptions_cubit.dart';
 import '../cubit/subscriptions_state.dart';
 import '../utils/plan_labels.dart';
-import 'subscription_package_card.dart';
+import 'subscription_plan_list.dart';
 
 /// The selected zone's plans. Rebuilds only when the plans or the purchase
 /// status change — not when, say, the banner refreshes.
@@ -84,7 +84,7 @@ class SubscriptionPlansSection extends StatelessWidget {
             plans: final List<SubscriptionPlan> list,
             :final bestValueId,
           ) =>
-            _PlanList(
+            SubscriptionPlanList(
               plans: list,
               bestValueId: bestValueId,
               purchasingPlanId: purchase is PurchaseInProgress
@@ -95,50 +95,6 @@ class SubscriptionPlansSection extends StatelessWidget {
             ),
         };
       },
-    );
-  }
-}
-
-class _PlanList extends StatelessWidget {
-  final List<SubscriptionPlan> plans;
-  final int? bestValueId;
-
-  /// Non-null while a purchase runs — every card is disabled meanwhile.
-  final int? purchasingPlanId;
-  final ValueChanged<SubscriptionPlan> onSelected;
-
-  const _PlanList({
-    required this.plans,
-    required this.bestValueId,
-    required this.purchasingPlanId,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        for (int i = 0; i < plans.length; i++) ...<Widget>[
-          if (i > 0)
-            // Extra room above the featured card for its overlapping badge.
-            SizedBox(
-              height:
-                  (plans[i].id == bestValueId ? AppSpacing.lg : AppSpacing.md)
-                      .h,
-            ),
-          SubscriptionPackageCard(
-            key: ValueKey<int>(plans[i].id),
-            title: plans[i].name,
-            subtitle: plans[i].summary,
-            price: plans[i].priceLabel,
-            currency: plans[i].currencyLabel,
-            featured: plans[i].id == bestValueId,
-            isLoading: plans[i].id == purchasingPlanId,
-            onTap: purchasingPlanId == null ? () => onSelected(plans[i]) : null,
-          ),
-        ],
-      ],
     );
   }
 }

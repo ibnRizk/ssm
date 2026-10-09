@@ -12,10 +12,12 @@ import '../../domain/entities/delivery_zone.dart';
 import '../cubit/subscriptions_cubit.dart';
 import '../cubit/subscriptions_state.dart';
 import '../widgets/active_subscription_banner.dart';
+import '../widgets/parcel_plans_section.dart';
 import '../widgets/subscription_plans_section.dart';
 import '../widgets/subscriptions_area_card.dart';
 import '../widgets/subscriptions_footer_note.dart';
 import '../widgets/subscriptions_header.dart';
+import '../widgets/subscriptions_product_toggle.dart';
 
 /// Subscriptions tab body. The bottom navigation bar and its Scaffold live
 /// in [MainScaffold] — this widget is only the scrollable content for that
@@ -69,12 +71,9 @@ class _SubscriptionsBody extends StatelessWidget {
             SubscriptionsLoaded() => Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                const _ActiveBanner(),
-                const _AreaCard(),
+                const _ProductToggle(),
                 SizedBox(height: AppSpacing.lg.h),
-                const SubscriptionPlansSection(),
-                SizedBox(height: AppSpacing.lg.h),
-                const SubscriptionsFooterNote(),
+                const _ProductBody(),
               ],
             ),
             SubscriptionsError(:final failure) => ErrorText(
@@ -86,6 +85,104 @@ class _SubscriptionsBody extends StatelessWidget {
               child: const Center(child: CircularProgressIndicator()),
             ),
           },
+    );
+  }
+}
+
+class _ProductToggle extends StatelessWidget {
+  const _ProductToggle();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      SubscriptionsCubit,
+      SubscriptionsState,
+      SubscriptionProduct
+    >(
+      selector: (SubscriptionsState state) => state is SubscriptionsLoaded
+          ? state.product
+          : SubscriptionProduct.delivery,
+      builder: (BuildContext context, SubscriptionProduct product) =>
+          SubscriptionsProductToggle(
+            selected: product,
+            onChanged: context.read<SubscriptionsCubit>().selectProduct,
+          ),
+    );
+  }
+}
+
+/// The selected product's sections. Rebuilds only when the product
+/// switches; each section selects its own slice.
+class _ProductBody extends StatelessWidget {
+  const _ProductBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      SubscriptionsCubit,
+      SubscriptionsState,
+      SubscriptionProduct
+    >(
+      selector: (SubscriptionsState state) => state is SubscriptionsLoaded
+          ? state.product
+          : SubscriptionProduct.delivery,
+      builder: (BuildContext context, SubscriptionProduct product) =>
+          switch (product) {
+            SubscriptionProduct.delivery => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const _ActiveBanner(),
+                const _AreaCard(),
+                SizedBox(height: AppSpacing.lg.h),
+                const SubscriptionPlansSection(),
+                SizedBox(height: AppSpacing.lg.h),
+                const SubscriptionsFooterNote(),
+              ],
+            ),
+            SubscriptionProduct.parcels => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const _ParcelBalances(),
+                const _AreaCard(),
+                SizedBox(height: AppSpacing.lg.h),
+                const ParcelPlansSection(),
+                SizedBox(height: AppSpacing.lg.h),
+                const SubscriptionsFooterNote(forParcels: true),
+              ],
+            ),
+          },
+    );
+  }
+}
+
+/// One banner per active parcel plan, with its remaining deliveries.
+class _ParcelBalances extends StatelessWidget {
+  const _ParcelBalances();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      SubscriptionsCubit,
+      SubscriptionsState,
+      List<ActiveSubscription>
+    >(
+      selector: (SubscriptionsState state) => state is SubscriptionsLoaded
+          ? state.parcelSubscriptions
+          : const <ActiveSubscription>[],
+      builder: (BuildContext context, List<ActiveSubscription> subscriptions) =>
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              for (final ActiveSubscription subscription in subscriptions)
+                Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.md.h),
+                  child: ActiveSubscriptionBanner(
+                    key: ValueKey<int>(subscription.id),
+                    subscription: subscription,
+                  ),
+                ),
+            ],
+          ),
     );
   }
 }

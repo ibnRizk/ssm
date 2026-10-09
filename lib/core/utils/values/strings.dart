@@ -428,6 +428,117 @@ abstract class Strings {
   static const String _parcelsPendingSubtitle = 'parcels_pending_subtitle';
   static String get parcelsPendingSubtitle => _parcelsPendingSubtitle.tr;
 
+  static const String _parcelsSendButton = 'parcels_send_button';
+  static String get parcelsSendButton => _parcelsSendButton.tr;
+
+  // --- Send a door-to-door parcel ---
+  static const String _sendParcelTitle = 'send_parcel_title';
+  static String get sendParcelTitle => _sendParcelTitle.tr;
+
+  static const String _sendParcelPickupLabel = 'send_parcel_pickup_label';
+  static String get sendParcelPickupLabel => _sendParcelPickupLabel.tr;
+
+  static const String _sendParcelDropoffLabel = 'send_parcel_dropoff_label';
+  static String get sendParcelDropoffLabel => _sendParcelDropoffLabel.tr;
+
+  static const String _sendParcelPointHint = 'send_parcel_point_hint';
+  static String get sendParcelPointHint => _sendParcelPointHint.tr;
+
+  static const String _sendParcelPointPicked = 'send_parcel_point_picked';
+  static String get sendParcelPointPicked => _sendParcelPointPicked.tr;
+
+  static const String _sendParcelPointRequired = 'send_parcel_point_required';
+  static String get sendParcelPointRequired => _sendParcelPointRequired.tr;
+
+  static const String _sendParcelPickOnMap = 'send_parcel_pick_on_map';
+  static String get sendParcelPickOnMap => _sendParcelPickOnMap.tr;
+
+  static const String _sendParcelUseMyLocation = 'send_parcel_use_my_location';
+  static String get sendParcelUseMyLocation => _sendParcelUseMyLocation.tr;
+
+  static const String _sendParcelMapTitle = 'send_parcel_map_title';
+  static String get sendParcelMapTitle => _sendParcelMapTitle.tr;
+
+  static const String _sendParcelMapHint = 'send_parcel_map_hint';
+  static String get sendParcelMapHint => _sendParcelMapHint.tr;
+
+  static const String _sendParcelMapConfirm = 'send_parcel_map_confirm';
+  static String get sendParcelMapConfirm => _sendParcelMapConfirm.tr;
+
+  static const String _sendParcelSizeLabel = 'send_parcel_size_label';
+  static String get sendParcelSizeLabel => _sendParcelSizeLabel.tr;
+
+  static const String _sendParcelSizeSmall = 'send_parcel_size_small';
+  static String get sendParcelSizeSmall => _sendParcelSizeSmall.tr;
+
+  static const String _sendParcelSizeMedium = 'send_parcel_size_medium';
+  static String get sendParcelSizeMedium => _sendParcelSizeMedium.tr;
+
+  static const String _sendParcelSizeLarge = 'send_parcel_size_large';
+  static String get sendParcelSizeLarge => _sendParcelSizeLarge.tr;
+
+  static const String _sendParcelWeightLabel = 'send_parcel_weight_label';
+  static String get sendParcelWeightLabel => _sendParcelWeightLabel.tr;
+
+  static const String _sendParcelWeightHint = 'send_parcel_weight_hint';
+  static String get sendParcelWeightHint => _sendParcelWeightHint.tr;
+
+  static const String _sendParcelWeightInvalid = 'send_parcel_weight_invalid';
+  static String get sendParcelWeightInvalid => _sendParcelWeightInvalid.tr;
+
+  static const String _sendParcelContentLabel = 'send_parcel_content_label';
+  static String get sendParcelContentLabel => _sendParcelContentLabel.tr;
+
+  static const String _sendParcelContentHint = 'send_parcel_content_hint';
+  static String get sendParcelContentHint => _sendParcelContentHint.tr;
+
+  static const String _sendParcelFragile = 'send_parcel_fragile';
+  static String get sendParcelFragile => _sendParcelFragile.tr;
+
+  static const String _sendParcelQuoteButton = 'send_parcel_quote_button';
+  static String get sendParcelQuoteButton => _sendParcelQuoteButton.tr;
+
+  static const String _sendParcelSummaryTitle = 'send_parcel_summary_title';
+  static String get sendParcelSummaryTitle => _sendParcelSummaryTitle.tr;
+
+  static const String _sendParcelDeliveryFee = 'send_parcel_delivery_fee';
+  static String get sendParcelDeliveryFee => _sendParcelDeliveryFee.tr;
+
+  static const String _sendParcelPlanDiscount = 'send_parcel_plan_discount';
+  static String get sendParcelPlanDiscount => _sendParcelPlanDiscount.tr;
+
+  static const String _sendParcelTotal = 'send_parcel_total';
+  static String get sendParcelTotal => _sendParcelTotal.tr;
+
+  static const String _sendParcelDistance = 'send_parcel_distance';
+
+  /// `{km}` in the translation is replaced with the trip distance.
+  static String sendParcelDistance(String km) =>
+      _sendParcelDistance.tr.replaceFirst('{km}', km);
+
+  static const String _sendParcelDiscountApplied =
+      'send_parcel_discount_applied';
+
+  /// `{remaining}` in the translation is replaced with the deliveries left
+  /// on the applied plan.
+  static String sendParcelDiscountApplied(int remaining) =>
+      _sendParcelDiscountApplied.tr.replaceFirst('{remaining}', '$remaining');
+
+  /// When the server applied a plan without saying how much is left on it.
+  static const String _sendParcelDiscountAppliedNoCount =
+      'send_parcel_discount_applied_no_count';
+  static String get sendParcelDiscountAppliedNoCount =>
+      _sendParcelDiscountAppliedNoCount.tr;
+
+  static const String _sendParcelQuoteHeld = 'send_parcel_quote_held';
+  static String get sendParcelQuoteHeld => _sendParcelQuoteHeld.tr;
+
+  static const String _sendParcelConfirmButton = 'send_parcel_confirm_button';
+  static String get sendParcelConfirmButton => _sendParcelConfirmButton.tr;
+
+  static const String _sendParcelConfirmSoon = 'send_parcel_confirm_soon';
+  static String get sendParcelConfirmSoon => _sendParcelConfirmSoon.tr;
+
   // --- Restaurants ---
   static const String _restaurantsTitle = 'restaurants_title';
   static String get restaurantsTitle => _restaurantsTitle.tr;
@@ -938,6 +1049,46 @@ abstract class Strings {
 
   static const String _subscriptionsFooterNote = 'subscriptions_footer_note';
   static String get subscriptionsFooterNote => _subscriptionsFooterNote.tr;
+
+  static const String _subscriptionsProductDelivery =
+      'subscriptions_product_delivery';
+  static String get subscriptionsProductDelivery =>
+      _subscriptionsProductDelivery.tr;
+
+  static const String _subscriptionsProductParcels =
+      'subscriptions_product_parcels';
+  static String get subscriptionsProductParcels =>
+      _subscriptionsProductParcels.tr;
+
+  static const String _subscriptionsPlanMaxDistance =
+      'subscriptions_plan_max_distance';
+
+  /// `{km}` in the translation is replaced with the plan's distance limit.
+  static String subscriptionsPlanMaxDistance(String km) =>
+      _subscriptionsPlanMaxDistance.tr.replaceFirst('{km}', km);
+
+  static const String _subscriptionsPlanMaxWeight =
+      'subscriptions_plan_max_weight';
+
+  /// `{kg}` in the translation is replaced with the plan's weight limit.
+  static String subscriptionsPlanMaxWeight(String kg) =>
+      _subscriptionsPlanMaxWeight.tr.replaceFirst('{kg}', kg);
+
+  static const String _subscriptionsNoParcelPlans =
+      'subscriptions_no_parcel_plans';
+  static String get subscriptionsNoParcelPlans =>
+      _subscriptionsNoParcelPlans.tr;
+
+  /// Parcel plans have no purchase endpoint — an admin grants them.
+  static const String _subscriptionsParcelPlanInfo =
+      'subscriptions_parcel_plan_info';
+  static String get subscriptionsParcelPlanInfo =>
+      _subscriptionsParcelPlanInfo.tr;
+
+  static const String _subscriptionsParcelFooterNote =
+      'subscriptions_parcel_footer_note';
+  static String get subscriptionsParcelFooterNote =>
+      _subscriptionsParcelFooterNote.tr;
 
   static const String _currencySar = 'currency_sar';
   static String get currencySar => _currencySar.tr;

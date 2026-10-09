@@ -5,6 +5,7 @@ import 'package:ssm/core/error/failures.dart';
 import 'package:ssm/features/subscriptions/data/datasources/subscriptions_remote_data_source.dart';
 import 'package:ssm/features/subscriptions/data/models/active_subscription_model.dart';
 import 'package:ssm/features/subscriptions/data/models/delivery_zone_model.dart';
+import 'package:ssm/features/subscriptions/data/models/parcel_subscription_model.dart';
 import 'package:ssm/features/subscriptions/data/models/subscription_plan_model.dart';
 import 'package:ssm/features/subscriptions/data/repos/subscriptions_repository_impl.dart';
 import 'package:ssm/features/subscriptions/domain/entities/active_subscription.dart';
@@ -94,6 +95,120 @@ void main() {
     });
   });
 
+  group('parcel plans', () {
+    test('read the distance and weight limits', () {
+      final List<SubscriptionPlanModel> plans =
+          SubscriptionPlanModel.listFromJson(<String, dynamic>{
+            'data': <dynamic>[
+              <String, dynamic>{
+                'id': 3,
+                'name': 'Parcel 30',
+                'deliveries_count': 30,
+                'validity_days': 30,
+                'price': '50.00',
+                'max_distance_km': '5.00',
+                'max_weight_kg': 5,
+              },
+            ],
+          });
+
+      expect(plans.single.maxDistanceKm, 5);
+      expect(plans.single.maxWeightKg, 5);
+    });
+
+    test('store plans have no limits', () {
+      final List<SubscriptionPlanModel> plans =
+          SubscriptionPlanModel.listFromJson(<String, dynamic>{
+            'data': <dynamic>[
+              <String, dynamic>{
+                'id': 5,
+                'name': 'Monthly',
+                'deliveries_count': 11,
+                'validity_days': 30,
+                'price': 100,
+              },
+            ],
+          });
+
+      expect(plans.single.maxDistanceKm, isNull);
+      expect(plans.single.maxWeightKg, isNull);
+    });
+  });
+
+  group('ParcelSubscriptionModel.listFromJson', () {
+    test('reads balances, expiry and the plan name', () {
+      final List<ActiveSubscription> subscriptions =
+          ParcelSubscriptionModel.listFromJson(<String, dynamic>{
+            'data': <dynamic>[
+              <String, dynamic>{
+                'id': 4,
+                'status': 'active',
+                'remaining_deliveries': 29,
+                'expires_at': '2026-11-08T00:00:00.000000Z',
+                'plan': <String, dynamic>{
+                  'name': 'Parcel 30',
+                  'deliveries_count': 30,
+                },
+              },
+            ],
+          });
+
+      expect(
+        subscriptions.single,
+        ActiveSubscription(
+          id: 4,
+          deliveriesTotal: 30,
+          deliveriesRemaining: 29,
+          expiresAt: DateTime.utc(2026, 11, 8),
+          planName: 'Parcel 30',
+        ),
+      );
+    });
+
+    test('skips inactive entries and entries without a balance', () {
+      final List<ActiveSubscription> subscriptions =
+          ParcelSubscriptionModel.listFromJson(<dynamic>[
+            <String, dynamic>{
+              'id': 1,
+              'status': 'expired',
+              'remaining_deliveries': 3,
+            },
+            <String, dynamic>{'id': 2, 'status': 'active'},
+            <String, dynamic>{'id': 3, 'deliveries_remaining': 2},
+          ]);
+
+      expect(subscriptions.map((ActiveSubscription s) => s.id), <int>[3]);
+      // No total anywhere: the remaining count stands in for it.
+      expect(subscriptions.single.deliveriesTotal, 2);
+    });
+
+    test('reads a paginated body', () {
+      final List<ActiveSubscription> subscriptions =
+          ParcelSubscriptionModel.listFromJson(<String, dynamic>{
+            'data': <String, dynamic>{
+              'data': <dynamic>[
+                <String, dynamic>{
+                  'id': 1,
+                  'remaining_deliveries': 5,
+                  'deliveries_total': 10,
+                },
+              ],
+            },
+          });
+
+      expect(subscriptions.single.deliveriesTotal, 10);
+    });
+
+    test('throws ServerException when the body holds no list', () {
+      expect(
+        () => ParcelSubscriptionModel.listFromJson(<String, dynamic>{
+          'data': null,
+        }),
+        throwsA(isA<ServerException>()),
+      );
+    });
+  });
+
   group('ActiveSubscriptionModel.fromJson', () {
     test('is null when there is no active subscription', () {
       expect(
@@ -171,6 +286,31 @@ void main() {
 
       expect(consumer.lastPath, ApiEndpoints.subscriptionPlans);
       expect(consumer.lastQuery, <String, dynamic>{'zone_id': 3});
+    });
+
+    test('parcel plans come from their own endpoint', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{'data': <dynamic>[]},
+      );
+
+      await SubscriptionsRemoteDataSourceImpl(
+        consumer: consumer,
+      ).getParcelPlans(3);
+
+      expect(consumer.lastPath, ApiEndpoints.c2cParcelSubscriptionPlans);
+      expect(consumer.lastQuery, <String, dynamic>{'zone_id': 3});
+    });
+
+    test('parcel balances come from their own endpoint', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{'data': <dynamic>[]},
+      );
+
+      await SubscriptionsRemoteDataSourceImpl(
+        consumer: consumer,
+      ).getParcelSubscriptions();
+
+      expect(consumer.lastPath, ApiEndpoints.c2cParcelSubscriptions);
     });
 
     test('a purchase intent posts the plan id', () async {

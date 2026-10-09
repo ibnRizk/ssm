@@ -130,6 +130,8 @@ void main() {
       'unread_count': 2,
     });
 
+    await pumpEventQueue();
+
     expect(events, <RealtimeEvent>[const NotificationCreated(unreadCount: 2)]);
   });
 
@@ -148,6 +150,8 @@ void main() {
         'status_version': 2,
       });
 
+    await pumpEventQueue();
+
     expect(events, <RealtimeEvent>[
       const OrderStatusChanged(5, statusVersion: 3),
     ]);
@@ -157,9 +161,11 @@ void main() {
     await repository.connect();
 
     socket.establishedController.add(null);
+    await pumpEventQueue();
     expect(events, isEmpty);
 
     socket.establishedController.add(null);
+    await pumpEventQueue();
     expect(events, <RealtimeEvent>[const RealtimeReconnected()]);
   });
 
@@ -170,6 +176,7 @@ void main() {
     socket.frame('ssm.notification.created', const <String, dynamic>{});
 
     expect(socket.disconnectCalls, 1);
+    await pumpEventQueue();
     expect(events, isEmpty);
   });
 
@@ -186,6 +193,8 @@ void main() {
       await repository.connect();
 
       socket.frame('ssm.order.status_changed', body);
+
+      await pumpEventQueue();
 
       expect(events, hasLength(2));
     },
