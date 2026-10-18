@@ -101,6 +101,7 @@
   "parcels_dropoff_confirm": "Send",
   "parcels_dropoff_sent": "Location sent — we'll start the delivery soon",
   "parcels_empty": "You don't have any parcels yet",
+  "parcels_not_found": "We couldn't find this parcel",
   "parcels_otp_hint": "Tell this code to the courier when your parcel arrives.",
   "parcels_payment_prepaid": "Prepaid",
   "parcels_payment_cod": "Cash on delivery: {amount} {currency}",

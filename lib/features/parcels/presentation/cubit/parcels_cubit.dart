@@ -28,6 +28,9 @@ class ParcelsCubit extends Cubit<ParcelsState> {
   /// one more runs as soon as it finishes.
   bool _reloadOwed = false;
 
+  /// A parcel's details opened before the list loaded — see [refreshParcel].
+  int? _parcelRefreshOwed;
+
   /// Periodic poll while the tab is open and there are active parcels.
   Timer? _pollTimer;
   static const Duration _pollInterval = Duration(seconds: 30);
@@ -38,7 +41,7 @@ class ParcelsCubit extends Cubit<ParcelsState> {
   void startPolling() {
     _pollTimer?.cancel();
     _pollTimer = Timer.periodic(_pollInterval, (_) {
-      if (_hasActiveParcels) unawaited(fetchParcels());
+      if (_hasActiveParcels) unawaited(fetchParcels(silent: true));
     });
   }
 
@@ -58,7 +61,12 @@ class ParcelsCubit extends Cubit<ParcelsState> {
   /// drop-off) keep the list visible and report a failure without
   /// replacing it. A call while one is in flight is ignored — see
   /// [_reloadAfterDropoff] for the case where that would lose data.
-  Future<void> fetchParcels() async {
+  ///
+  /// [silent] — when true, a refresh failure while already loaded keeps the
+  /// list without setting [ParcelsLoaded.refreshFailure]. Use for timer-driven
+  /// background polls that the customer didn't initiate, so a snack bar isn't
+  /// shown on every offline tick.
+  Future<void> fetchParcels({bool silent = false}) async {
     if (_fetching) return;
     _fetching = true;
     final ParcelsState before = state;
@@ -77,7 +85,9 @@ class ParcelsCubit extends Cubit<ParcelsState> {
     result.fold(
       (Failure failure) => emit(
         current is ParcelsLoaded
-            ? current.copyWith(isRefreshing: false, refreshFailure: failure)
+            ? silent
+                ? current.copyWith(isRefreshing: false)
+                : current.copyWith(isRefreshing: false, refreshFailure: failure)
             : ParcelsError(failure),
       ),
       (List<Parcel> parcels) => emit(
@@ -93,7 +103,41 @@ class ParcelsCubit extends Cubit<ParcelsState> {
     if (_reloadOwed) {
       _reloadOwed = false;
       await fetchParcels();
+    } else if (state is ParcelsLoaded) {
+      if (_parcelRefreshOwed case final int parcelId) {
+        _parcelRefreshOwed = null;
+        await refreshParcel(parcelId);
+      }
     }
+  }
+
+  /// Refetches one parcel (its details screen opened) and swaps it into the
+  /// list, appended when it isn't on the first page. Asked before the list
+  /// is loaded, it runs once the list is. A failure is reported like a
+  /// failed refresh, keeping what's shown.
+  Future<void> refreshParcel(int parcelId) async {
+    if (state is! ParcelsLoaded) {
+      _parcelRefreshOwed = parcelId;
+      return;
+    }
+    final Either<Failure, Parcel> result = await parcelsRepository.getParcel(
+      parcelId,
+    );
+    if (isClosed) return;
+    result.fold(
+      (Failure failure) =>
+          _updateLoaded((ParcelsLoaded s) => s.copyWith(refreshFailure: failure)),
+      (Parcel parcel) => _updateLoaded(
+        (ParcelsLoaded s) => s.copyWith(parcels: _upsert(s.parcels, parcel)),
+      ),
+    );
+    _syncDeliveryOtps();
+  }
+
+  static List<Parcel> _upsert(List<Parcel> parcels, Parcel parcel) {
+    final int index = parcels.indexWhere((Parcel p) => p.id == parcel.id);
+    if (index < 0) return <Parcel>[...parcels, parcel];
+    return <Parcel>[...parcels]..[index] = parcel;
   }
 
   /// Fetches [parcelId]'s delivery code — a new one replaces the old, so

@@ -3,36 +3,39 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/delivery_otp/delivery_otp.dart';
+import '../../../../core/error/failures.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/failure_message.dart';
 import '../../../../core/utils/values/strings.dart';
-import '../../../../core/widgets/delivery_otp_card.dart';
+import '../../../../core/widgets/error_text.dart';
+import '../../../../core/widgets/no_data_found.dart';
 import '../../../../core/widgets/simple_app_bar.dart';
 import '../../../../core/widgets/vertical_timeline.dart';
 import '../../domain/entities/parcel.dart';
 import '../cubit/parcels_cubit.dart';
 import '../cubit/parcels_state.dart';
 import '../utils/parcel_labels.dart';
-import '../widgets/dropoff_details_sheet.dart';
-import '../widgets/parcel_action_card.dart';
+import '../widgets/parcel_dropoff_card.dart';
+import '../widgets/parcel_otp_card.dart';
+import '../widgets/parcel_summary.dart';
 
-/// Detail view for a single admin-created (warehouse) parcel.
+/// What the details screen shows: the parcel, else why there's none.
+typedef _DetailView = ({Parcel? parcel, Failure? failure, bool listLoaded});
+
+/// Details of one admin-created (warehouse) parcel, pushed from the
+/// Parcels tab.
 ///
-/// Pushed from the Parcels tab. The route provides its **own**
-/// [ParcelsCubit] instance (see `AppRoutes`) so that [BlocBuilder] never
-/// throws a [ProviderNotFoundException] — GoRouter child routes do not
-/// inherit the parent route's providers.
-///
-/// [initialParcel] is the parcel passed via `state.extra` on navigation;
-/// it is displayed immediately while the cubit fetches fresh data, avoiding
-/// a loading-spinner flash on entry.
-class ParcelDetailScreen extends StatelessWidget {
+/// Shares the tab's [ParcelsCubit] (provided around both routes in
+/// `AppRoutes`), so a drop-off sent or a delivery code fetched here is the
+/// same one the list shows — a second cubit would request its own code,
+/// invalidating the list's. Opening refetches this parcel from the server.
+class ParcelDetailScreen extends StatefulWidget {
   final int parcelId;
 
-  /// Shown instantly on open; replaced by the cubit's data once loaded.
+  /// The tapped parcel, shown until the cubit has this one.
   final Parcel? initialParcel;
 
   const ParcelDetailScreen({
@@ -41,20 +44,36 @@ class ParcelDetailScreen extends StatelessWidget {
     this.initialParcel,
   });
 
-  Future<void> _onSendLocation(BuildContext context, Parcel parcel) async {
-    final ParcelsCubit cubit = context.read<ParcelsCubit>();
-    final (String, String)? details = await DropoffDetailsSheet.show(
-      context,
-      initialAddress: parcel.deliveryAddress,
-    );
-    if (details == null) return;
-    final (String address, String notes) = details;
-    await cubit.sendDropoffLocation(
-      parcel.id,
-      deliveryAddress: address,
-      notes: notes,
-    );
+  @override
+  State<ParcelDetailScreen> createState() => _ParcelDetailScreenState();
+}
+
+class _ParcelDetailScreenState extends State<ParcelDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ParcelsCubit>().refreshParcel(widget.parcelId);
   }
+
+  _DetailView _select(ParcelsState state) => switch (state) {
+    ParcelsLoaded(:final parcels) => (
+      parcel:
+          parcels.where((Parcel p) => p.id == widget.parcelId).firstOrNull ??
+          widget.initialParcel,
+      failure: null,
+      listLoaded: true,
+    ),
+    ParcelsError(:final failure) => (
+      parcel: widget.initialParcel,
+      failure: failure,
+      listLoaded: false,
+    ),
+    ParcelsInitial() || ParcelsLoading() => (
+      parcel: widget.initialParcel,
+      failure: null,
+      listLoaded: false,
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -66,85 +85,22 @@ class ParcelDetailScreen extends StatelessWidget {
         onBack: () => context.pop(),
       ),
       body: SafeArea(
-        child: BlocBuilder<ParcelsCubit, ParcelsState>(
-          builder: (BuildContext context, ParcelsState state) {
-            // Prefer fresh data from cubit; fall back to the parcel passed
-            // via navigation extra while the first fetch is in flight.
-            final Parcel? parcel = (state is ParcelsLoaded
-                    ? state.parcels
-                        .where((Parcel p) => p.id == parcelId)
-                        .firstOrNull
-                    : null) ??
-                initialParcel;
-
-            if (parcel == null) {
-              if (state is ParcelsLoading || state is ParcelsInitial) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return Center(
-                child: Text(
-                  Strings.parcelsEmpty,
-                  style: AppTextStyles.body(color: c.textSecondary),
-                ),
-              );
-            }
-
-            final DeliveryOtpState? otp = state is ParcelsLoaded
-                ? state.otps[parcelId]
-                : null;
-            final bool dropoffBusy = state is ParcelsLoaded &&
-                state.dropoff is DropoffInProgress &&
-                (state.dropoff as DropoffInProgress).parcelId == parcelId;
-
-            return RefreshIndicator(
-              onRefresh: () => context.read<ParcelsCubit>().fetchParcels(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(
-                  AppSpacing.screen.w,
-                  AppSpacing.lg.h,
-                  AppSpacing.screen.w,
-                  AppSpacing.xxl.h,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    // OTP card — only when driver is out for delivery
-                    if (parcel.needsDeliveryOtp && otp != null) ...<Widget>[
-                      DeliveryOtpCard(
-                        otp: otp,
-                        subtitle: parcel.reference,
-                        hint: Strings.parcelsOtpHint,
-                        onRequest: () => context
-                            .read<ParcelsCubit>()
-                            .requestDeliveryOtp(parcel.id),
-                      ),
-                      SizedBox(height: AppSpacing.lg.h),
-                    ],
-
-                    // Drop-off action card (warehouse or awaiting location)
-                    if (parcel.acceptsDropoffLocation &&
-                        parcel.status != ParcelStatus.delivered) ...<Widget>[
-                      ParcelActionCard(
-                        reference: parcel.reference,
-                        locationSent: parcel.hasDropoffLocation,
-                        isBusy: dropoffBusy,
-                        onSendLocation: () =>
-                            _onSendLocation(context, parcel),
-                      ),
-                      SizedBox(height: AppSpacing.lg.h),
-                    ],
-
-                    // Timeline card
-                    _TimelineCard(parcel: parcel),
-                    SizedBox(height: AppSpacing.lg.h),
-
-                    // Payment & reference info
-                    _PaymentCard(parcel: parcel),
-                  ],
-                ),
+        child: BlocSelector<ParcelsCubit, ParcelsState, _DetailView>(
+          selector: _select,
+          builder: (BuildContext context, _DetailView view) => switch (view) {
+            (parcel: final Parcel parcel, failure: _, listLoaded: _) =>
+              _ParcelDetailContent(parcel: parcel),
+            (parcel: null, failure: final Failure failure, listLoaded: _) =>
+              ErrorText(
+                message: failure.userMessage,
+                onRetry: () => context.read<ParcelsCubit>().fetchParcels(),
               ),
-            );
+            (parcel: null, failure: null, listLoaded: true) => Center(
+              child: NoDataFound(text: Strings.parcelsNotFound),
+            ),
+            (parcel: null, failure: null, listLoaded: false) => const Center(
+              child: CircularProgressIndicator(),
+            ),
           },
         ),
       ),
@@ -152,119 +108,67 @@ class ParcelDetailScreen extends StatelessWidget {
   }
 }
 
-class _TimelineCard extends StatelessWidget {
+class _ParcelDetailContent extends StatelessWidget {
   final Parcel parcel;
 
-  const _TimelineCard({required this.parcel});
+  const _ParcelDetailContent({required this.parcel});
 
   @override
   Widget build(BuildContext context) {
-    final AppColors c = context.colors;
-    return Container(
-      decoration: AppDecorations.card(c),
-      padding: EdgeInsets.all(AppSpacing.md.r),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(
-            Strings.parcelsTrackingTitle,
-            style: AppTextStyles.title(color: c.textPrimary),
-          ),
-          SizedBox(height: AppSpacing.md.h),
-          VerticalTimeline(steps: parcel.timeline),
-        ],
-      ),
-    );
-  }
-}
-
-class _PaymentCard extends StatelessWidget {
-  final Parcel parcel;
-
-  const _PaymentCard({required this.parcel});
-
-  @override
-  Widget build(BuildContext context) {
-    final AppColors c = context.colors;
-    final DateTime? updatedAt = parcel.updatedAt;
-    return Container(
-      decoration: AppDecorations.card(c),
-      padding: EdgeInsets.all(AppSpacing.md.r),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  Strings.parcelsShipmentReference(parcel.reference),
-                  style: AppTextStyles.titleSmall(color: c.textPrimary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (updatedAt != null)
-                Text(
-                  parcelUpdatedLabel(
-                    updatedAt,
-                    DateTime.now(),
-                    Localizations.localeOf(context).languageCode,
+    return RefreshIndicator(
+      onRefresh: () => context.read<ParcelsCubit>().refreshParcel(parcel.id),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.screen.w,
+          AppSpacing.lg.h,
+          AppSpacing.screen.w,
+          AppSpacing.xxl.h,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (parcel.needsDeliveryOtp) ...<Widget>[
+              ParcelOtpCard(parcel: parcel),
+              SizedBox(height: AppSpacing.lg.h),
+            ],
+            if (parcel.offersDropoffAction) ...<Widget>[
+              ParcelDropoffCard(parcel: parcel),
+              SizedBox(height: AppSpacing.lg.h),
+            ],
+            _Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Text(
+                    Strings.parcelsTrackingTitle,
+                    style: AppTextStyles.title(color: context.colors.textPrimary),
                   ),
-                  style: AppTextStyles.caption(color: c.textSecondary),
-                ),
-            ],
-          ),
-          SizedBox(height: AppSpacing.xs.h),
-          Wrap(
-            spacing: AppSpacing.xs.w,
-            runSpacing: AppSpacing.xxs.h,
-            children: <Widget>[
-              _Chip(
-                label: parcel.paymentLabel,
-                background: parcel.paymentType == ParcelPaymentType.cod
-                    ? c.secondaryLight
-                    : c.successLight,
-                foreground: parcel.paymentType == ParcelPaymentType.cod
-                    ? c.secondaryDark
-                    : c.success,
+                  SizedBox(height: AppSpacing.md.h),
+                  VerticalTimeline(steps: parcel.timeline),
+                ],
               ),
-              if (parcel.deliveryFee == 0)
-                _Chip(
-                  label: Strings.parcelsFreeDelivery,
-                  background: c.primaryLight,
-                  foreground: c.primary,
-                ),
-            ],
-          ),
-        ],
+            ),
+            SizedBox(height: AppSpacing.lg.h),
+            _Card(child: ParcelSummary(parcel: parcel)),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _Chip extends StatelessWidget {
-  final String label;
-  final Color background;
-  final Color foreground;
+class _Card extends StatelessWidget {
+  final Widget child;
 
-  const _Chip({
-    required this.label,
-    required this.background,
-    required this.foreground,
-  });
+  const _Card({required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.xs.w,
-        vertical: 3.h,
-      ),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Text(label, style: AppTextStyles.label(color: foreground)),
+      decoration: AppDecorations.card(context.colors),
+      padding: EdgeInsets.all(AppSpacing.md.r),
+      child: child,
     );
   }
 }

@@ -67,6 +67,11 @@ class Parcel extends Equatable {
   /// The backend refuses a drop-off once the parcel is delivered.
   bool get acceptsDropoffLocation => status != ParcelStatus.delivered;
 
+  /// The app offers the drop-off action only at the warehouse: before that
+  /// there's nothing to deliver yet, and once out for delivery the driver
+  /// already left with the location they had.
+  bool get offersDropoffAction => status == ParcelStatus.atWarehouse;
+
   /// Waiting on the customer: at the warehouse, no drop-off sent yet.
   bool get awaitsDropoffLocation =>
       status == ParcelStatus.atWarehouse && !hasDropoffLocation;

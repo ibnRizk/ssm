@@ -50,6 +50,8 @@ import '../../features/c2c_parcels/domain/entities/c2c_parcel.dart';
 import '../../features/parcels/presentation/cubit/parcels_cubit.dart';
 import '../../features/parcels/presentation/screens/parcel_detail_screen.dart';
 import '../../features/parcels/presentation/screens/parcels_screen.dart';
+import '../../features/parcels/presentation/widgets/parcels_feedback_listener.dart';
+import '../../features/parcels/presentation/widgets/parcels_polling_scope.dart';
 import '../../features/parcels/domain/entities/parcel.dart';
 import '../../features/pharmacy/presentation/cubit/pharmacy_order_cubit.dart';
 import '../../features/pharmacy/presentation/screens/pharmacy_order_screen.dart';
@@ -299,47 +301,48 @@ abstract class AppRoutes {
           ),
           StatefulShellBranch(
             routes: <RouteBase>[
-              GoRoute(
-                path: parcels,
-                name: parcelsName,
-                builder: (_, __) => BlocProvider<ParcelsCubit>(
+              // One ParcelsCubit for the list and a parcel's details: a
+              // pushed child route doesn't see its parent page's providers,
+              // and a second cubit would request its own delivery code —
+              // invalidating the one the list shows. The shell puts both
+              // pages under the same provider and snack-bar listener.
+              ShellRoute(
+                builder: (_, __, Widget child) => BlocProvider<ParcelsCubit>(
                   create: (_) =>
                       ServiceLocator.instance<ParcelsCubit>()..fetchParcels(),
-                  child: const ParcelsScreen(),
+                  child: ParcelsPollingScope(
+                    child: ParcelsFeedbackListener(child: child),
+                  ),
                 ),
                 routes: <RouteBase>[
                   GoRoute(
-                    path: ':parcelId',
-                    name: parcelDetailName,
-                    builder: (_, GoRouterState state) {
-                      final int? id = int.tryParse(
-                        state.pathParameters['parcelId'] ?? '',
-                      );
-                      if (id == null) {
-                        return Center(
-                          child: Text('No route found for ${state.uri}'),
-                        );
-                      }
-                      // GoRouter child routes don't share the parent route's
-                      // BlocProvider. We give the detail screen its own
-                      // ParcelsCubit so BlocBuilder never throws
-                      // ProviderNotFoundException.
-                      //
-                      // The caller may pass the already-loaded Parcel via
-                      // state.extra for instant display while the cubit
-                      // finishes its first fetch.
-                      final Parcel? initialParcel =
-                          state.extra is Parcel ? state.extra as Parcel : null;
-                      return BlocProvider<ParcelsCubit>(
-                        create: (_) =>
-                            ServiceLocator.instance<ParcelsCubit>()
-                              ..fetchParcels(),
-                        child: ParcelDetailScreen(
-                          parcelId: id,
-                          initialParcel: initialParcel,
-                        ),
-                      );
-                    },
+                    path: parcels,
+                    name: parcelsName,
+                    builder: (_, __) => const ParcelsScreen(),
+                    routes: <RouteBase>[
+                      GoRoute(
+                        path: ':parcelId',
+                        name: parcelDetailName,
+                        builder: (_, GoRouterState state) {
+                          final int? id = int.tryParse(
+                            state.pathParameters['parcelId'] ?? '',
+                          );
+                          if (id == null) {
+                            return Center(
+                              child: Text('No route found for ${state.uri}'),
+                            );
+                          }
+                          // The tapped parcel, shown while this one loads;
+                          // absent when the route is reached any other way.
+                          return ParcelDetailScreen(
+                            parcelId: id,
+                            initialParcel: state.extra is Parcel
+                                ? state.extra as Parcel
+                                : null,
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

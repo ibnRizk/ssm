@@ -8,6 +8,9 @@ abstract class ParcelsRepository {
   /// The first page, newest first.
   Future<Either<Failure, List<Parcel>>> getParcels();
 
+  /// One parcel, fresh. A parcel that isn't the customer's answers 404.
+  Future<Either<Failure, Parcel>> getParcel(int parcelId);
+
   /// Invalid coordinates or an already-delivered parcel answer 422; a
   /// parcel that isn't the customer's answers 404. Both carry the server's
   /// message.

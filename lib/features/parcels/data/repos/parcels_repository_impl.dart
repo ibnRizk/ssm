@@ -17,6 +17,10 @@ class ParcelsRepositoryImpl implements ParcelsRepository {
       safeApiCall(remote.getParcels);
 
   @override
+  Future<Either<Failure, Parcel>> getParcel(int parcelId) =>
+      safeApiCall(() => remote.getParcel(parcelId));
+
+  @override
   Future<Either<Failure, Unit>> sendDropoff(
     int parcelId,
     ParcelDropoff dropoff,

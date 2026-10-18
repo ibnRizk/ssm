@@ -101,6 +101,7 @@
   "parcels_dropoff_confirm": "إرسال",
   "parcels_dropoff_sent": "تم إرسال موقعك — سنبدأ التوصيل قريباً",
   "parcels_empty": "لا توجد لديك طرود حالياً",
+  "parcels_not_found": "لم نعثر على هذه الشحنة",
   "parcels_otp_hint": "أخبر المندوب بهذا الرمز عند وصول طردك.",
   "parcels_payment_prepaid": "مدفوع مسبقاً",
   "parcels_payment_cod": "الدفع عند الاستلام: {amount} {currency}",

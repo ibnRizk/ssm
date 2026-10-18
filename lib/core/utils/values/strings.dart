@@ -352,6 +352,9 @@ abstract class Strings {
   static const String _parcelsEmpty = 'parcels_empty';
   static String get parcelsEmpty => _parcelsEmpty.tr;
 
+  static const String _parcelsNotFound = 'parcels_not_found';
+  static String get parcelsNotFound => _parcelsNotFound.tr;
+
   static const String _parcelsOtpHint = 'parcels_otp_hint';
   static String get parcelsOtpHint => _parcelsOtpHint.tr;
 

@@ -72,6 +72,7 @@ abstract class ApiEndpoints {
 
   // --- Parcels ---
   static const String parcels = '$_v1/customer/parcels';
+  static String parcel(int parcelId) => '$parcels/$parcelId';
   static String parcelLocation(int parcelId) => '$parcels/$parcelId/location';
 
   /// Same contract as [deliveryOtpRequest]: only while the parcel is out

@@ -8,6 +8,8 @@ import '../models/parcel_model.dart';
 abstract class ParcelsRemoteDataSource {
   Future<List<ParcelModel>> getParcels();
 
+  Future<ParcelModel> getParcel(int parcelId);
+
   Future<void> sendDropoff(int parcelId, ParcelDropoff dropoff);
 
   Future<DeliveryOtp> requestDeliveryOtp(int parcelId);
@@ -21,6 +23,12 @@ class ParcelsRemoteDataSourceImpl implements ParcelsRemoteDataSource {
   @override
   Future<List<ParcelModel>> getParcels() async =>
       ParcelModel.listFromJson(await consumer.get(ApiEndpoints.parcels));
+
+  @override
+  Future<ParcelModel> getParcel(int parcelId) async =>
+      ParcelModel.fromDetailJson(
+        await consumer.get(ApiEndpoints.parcel(parcelId)),
+      );
 
   /// Coordinates go as numbers, as in the API guide's example. Empty notes
   /// are left out rather than sent blank.

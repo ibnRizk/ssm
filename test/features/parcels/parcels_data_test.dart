@@ -118,6 +118,21 @@ void main() {
       expect(ParcelModel.statusFromWire('delivered'), ParcelStatus.delivered);
     });
 
+    test('reads the uppercase warehouse statuses', () {
+      expect(
+        ParcelModel.statusFromWire('ARRIVED_AT_WAREHOUSE'),
+        ParcelStatus.atWarehouse,
+      );
+      expect(
+        ParcelModel.statusFromWire('OUT_FOR_DELIVERY'),
+        ParcelStatus.outForDelivery,
+      );
+      expect(
+        ParcelModel.statusFromWire('DELIVERED'),
+        ParcelStatus.delivered,
+      );
+    });
+
     test('never guesses a later stage for an unknown value', () {
       expect(ParcelModel.statusFromWire('mystery'), ParcelStatus.processing);
       expect(ParcelModel.statusFromWire(null), ParcelStatus.processing);
@@ -152,6 +167,60 @@ void main() {
           _parcel(2, ParcelStatus.delivered),
         ]),
         isNull,
+      );
+    });
+  });
+
+  group('GET /customer/parcels/{id}', () {
+    test('reads the parcel under data', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer(
+        response: <String, dynamic>{
+          'data': <String, dynamic>{
+            'id': 2048,
+            'tracking_number': 'SSM-P2048',
+            'status': 'OUT_FOR_DELIVERY',
+            'payment_type': 'PREPAID',
+          },
+        },
+      );
+
+      final Parcel parcel = await ParcelsRemoteDataSourceImpl(
+        consumer: consumer,
+      ).getParcel(2048);
+
+      expect(consumer.lastVerb, 'GET');
+      expect(consumer.lastPath, ApiEndpoints.parcel(2048));
+      expect(parcel.reference, 'SSM-P2048');
+      expect(parcel.status, ParcelStatus.outForDelivery);
+    });
+
+    test('accepts a bare parcel object', () {
+      expect(
+        ParcelModel.fromDetailJson(<String, dynamic>{'id': 7}).reference,
+        '#7',
+      );
+    });
+
+    test('throws ServerException without a parcel id', () {
+      expect(
+        () => ParcelModel.fromDetailJson(<String, dynamic>{
+          'data': <String, dynamic>{'status': 'delivered'},
+        }),
+        throwsA(isA<ServerException>()),
+      );
+    });
+
+    test('a foreign parcel (404) maps to a NotFoundFailure', () async {
+      final FakeDioConsumer consumer = FakeDioConsumer()
+        ..error = const NotFoundException();
+
+      final Either<Failure, Parcel> result = await ParcelsRepositoryImpl(
+        remote: ParcelsRemoteDataSourceImpl(consumer: consumer),
+      ).getParcel(2048);
+
+      expect(
+        result.fold((Failure f) => f, (_) => null),
+        isA<NotFoundFailure>(),
       );
     });
   });

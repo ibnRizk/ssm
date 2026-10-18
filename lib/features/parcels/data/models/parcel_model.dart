@@ -48,6 +48,16 @@ class ParcelModel extends Parcel {
     );
   }
 
+  /// `GET /customer/parcels/{id}` → `{ "data": {...} }`; a bare object is
+  /// accepted too. Throws [ServerException] when there's no parcel with an
+  /// id in it.
+  static ParcelModel fromDetailJson(dynamic json) {
+    final dynamic data = json is Map && json['data'] is Map
+        ? json['data']
+        : json;
+    return tryFromJson(data) ?? (throw const ServerException());
+  }
+
   /// Throws [ServerException] when the body has no `data` list.
   static List<ParcelModel> listFromJson(dynamic json) {
     final dynamic data = json is Map ? json['data'] : null;
