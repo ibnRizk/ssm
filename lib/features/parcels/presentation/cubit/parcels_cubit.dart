@@ -1,7 +1,7 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'dart:async';
 
 import '../../../../core/delivery_otp/delivery_otp.dart';
 import '../../../../core/error/failures.dart';
@@ -27,6 +27,32 @@ class ParcelsCubit extends Cubit<ParcelsState> {
   /// fetch may have been answered before the server had the location, so
   /// one more runs as soon as it finishes.
   bool _reloadOwed = false;
+
+  /// Periodic poll while the tab is open and there are active parcels.
+  Timer? _pollTimer;
+  static const Duration _pollInterval = Duration(seconds: 30);
+
+  /// Call when the Parcels tab becomes visible. Starts a periodic refresh
+  /// so status changes (driver picks up, OTP required) are reflected without
+  /// the customer tapping "Update now".
+  void startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(_pollInterval, (_) {
+      if (_hasActiveParcels) unawaited(fetchParcels());
+    });
+  }
+
+  /// Call when the Parcels tab is hidden or the app goes to background.
+  void stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+  }
+
+  bool get _hasActiveParcels {
+    final ParcelsState s = state;
+    if (s is! ParcelsLoaded) return false;
+    return s.parcels.any((Parcel p) => p.status != ParcelStatus.delivered);
+  }
 
   /// First load shows a spinner; later calls ("Update now", after a
   /// drop-off) keep the list visible and report a failure without
@@ -198,5 +224,11 @@ class ParcelsCubit extends Cubit<ParcelsState> {
   void _updateLoaded(ParcelsLoaded Function(ParcelsLoaded) update) {
     final ParcelsState current = state;
     if (current is ParcelsLoaded) emit(update(current));
+  }
+
+  @override
+  Future<void> close() {
+    _pollTimer?.cancel();
+    return super.close();
   }
 }

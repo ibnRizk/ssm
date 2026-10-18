@@ -14,65 +14,70 @@ import '../utils/parcel_labels.dart';
 /// the warehouse → out for delivery → delivered timeline.
 class ParcelTrackingCard extends StatelessWidget {
   final Parcel parcel;
+  final VoidCallback? onTap;
 
-  const ParcelTrackingCard({super.key, required this.parcel});
+  const ParcelTrackingCard({super.key, required this.parcel, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = context.colors;
     final DateTime? updatedAt = parcel.updatedAt;
-    return Container(
-      decoration: AppDecorations.card(c),
-      padding: EdgeInsets.all(AppSpacing.md.r),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  Strings.parcelsShipmentReference(parcel.reference),
-                  style: AppTextStyles.titleSmall(color: c.textPrimary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (updatedAt != null)
-                Text(
-                  parcelUpdatedLabel(
-                    updatedAt,
-                    DateTime.now(),
-                    Localizations.localeOf(context).languageCode,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.lg.r),
+      child: Container(
+        decoration: AppDecorations.card(c),
+        padding: EdgeInsets.all(AppSpacing.md.r),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    Strings.parcelsShipmentReference(parcel.reference),
+                    style: AppTextStyles.titleSmall(color: c.textPrimary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  style: AppTextStyles.caption(color: c.textSecondary),
                 ),
-            ],
-          ),
-          SizedBox(height: AppSpacing.xs.h),
-          Wrap(
-            spacing: AppSpacing.xs.w,
-            runSpacing: AppSpacing.xxs.h,
-            children: <Widget>[
-              _Chip(
-                label: parcel.paymentLabel,
-                background: parcel.paymentType == ParcelPaymentType.cod
-                    ? c.secondaryLight
-                    : c.successLight,
-                foreground: parcel.paymentType == ParcelPaymentType.cod
-                    ? c.secondaryDark
-                    : c.success,
-              ),
-              if (parcel.deliveryFee == 0)
+                if (updatedAt != null)
+                  Text(
+                    parcelUpdatedLabel(
+                      updatedAt,
+                      DateTime.now(),
+                      Localizations.localeOf(context).languageCode,
+                    ),
+                    style: AppTextStyles.caption(color: c.textSecondary),
+                  ),
+              ],
+            ),
+            SizedBox(height: AppSpacing.xs.h),
+            Wrap(
+              spacing: AppSpacing.xs.w,
+              runSpacing: AppSpacing.xxs.h,
+              children: <Widget>[
                 _Chip(
-                  label: Strings.parcelsFreeDelivery,
-                  background: c.primaryLight,
-                  foreground: c.primary,
+                  label: parcel.paymentLabel,
+                  background: parcel.paymentType == ParcelPaymentType.cod
+                      ? c.secondaryLight
+                      : c.successLight,
+                  foreground: parcel.paymentType == ParcelPaymentType.cod
+                      ? c.secondaryDark
+                      : c.success,
                 ),
-            ],
-          ),
-          SizedBox(height: AppSpacing.lg.h),
-          VerticalTimeline(steps: parcel.timeline),
-        ],
+                if (parcel.deliveryFee == 0)
+                  _Chip(
+                    label: Strings.parcelsFreeDelivery,
+                    background: c.primaryLight,
+                    foreground: c.primary,
+                  ),
+              ],
+            ),
+            SizedBox(height: AppSpacing.lg.h),
+            VerticalTimeline(steps: parcel.timeline),
+          ],
+        ),
       ),
     );
   }

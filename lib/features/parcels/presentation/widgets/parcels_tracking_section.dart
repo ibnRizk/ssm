@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -44,11 +46,19 @@ class ParcelsTrackingSection extends StatelessWidget {
             PendingShipmentCard(
               key: ValueKey<int>(parcels[i].id),
               reference: parcels[i].reference,
+              onTap: () => context.push(
+                AppRoutes.parcelDetailPath(parcels[i].id),
+                extra: parcels[i],
+              ),
             )
           else
             ParcelTrackingCard(
               key: ValueKey<int>(parcels[i].id),
               parcel: parcels[i],
+              onTap: () => context.push(
+                AppRoutes.parcelDetailPath(parcels[i].id),
+                extra: parcels[i],
+              ),
             ),
         ],
       ],

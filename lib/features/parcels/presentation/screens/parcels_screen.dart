@@ -25,8 +25,36 @@ import '../widgets/parcels_tracking_section.dart';
 /// Parcels tab body. The bottom navigation bar and its Scaffold live in
 /// [MainScaffold] — this widget is only the scrollable content for that tab.
 /// Expects a [ParcelsCubit] above it (provided at the route).
-class ParcelsScreen extends StatelessWidget {
+///
+/// Auto-polls every 30 s while the tab is open so that status changes
+/// (driver picks up, OTP required) surface without the customer tapping
+/// "Update now".
+class ParcelsScreen extends StatefulWidget {
   const ParcelsScreen({super.key});
+
+  @override
+  State<ParcelsScreen> createState() => _ParcelsScreenState();
+}
+
+class _ParcelsScreenState extends State<ParcelsScreen> {
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ParcelsCubit>().startPolling();
+    _lifecycle = AppLifecycleListener(
+      onHide: () => context.read<ParcelsCubit>().stopPolling(),
+      onShow: () => context.read<ParcelsCubit>().startPolling(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    context.read<ParcelsCubit>().stopPolling();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +73,7 @@ class ParcelsScreen extends StatelessWidget {
               AppSpacing.xxl.h,
             ),
             child: BlocBuilder<ParcelsCubit, ParcelsState>(
-              // The drop-off flow and "Update now" rebuild their own widgets.
+              // The drop-off flow and \"Update now\" rebuild their own widgets.
               buildWhen: (ParcelsState previous, ParcelsState current) =>
                   previous.runtimeType != current.runtimeType ||
                   (previous is ParcelsLoaded &&
@@ -81,6 +109,7 @@ class ParcelsScreen extends StatelessWidget {
     );
   }
 }
+
 
 class _ParcelsContent extends StatelessWidget {
   final List<Parcel> parcels;

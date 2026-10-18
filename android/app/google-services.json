@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "674240503833",
+    "project_id": "ssm-groups-a646e",
+    "storage_bucket": "ssm-groups-a646e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:674240503833:android:6fcd107e74b30d26ef8a88",
+        "android_client_info": {
+          "package_name": "com.ssm.user"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxNFK2Jy_cLAGaB6s2LM1XVpVRPNYdH_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

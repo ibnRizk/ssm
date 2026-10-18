@@ -48,7 +48,9 @@ import '../../features/c2c_parcels/presentation/screens/create_parcel_screen.dar
 import '../../features/c2c_parcels/presentation/screens/send_parcel_screen.dart';
 import '../../features/c2c_parcels/domain/entities/c2c_parcel.dart';
 import '../../features/parcels/presentation/cubit/parcels_cubit.dart';
+import '../../features/parcels/presentation/screens/parcel_detail_screen.dart';
 import '../../features/parcels/presentation/screens/parcels_screen.dart';
+import '../../features/parcels/domain/entities/parcel.dart';
 import '../../features/pharmacy/presentation/cubit/pharmacy_order_cubit.dart';
 import '../../features/pharmacy/presentation/screens/pharmacy_order_screen.dart';
 import '../../features/promotions/presentation/cubit/promotions_cubit.dart';
@@ -73,6 +75,8 @@ abstract class AppRoutes {
   static const String home = '/home';
   static const String orders = '/orders';
   static const String parcels = '/parcels';
+  static const String parcelDetail = '/parcels/:parcelId';
+  static String parcelDetailPath(int parcelId) => '/parcels/$parcelId';
   static const String sendParcel = '/send-parcel';
   static const String createParcel = '/send-parcel/details';
   static const String c2cParcels = '/c2c-parcels';
@@ -106,6 +110,7 @@ abstract class AppRoutes {
   static const String homeName = 'home';
   static const String ordersName = 'orders';
   static const String parcelsName = 'parcels';
+  static const String parcelDetailName = 'parcelDetail';
   static const String sendParcelName = 'sendParcel';
   static const String createParcelName = 'createParcel';
   static const String c2cParcelsName = 'c2cParcels';
@@ -302,6 +307,41 @@ abstract class AppRoutes {
                       ServiceLocator.instance<ParcelsCubit>()..fetchParcels(),
                   child: const ParcelsScreen(),
                 ),
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: ':parcelId',
+                    name: parcelDetailName,
+                    builder: (_, GoRouterState state) {
+                      final int? id = int.tryParse(
+                        state.pathParameters['parcelId'] ?? '',
+                      );
+                      if (id == null) {
+                        return Center(
+                          child: Text('No route found for ${state.uri}'),
+                        );
+                      }
+                      // GoRouter child routes don't share the parent route's
+                      // BlocProvider. We give the detail screen its own
+                      // ParcelsCubit so BlocBuilder never throws
+                      // ProviderNotFoundException.
+                      //
+                      // The caller may pass the already-loaded Parcel via
+                      // state.extra for instant display while the cubit
+                      // finishes its first fetch.
+                      final Parcel? initialParcel =
+                          state.extra is Parcel ? state.extra as Parcel : null;
+                      return BlocProvider<ParcelsCubit>(
+                        create: (_) =>
+                            ServiceLocator.instance<ParcelsCubit>()
+                              ..fetchParcels(),
+                        child: ParcelDetailScreen(
+                          parcelId: id,
+                          initialParcel: initialParcel,
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
