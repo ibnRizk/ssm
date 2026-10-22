@@ -436,16 +436,27 @@ void main() {
     testWidgets('stops polling when the app is hidden', (
       WidgetTester tester,
     ) async {
+      // AppLifecycleListener fires onHide only on the inactive→hidden transition.
+      // Reset the binding to a known state (resumed) before mounting, then use
+      // the proper two-step hide sequence in the test body.
+      // The reset calls happen before pumpScope (no listener mounted yet).
+      tester.binding
+          .handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding
+          .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+
       final (:repo, cubit: _) = await pumpScope(tester);
 
       await tester.pump(const Duration(seconds: 30));
       await tester.pump();
       final int callsBeforeHide = repo.listCalls;
 
-      // Simulate app going to background.
-      tester.binding.handleAppLifecycleStateChanged(
-        AppLifecycleState.hidden,
-      );
+      // Proper hide sequence: resumed → inactive → hidden (onHide fires on hidden).
+      tester.binding
+          .handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      tester.binding
+          .handleAppLifecycleStateChanged(AppLifecycleState.hidden);
       await tester.pump();
 
       await tester.pump(const Duration(seconds: 30));
@@ -457,24 +468,29 @@ void main() {
     testWidgets(
       'resumes polling with an immediate fetch on app show',
       (WidgetTester tester) async {
+        // Reset binding to a known state before mounting.
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+
         final (:repo, cubit: _) = await pumpScope(tester);
 
-        // Hide the app.
-        tester.binding.handleAppLifecycleStateChanged(
-          AppLifecycleState.hidden,
-        );
+        // Hide: inactive → hidden (onHide fires on hidden, stopPolling).
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        await tester.pump();
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.hidden);
         await tester.pump();
         final int callsBeforeShow = repo.listCalls;
 
-        // Bring app back to foreground.
-        repo.list = const Right<Failure, List<Parcel>>(
-          <Parcel>[_atWarehouse],
-        );
-        tester.binding.handleAppLifecycleStateChanged(
-          AppLifecycleState.resumed,
-        );
+        // Show: hidden → inactive (onShow fires on inactive, _resumePolling).
+        repo.list = const Right<Failure, List<Parcel>>(<Parcel>[_atWarehouse]);
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.inactive);
         await tester.pump();
-        await tester.pump(); // flush fetch
+        await tester.pump(); // flush the immediate fetchParcels(silent: true)
 
         expect(repo.listCalls, callsBeforeShow + 1);
       },
