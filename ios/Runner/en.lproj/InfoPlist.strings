@@ -1,0 +1,4 @@
+"CFBundleDisplayName" = "SSM";
+"NSLocationWhenInUseUsageDescription" = "Your location is used to set a delivery address on the map.";
+"NSCameraUsageDescription" = "Take a photo of a prescription or a parcel to attach to your order.";
+"NSPhotoLibraryUsageDescription" = "Choose a photo of a prescription or a parcel to attach to your order.";

@@ -1,0 +1,4 @@
+"CFBundleDisplayName" = "إس إس إم";
+"NSLocationWhenInUseUsageDescription" = "يُستخدم موقعك لتحديد عنوان التوصيل على الخريطة.";
+"NSCameraUsageDescription" = "التقط صورة للوصفة الطبية أو للطرد لإرفاقها بطلبك.";
+"NSPhotoLibraryUsageDescription" = "اختر صورة للوصفة الطبية أو للطرد من المعرض لإرفاقها بطلبك.";

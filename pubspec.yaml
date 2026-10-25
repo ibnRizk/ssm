@@ -1,7 +1,12 @@
 name: ssm
 description: "Team base architecture boilerplate — Clean Architecture + Cubit + GetIt + Dio."
 publish_to: 'none'
+# ios
 version: 1.0.0+1
+
+
+# android
+# version: 1.0.0+1
 
 environment:
   sdk: ^3.9.2
@@ -52,7 +57,7 @@ dependencies:
 
   # --- Device ---
   geolocator: ^14.0.2
-  google_maps_flutter: ^2.18.2
+  google_maps_flutter: ^2.18.1
   image_picker: ^1.2.3
   package_info_plus: ^9.0.1
   firebase_core: ^4.15.0
