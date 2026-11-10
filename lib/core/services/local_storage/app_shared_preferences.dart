@@ -12,7 +12,7 @@ abstract class _Keys {
   static const String userType = 'userType';
   static const String userCycle = 'userCycle';
   static const String zoneIds = 'zoneIds';
-  static const String guestMode = 'guestMode';
+  static const String onboardingSeen = 'onboardingSeen';
 }
 
 /// Non-sensitive key/value storage. Anything secret (tokens, refresh tokens)
@@ -74,14 +74,11 @@ abstract class AppSharedPreferences {
 
   Future<bool> removeZoneIds();
 
-  // --- Guest mode ---
-  /// True once the customer chose "Continue as guest" and hasn't signed in
-  /// since — the app then opens on Home instead of Login.
-  bool getGuestMode();
+  // --- Onboarding ---
+  /// True once the first-launch onboarding was completed or skipped.
+  bool getOnboardingSeen();
 
-  Future<bool> saveGuestMode(bool value);
-
-  Future<bool> removeGuestMode();
+  Future<bool> saveOnboardingSeen(bool value);
 
   Future<bool> clearAll();
 }
@@ -180,16 +177,13 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
   @override
   Future<bool> removeZoneIds() => instance.remove(_Keys.zoneIds);
 
-  // --- Guest mode ---
+  // --- Onboarding ---
   @override
-  bool getGuestMode() => instance.getBool(_Keys.guestMode) ?? false;
+  bool getOnboardingSeen() => instance.getBool(_Keys.onboardingSeen) ?? false;
 
   @override
-  Future<bool> saveGuestMode(bool value) =>
-      instance.setBool(_Keys.guestMode, value);
-
-  @override
-  Future<bool> removeGuestMode() => instance.remove(_Keys.guestMode);
+  Future<bool> saveOnboardingSeen(bool value) =>
+      instance.setBool(_Keys.onboardingSeen, value);
 
   @override
   Future<bool> clearAll() => instance.clear();

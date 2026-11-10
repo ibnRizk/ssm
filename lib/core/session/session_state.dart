@@ -18,12 +18,14 @@ final class SessionSignedIn extends SessionState {
   const SessionSignedIn();
 }
 
-/// Browsing without an account. Account-based features ask to sign in.
+/// Browsing without an account — the default. Account-based features ask
+/// to sign in (see `ensureSignedIn`).
 final class SessionGuest extends SessionState {
-  const SessionGuest();
-}
+  /// False on a first launch: the splash routes to onboarding.
+  final bool hasSeenOnboarding;
 
-/// Neither signed in nor chose guest mode — the app opens on Login.
-final class SessionSignedOut extends SessionState {
-  const SessionSignedOut();
+  const SessionGuest({required this.hasSeenOnboarding});
+
+  @override
+  List<Object?> get props => [hasSeenOnboarding];
 }

@@ -160,8 +160,41 @@ abstract class Strings {
   static const String _signInRequiredMessage = 'sign_in_required_message';
   static String get signInRequiredMessage => _signInRequiredMessage.tr;
 
+  static const String _signInRequiredCreateAccount =
+      'sign_in_required_create_account';
+  static String get signInRequiredCreateAccount =>
+      _signInRequiredCreateAccount.tr;
+
   static const String _notNow = 'not_now';
   static String get notNow => _notNow.tr;
+
+  // --- Onboarding ---
+  static const String _onboardingSkip = 'onboarding_skip';
+  static String get onboardingSkip => _onboardingSkip.tr;
+
+  static const String _onboardingNext = 'onboarding_next';
+  static String get onboardingNext => _onboardingNext.tr;
+
+  static const String _onboardingGetStarted = 'onboarding_get_started';
+  static String get onboardingGetStarted => _onboardingGetStarted.tr;
+
+  static const String _onboardingTitle1 = 'onboarding_title_1';
+  static String get onboardingTitle1 => _onboardingTitle1.tr;
+
+  static const String _onboardingBody1 = 'onboarding_body_1';
+  static String get onboardingBody1 => _onboardingBody1.tr;
+
+  static const String _onboardingTitle2 = 'onboarding_title_2';
+  static String get onboardingTitle2 => _onboardingTitle2.tr;
+
+  static const String _onboardingBody2 = 'onboarding_body_2';
+  static String get onboardingBody2 => _onboardingBody2.tr;
+
+  static const String _onboardingTitle3 = 'onboarding_title_3';
+  static String get onboardingTitle3 => _onboardingTitle3.tr;
+
+  static const String _onboardingBody3 = 'onboarding_body_3';
+  static String get onboardingBody3 => _onboardingBody3.tr;
 
   static const String _authRegisterTitle = 'auth_register_title';
   static String get authRegisterTitle => _authRegisterTitle.tr;

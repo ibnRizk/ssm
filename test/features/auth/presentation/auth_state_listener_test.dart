@@ -68,6 +68,12 @@ Widget _authScreen(String label, Future<void> Function(AuthCubit) action) {
 GoRouter _router(String initialLocation) => GoRouter(
   initialLocation: initialLocation,
   routes: <RouteBase>[
+    // Re-entry after sign-out: the real splash then opens Home as a guest.
+    GoRoute(
+      path: AppRoutes.splash,
+      name: AppRoutes.splashName,
+      builder: (_, __) => const Scaffold(body: Text('splash screen')),
+    ),
     GoRoute(
       path: AppRoutes.login,
       name: AppRoutes.loginName,
@@ -123,20 +129,25 @@ void main() {
 
   tearDown(() => session.close());
 
-  testWidgets('logout lands on Login with nothing to go back to', (
-    WidgetTester tester,
-  ) async {
-    final GoRouter router = _router('${AppRoutes.home}/profile');
-    addTearDown(router.dispose);
-    await tester.pumpWidget(_app(router, session));
-    expect(router.canPop(), isTrue); // profile sits on top of home
+  testWidgets(
+    'logout re-enters as a guest (via the splash), not Login, with nothing '
+    'to go back to',
+    (WidgetTester tester) async {
+      sessionRepository.onboardingSeen = true;
+      final GoRouter router = _router('${AppRoutes.home}/profile');
+      addTearDown(router.dispose);
+      await tester.pumpWidget(_app(router, session));
+      expect(router.canPop(), isTrue); // profile sits on top of home
 
-    await tester.tap(find.text('log out'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('log out'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('login screen'), findsOneWidget);
-    expect(router.canPop(), isFalse);
-  });
+      expect(find.text('splash screen'), findsOneWidget);
+      expect(find.text('login screen'), findsNothing);
+      expect(router.canPop(), isFalse);
+      expect(session.state, const SessionGuest(hasSeenOnboarding: true));
+    },
+  );
 
   testWidgets('sign-up lands on Home, not Login, with nothing to go back to', (
     WidgetTester tester,

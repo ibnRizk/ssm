@@ -23,14 +23,14 @@ class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  bool get isGuestModeChosen => sharedPreferences.getGuestMode();
+  bool get hasSeenOnboarding => sharedPreferences.getOnboardingSeen();
 
   @override
-  Future<void> chooseGuestMode() async {
+  Future<void> markOnboardingSeen() async {
     try {
-      await sharedPreferences.saveGuestMode(true);
+      await sharedPreferences.saveOnboardingSeen(true);
     } catch (_) {
-      // Only costs the shortcut on the next launch — browsing still works.
+      // Only means onboarding shows again on the next launch.
     }
   }
 }

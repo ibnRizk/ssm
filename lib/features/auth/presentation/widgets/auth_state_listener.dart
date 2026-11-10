@@ -16,6 +16,8 @@ import '../utils/auth_failure_message.dart';
 /// Expects the app-wide [SessionCubit] above it, which is refreshed before
 /// navigating so the screens behind see the new session.
 ///
+/// After sign-out: Home as a guest (through the splash, see [_onSignedOut]).
+///
 /// After sign-in:
 /// - Login *pushed* by a guest's sign-in gate (`ensureSignedIn`) pops
 ///   `true`, returning the guest to what they were doing.
@@ -37,9 +39,12 @@ class AuthStateListener extends StatelessWidget {
     }
   }
 
+  /// Guest by default: back to Home as a guest, via the splash — leaving
+  /// the bottom-nav shell disposes the signed-out customer's tabs and their
+  /// notification hub, so nothing of theirs lingers for the next session.
   Future<void> _onSignedOut(BuildContext context) async {
     await context.read<SessionCubit>().refresh();
-    if (context.mounted) context.goNamed(AppRoutes.loginName);
+    if (context.mounted) context.goNamed(AppRoutes.splashName);
   }
 
   @override

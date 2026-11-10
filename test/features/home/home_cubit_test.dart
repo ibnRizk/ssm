@@ -10,6 +10,7 @@ import 'package:ssm/features/home/presentation/cubit/home_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_catalog_repository.dart';
+import '../../helpers/fake_session_repository.dart';
 import '../../helpers/fake_zone_repository.dart';
 
 class _FakeAccountRepository implements AccountRepository {
@@ -43,16 +44,19 @@ void main() {
   late _FakeAccountRepository account;
   late FakeCatalogRepository catalog;
   late FakeZoneRepository zone;
+  late FakeSessionRepository session;
   late HomeCubit cubit;
 
   setUp(() {
     account = _FakeAccountRepository();
     catalog = FakeCatalogRepository();
     zone = FakeZoneRepository();
+    session = FakeSessionRepository(signedIn: true);
     cubit = HomeCubit(
       accountRepository: account,
       catalogRepository: catalog,
       zoneRepository: zone,
+      sessionRepository: session,
     );
   });
 
@@ -63,6 +67,8 @@ void main() {
     Either<Failure, CustomerProfile> profile = const Right(_profile),
     Failure? catalogFailure,
   }) async {
+    // The profile call starts once the session check has answered.
+    await Future<void>.delayed(Duration.zero);
     account.calls.last.complete(profile);
     if (catalogFailure == null) {
       catalog.categoryCalls.last.succeed(_categories);
@@ -91,6 +97,30 @@ void main() {
       ),
     );
   });
+
+  test(
+    'a guest loads the public catalog without asking for a profile',
+    () async {
+      session.signedIn = false;
+
+      final Future<void> load = cubit.load();
+      await Future<void>.delayed(Duration.zero);
+      catalog.categoryCalls.last.succeed(_categories);
+      catalog.storeCalls.last.succeed(storesPage(<int>[1], total: 1));
+      await load;
+
+      expect(account.calls, isEmpty);
+      expect(
+        cubit.state,
+        HomeLoaded(
+          customerName: null,
+          categories: _categories,
+          stores: <int>[1].map(fakeStore).toList(),
+          zoneIds: const <int>[8],
+        ),
+      );
+    },
+  );
 
   test('a failed profile only makes the greeting generic', () async {
     final Future<void> load = cubit.load();
@@ -128,7 +158,7 @@ void main() {
     final Future<void> first = cubit.load();
     unawaited(cubit.load());
 
-    expect(account.calls, hasLength(1));
+    expect(catalog.categoryCalls, hasLength(1));
     await answer();
     await first;
   });
@@ -139,7 +169,7 @@ void main() {
     await first;
 
     zone.change(<int>[7]);
-    expect(account.calls, hasLength(2), reason: 'reloaded');
+    expect(catalog.categoryCalls, hasLength(2), reason: 'reloaded');
     await answer();
     await pumpEventQueue();
 

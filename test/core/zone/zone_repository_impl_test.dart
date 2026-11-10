@@ -210,6 +210,30 @@ void main() {
       },
     );
 
+    test('a guest (address list answers 401) resolves the zone by location '
+        'instead of failing Home with Unauthenticated', () async {
+      await setUpWith(<String, Object>{});
+      remote.error = const UnauthorizedException(message: 'Unauthenticated.');
+      location.point = _cairo;
+      remote.zonesHere = <int>[8];
+
+      final Either<Failure, List<int>> result = await repository
+          .ensureZoneIds();
+
+      expect(result.isRight(), isTrue, reason: '$result');
+      expect(zoneOf(result), <int>[8]);
+    });
+
+    test('a guest without a location fix falls back to the first service '
+        'zone', () async {
+      await setUpWith(<String, Object>{});
+      remote
+        ..error = const UnauthorizedException()
+        ..serviceZoneId = 1;
+
+      expect(zoneOf(await repository.ensureZoneIds()), <int>[1]);
+    });
+
     test('without a saved zone, a network error is a failure', () async {
       await setUpWith(<String, Object>{});
       remote.error = const InternetConnectionException(message: 'offline');

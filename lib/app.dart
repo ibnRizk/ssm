@@ -29,12 +29,14 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
-    // Any 401/403 from any request lands here. Clear the session and bounce to
-    // the app entry point — swap for your login route once auth exists.
+    // A 401 on a request that carried the bearer token (an expired session)
+    // lands here: clear the session and continue as a guest.
     _unauthorizedSub = eventBus.unauthorizedStream.listen((_) async {
       await secureStorage.clearAll();
       await sessionCubit.refresh();
-      AppRoutes.router.go(AppRoutes.login);
+      // Guest by default: Home as a guest, via the splash so the shell (and
+      // the expired session's tabs) is torn down first.
+      AppRoutes.router.go(AppRoutes.splash);
     });
   }
 

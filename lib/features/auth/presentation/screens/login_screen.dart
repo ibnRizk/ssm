@@ -7,7 +7,6 @@ import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/session/session_cubit.dart';
 import '../../../../core/utils/validator.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_outlined_button.dart';
@@ -70,14 +69,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   /// Browsing needs no account (App Store guideline 5.1.1(v)). Pushed by a
   /// sign-in gate, this just closes Login and leaves the guest where they
-  /// were.
-  Future<void> _continueAsGuest() async {
+  /// were; otherwise (after a logout) it enters Home as a guest.
+  void _continueAsGuest() {
     if (context.canPop()) {
       context.pop(false);
-      return;
+    } else {
+      context.goNamed(AppRoutes.homeName);
     }
-    await context.read<SessionCubit>().continueAsGuest();
-    if (mounted) context.goNamed(AppRoutes.homeName);
   }
 
   @override

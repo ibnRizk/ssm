@@ -13,9 +13,9 @@ void main() {
   });
 
   group('refresh', () {
-    test('a stored token means signed in, even in guest mode', () async {
+    test('a stored token means signed in', () async {
       final SessionCubit cubit = SessionCubit(
-        repository: FakeSessionRepository(signedIn: true, guestChosen: true),
+        repository: FakeSessionRepository(signedIn: true),
       );
 
       await cubit.refresh();
@@ -23,34 +23,41 @@ void main() {
       expect(cubit.state, const SessionSignedIn());
     });
 
-    test('no token but guest mode chosen means guest', () async {
-      final SessionCubit cubit = SessionCubit(
-        repository: FakeSessionRepository(guestChosen: true),
-      );
+    test(
+      'without a token, a first launch is a guest who needs onboarding',
+      () async {
+        final SessionCubit cubit = SessionCubit(
+          repository: FakeSessionRepository(),
+        );
 
-      await cubit.refresh();
+        await cubit.refresh();
 
-      expect(cubit.state, const SessionGuest());
-    });
+        expect(cubit.state, const SessionGuest(hasSeenOnboarding: false));
+      },
+    );
 
-    test('neither means signed out', () async {
-      final SessionCubit cubit = SessionCubit(
-        repository: FakeSessionRepository(),
-      );
+    test(
+      'without a token, a returning device is a guest past onboarding',
+      () async {
+        final SessionCubit cubit = SessionCubit(
+          repository: FakeSessionRepository(onboardingSeen: true),
+        );
 
-      await cubit.refresh();
+        await cubit.refresh();
 
-      expect(cubit.state, const SessionSignedOut());
-    });
+        expect(cubit.state, const SessionGuest(hasSeenOnboarding: true));
+      },
+    );
   });
 
-  test('continueAsGuest remembers the choice and becomes guest', () async {
+  test('completeOnboarding remembers it and enters as a guest', () async {
     final FakeSessionRepository repository = FakeSessionRepository();
     final SessionCubit cubit = SessionCubit(repository: repository);
+    await cubit.refresh();
 
-    await cubit.continueAsGuest();
+    await cubit.completeOnboarding();
 
-    expect(cubit.state, const SessionGuest());
-    expect(repository.guestChosen, isTrue);
+    expect(cubit.state, const SessionGuest(hasSeenOnboarding: true));
+    expect(repository.onboardingSeen, isTrue);
   });
 }

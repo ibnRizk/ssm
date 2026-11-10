@@ -156,12 +156,10 @@ void main() {
 
     test('a successful sign-in discards the guest session', () async {
       guestSessions.session = guest;
-      await preferences.saveGuestMode(true);
 
       await repository.login(_credentials);
 
       expect(guestSessions.clearCalls, 1);
-      expect(preferences.getGuestMode(), isFalse);
     });
 
     test('a failed sign-in keeps the guest session and its cart', () async {

@@ -18,6 +18,7 @@ Future<void> initHomeFeatureInjection() async {
       accountRepository: ServiceLocator.instance(),
       catalogRepository: ServiceLocator.instance(),
       zoneRepository: ServiceLocator.instance(),
+      sessionRepository: ServiceLocator.instance(),
     ),
   );
 }

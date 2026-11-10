@@ -74,7 +74,7 @@ class ZoneRepositoryImpl implements ZoneRepository {
   }
 
   Future<List<int>> _pick(List<int> saved) async {
-    final List<int> addressZones = await remote.addressZoneIds();
+    final List<int> addressZones = await _addressZoneIdsOrNone();
     final List<int> zoneIds;
     if (addressZones.isNotEmpty) {
       // A zone picked from one of the addresses (e.g. at checkout) stays.
@@ -95,6 +95,17 @@ class ZoneRepositoryImpl implements ZoneRepository {
     }
     _resolved = true;
     return zoneIds;
+  }
+
+  /// Saved addresses need an account: a guest's 401 just means "no
+  /// addresses", so the zone comes from the location instead — the catalog
+  /// itself is public.
+  Future<List<int>> _addressZoneIdsOrNone() async {
+    try {
+      return await remote.addressZoneIds();
+    } on UnauthorizedException {
+      return const <int>[];
+    }
   }
 
   /// The zone at the device's location; null when the device can't tell

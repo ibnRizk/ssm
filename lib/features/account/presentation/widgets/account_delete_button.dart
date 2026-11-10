@@ -16,8 +16,8 @@ import '../cubit/delete_account_state.dart';
 import 'delete_account_dialog.dart';
 
 /// Store-required "Delete account" action, deliberately quieter than Log
-/// out. Confirms first, then leaves for Login with the stack cleared once
-/// the account is gone. Only this widget rebuilds while it runs.
+/// out. Confirms first, then leaves for Home as a guest with the stack
+/// cleared once the account is gone. Only this widget rebuilds while it runs.
 class AccountDeleteButton extends StatelessWidget {
   const AccountDeleteButton({super.key});
 
@@ -34,7 +34,8 @@ class AccountDeleteButton extends StatelessWidget {
           message: Strings.accountDeleted,
           type: ToastType.success,
         );
-        context.goNamed(AppRoutes.loginName);
+        // Home as a guest; the splash re-reads the (now empty) session.
+        context.goNamed(AppRoutes.splashName);
       case DeleteAccountError(:final Failure failure):
         final bool ongoingOrder =
             failure is ForbiddenFailure &&

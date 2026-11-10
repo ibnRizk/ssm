@@ -47,17 +47,16 @@ class _SplashScreenState extends State<SplashScreen>
     context.read<SplashCubit>().start(minimumDuration: _bootDuration);
   }
 
-  /// Signed-in customers and returning guests open on Home; everyone else
-  /// on Login, which offers "Continue as guest".
+  /// Guest by default: Home for everyone — after the onboarding on a first
+  /// launch. Never Login; account-based features ask for it when opened.
   Future<void> _enterApp() async {
     final SessionCubit session = context.read<SessionCubit>();
     await session.refresh();
     if (!mounted) return;
-    context.goNamed(
-      session.state is SessionSignedOut
-          ? AppRoutes.loginName
-          : AppRoutes.homeName,
-    );
+    context.goNamed(switch (session.state) {
+      SessionGuest(hasSeenOnboarding: false) => AppRoutes.onboardingName,
+      _ => AppRoutes.homeName,
+    });
   }
 
   @override

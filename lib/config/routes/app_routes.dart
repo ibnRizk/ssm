@@ -36,6 +36,7 @@ import '../../features/notifications/presentation/cubit/notification_hub_cubit.d
 import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/notifications/presentation/widgets/notification_hub_listener.dart';
+import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/orders/presentation/cubit/orders_cubit.dart';
 import '../../features/orders/presentation/cubit/reorder_cubit.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
@@ -70,6 +71,7 @@ import 'navigator_observer.dart';
 abstract class AppRoutes {
   // --- Paths (for context.go / context.push) ---
   static const String splash = '/';
+  static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
@@ -112,6 +114,7 @@ abstract class AppRoutes {
 
   // --- Names (for context.goNamed / context.pushNamed) ---
   static const String splashName = 'splash';
+  static const String onboardingName = 'onboarding';
   static const String loginName = 'login';
   static const String registerName = 'register';
   static const String forgotPasswordName = 'forgotPassword';
@@ -155,6 +158,12 @@ abstract class AppRoutes {
               ServiceLocator.instance<SplashCubit>(),
           child: const SplashScreen(),
         ),
+      ),
+      // First launch only; ends on Home as a guest (see SplashScreen).
+      GoRoute(
+        path: onboarding,
+        name: onboardingName,
+        builder: (_, __) => const OnboardingScreen(),
       ),
       GoRoute(
         path: login,

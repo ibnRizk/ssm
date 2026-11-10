@@ -129,7 +129,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> _endGuestSession() async {
     try {
       await guestSessions.clear();
-      await sharedPreferences.removeGuestMode();
     } catch (_) {
       // Harmless leftover: a stored token is never sent alongside a bearer.
     }

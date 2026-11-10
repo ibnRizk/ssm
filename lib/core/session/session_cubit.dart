@@ -17,14 +17,14 @@ class SessionCubit extends Cubit<SessionState> {
     emit(
       signedIn
           ? const SessionSignedIn()
-          : repository.isGuestModeChosen
-          ? const SessionGuest()
-          : const SessionSignedOut(),
+          : SessionGuest(hasSeenOnboarding: repository.hasSeenOnboarding),
     );
   }
 
-  Future<void> continueAsGuest() async {
-    await repository.chooseGuestMode();
-    if (!isClosed) emit(const SessionGuest());
+  /// Onboarding finished or skipped — straight into the app as a guest.
+  Future<void> completeOnboarding() async {
+    await repository.markOnboardingSeen();
+    if (isClosed || state.isSignedIn) return;
+    emit(const SessionGuest(hasSeenOnboarding: true));
   }
 }

@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/session/session_repository.dart';
 import '../../../../core/zone/zone_repository.dart';
 import '../../../account/domain/entities/customer_profile.dart';
 import '../../../account/domain/repos/account_repository.dart';
@@ -18,6 +19,7 @@ class HomeCubit extends Cubit<HomeState> {
   final AccountRepository accountRepository;
   final CatalogRepository catalogRepository;
   final ZoneRepository zoneRepository;
+  final SessionRepository sessionRepository;
 
   /// The catalog shown belongs to one zone — a new zone reloads it.
   late final StreamSubscription<List<int>> _zoneChanges;
@@ -26,6 +28,7 @@ class HomeCubit extends Cubit<HomeState> {
     required this.accountRepository,
     required this.catalogRepository,
     required this.zoneRepository,
+    required this.sessionRepository,
   }) : super(const HomeInitial()) {
     _zoneChanges = zoneRepository.zoneChanges.listen((_) => load());
   }
@@ -49,7 +52,7 @@ class HomeCubit extends Cubit<HomeState> {
       Either<Failure, List<CatalogCategory>> categories,
       Either<Failure, CatalogPage<Store>> stores,
     ) = await (
-      accountRepository.getProfile(),
+      _profileIfSignedIn(),
       catalogRepository.getCategories(),
       catalogRepository.getStores(page: 1, pageSize: storesPreviewCount),
     ).wait;
@@ -82,6 +85,13 @@ class HomeCubit extends Cubit<HomeState> {
       ),
     );
   }
+
+  /// The profile needs a bearer token. A guest gets the generic greeting
+  /// without a request — the catalog calls are public.
+  Future<Either<Failure, CustomerProfile>> _profileIfSignedIn() async =>
+      await sessionRepository.isSignedIn()
+      ? accountRepository.getProfile()
+      : const Left<Failure, CustomerProfile>(UnauthorizedFailure());
 
   @override
   Future<void> close() async {

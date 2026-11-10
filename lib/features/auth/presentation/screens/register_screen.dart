@@ -52,6 +52,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  /// Pushed by a sign-in gate, Login is pushed too, and its success pops
+  /// back through here to the gate. As a root screen, it replaces.
+  Future<void> _openLogin() async {
+    if (!context.canPop()) {
+      context.goNamed(AppRoutes.loginName);
+      return;
+    }
+    final bool? signedIn = await context.pushNamed<bool>(AppRoutes.loginName);
+    if (signedIn == true && mounted) context.pop(true);
+  }
+
   void _submit() {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) {
@@ -172,10 +183,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 AuthToggleLink(
                   question: Strings.authHaveAccount,
                   action: Strings.authLoginLink,
-                  // Pushed from a gate-pushed Login: back to that Login.
-                  onTap: () => context.canPop()
-                      ? context.pop()
-                      : context.goNamed(AppRoutes.loginName),
+                  onTap: _openLogin,
                 ),
               ],
             ),
