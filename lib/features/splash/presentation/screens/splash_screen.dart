@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../config/routes/app_routes.dart';
+import '../../../../core/session/session_cubit.dart';
+import '../../../../core/session/session_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -12,7 +14,6 @@ import '../../../../core/utils/constants.dart';
 import '../../../../core/utils/values/app_assets.dart';
 import '../../../../core/utils/values/strings.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../injection_container.dart';
 import '../cubit/splash_cubit.dart';
 import '../cubit/splash_state.dart';
 
@@ -46,14 +47,17 @@ class _SplashScreenState extends State<SplashScreen>
     context.read<SplashCubit>().start(minimumDuration: _bootDuration);
   }
 
+  /// Signed-in customers and returning guests open on Home; everyone else
+  /// on Login, which offers "Continue as guest".
   Future<void> _enterApp() async {
-    final String? token = await secureStorage.getAccessToken();
+    final SessionCubit session = context.read<SessionCubit>();
+    await session.refresh();
     if (!mounted) return;
-    if (token != null && token.isNotEmpty) {
-      context.goNamed(AppRoutes.homeName);
-    } else {
-      context.goNamed(AppRoutes.loginName);
-    }
+    context.goNamed(
+      session.state is SessionSignedOut
+          ? AppRoutes.loginName
+          : AppRoutes.homeName,
+    );
   }
 
   @override

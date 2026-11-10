@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/session/ensure_signed_in.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/values/strings.dart';
 
@@ -21,18 +22,24 @@ class MainScaffold extends StatelessWidget {
 
   const MainScaffold({super.key, required this.navigationShell});
 
+  /// The only tab a guest can open; the others are account-based.
+  static const int _homeIndex = 0;
+
+  Future<void> _onTap(BuildContext context, int index) async {
+    // Re-tapping the already-active tab pops it back to its root instead of
+    // leaving it mid-stack.
+    final bool reselected = index == navigationShell.currentIndex;
+    if (index != _homeIndex && !await ensureSignedIn(context)) return;
+    navigationShell.goBranch(index, initialLocation: reselected);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: navigationShell.currentIndex,
-        onTap: (int index) => navigationShell.goBranch(
-          index,
-          // Re-tapping the already-active tab pops it back to its root
-          // instead of leaving it mid-stack.
-          initialLocation: index == navigationShell.currentIndex,
-        ),
+        onTap: (int index) => _onTap(context, index),
         // Selected/unselected colours (orange / muted gray) come from
         // `bottomNavigationBarTheme` in app_theme.dart — not repeated here.
         items: <BottomNavigationBarItem>[

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/session/session_cubit.dart';
+import '../../core/session/session_state.dart';
 import '../../core/utils/values/strings.dart';
 import '../../core/widgets/coming_soon_screen.dart';
 import '../../core/widgets/slider_photo.dart';
@@ -198,16 +200,29 @@ abstract class AppRoutes {
       // unread badge for exactly as long as the shell is mounted. The
       // provider sits at a fixed spot in the tree, so it's created once and
       // survives tab switches and pushed routes.
+      //
+      // Guests browse the shell too, but the hub's calls all need a bearer
+      // token — it starts only once a customer is signed in, including a
+      // guest who signs in from a gate without leaving the shell.
       StatefulShellRoute.indexedStack(
         builder: (_, __, StatefulNavigationShell shell) =>
             BlocProvider<NotificationHubCubit>(
-              create: (_) =>
-                  ServiceLocator.instance<
-                      NotificationHubCubit
-                    >()
-                    ..start(),
-              child: NotificationHubListener(
-                child: MainScaffold(navigationShell: shell),
+              create: (BuildContext context) {
+                final NotificationHubCubit hub =
+                    ServiceLocator.instance<NotificationHubCubit>();
+                if (context.read<SessionCubit>().state.isSignedIn) {
+                  hub.start();
+                }
+                return hub;
+              },
+              child: BlocListener<SessionCubit, SessionState>(
+                listenWhen: (SessionState previous, SessionState current) =>
+                    !previous.isSignedIn && current.isSignedIn,
+                listener: (BuildContext context, _) =>
+                    context.read<NotificationHubCubit>().start(),
+                child: NotificationHubListener(
+                  child: MainScaffold(navigationShell: shell),
+                ),
               ),
             ),
         branches: <StatefulShellBranch>[

@@ -1,0 +1,95 @@
+{
+  "info": {
+    "name": "SSM - Customer Guest Mode API",
+    "description": "Guest browsing is public. Guest cart, guest checkout, order list and tracking require the guest_id plus X-Guest-Token returned by Create secure guest session. Do not treat guest_id by itself as authorization.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key":"base_url","value":"https://api.ssm-sa.com/api/v1"},
+    {"key":"module_id","value":"1"},
+    {"key":"zone_id","value":"11"},
+    {"key":"guest_id","value":""},
+    {"key":"guest_token","value":""},
+    {"key":"guest_fcm_token","value":"guest-postman-test"},
+    {"key":"item_id","value":""},
+    {"key":"cart_id","value":""}
+  ],
+  "item": [
+    {
+      "name": "01 Public guest browsing (no token)",
+      "item": [
+        {
+          "name": "Browse stores in zone",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key":"zoneId","value":"[{{zone_id}}]"},
+              {"key":"moduleId","value":"{{module_id}}"}
+            ],
+            "url": "{{base_url}}/stores/get-stores/all?limit=20&offset=1"
+          }
+        },
+        {
+          "name": "Browse pharmacies in zone",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key":"zoneId","value":"[{{zone_id}}]"},
+              {"key":"moduleId","value":"{{module_id}}"}
+            ],
+            "url": "{{base_url}}/stores/pharmacies?limit=20&offset=1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Secure guest session",
+      "item": [
+        {
+          "name": "Create secure guest session - saves variables",
+          "event": [{"listen":"test","script":{"exec":["const body = pm.response.json();","pm.test('guest session created', () => pm.response.to.have.status(200));","pm.collectionVariables.set('guest_id', String(body.guest_id));","pm.collectionVariables.set('guest_token', body.guest_token);","pm.test('guest token returned', () => pm.expect(body.guest_token).to.be.a('string').and.not.empty;"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"fcm_token\": \"{{guest_fcm_token}}\"\n}"},
+            "url": "{{base_url}}/auth/guest/request"
+          }
+        },
+        {
+          "name": "Guest cart is rejected without token",
+          "event": [{"listen":"test","script":{"exec":["pm.test('token is required', () => pm.response.to.have.status(401));"]}}],
+          "request": {
+            "method": "GET",
+            "header": [{"key":"moduleId","value":"{{module_id}}"}],
+            "url": "{{base_url}}/customer/cart/list?guest_id={{guest_id}}"
+          }
+        },
+        {
+          "name": "Read guest cart",
+          "event": [{"listen":"test","script":{"exec":["pm.test('secure guest cart loads', () => pm.response.to.have.status(200));"]}}],
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key":"moduleId","value":"{{module_id}}"},
+              {"key":"X-Guest-Token","value":"{{guest_token}}"}
+            ],
+            "url": "{{base_url}}/customer/cart/list?guest_id={{guest_id}}"
+          }
+        },
+        {
+          "name": "Add item to guest cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key":"moduleId","value":"{{module_id}}"},
+              {"key":"X-Guest-Token","value":"{{guest_token}}"},
+              {"key":"Content-Type","value":"application/json"}
+            ],
+            "body": {"mode":"raw","raw":"{\n  \"guest_id\": {{guest_id}},\n  \"item_id\": {{item_id}},\n  \"model\": \"Item\",\n  \"quantity\": 1,\n  \"variation\": []\n}"},
+            "url": "{{base_url}}/customer/cart/add"
+          }
+        }
+      ]
+    }
+  ]
+}

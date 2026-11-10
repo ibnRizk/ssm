@@ -229,4 +229,18 @@ void main() {
       expect(apiErrorCode(<String, dynamic>{'message': 'x'}), isNull);
     });
   });
+
+  group('mapDioException — interceptor failures', () {
+    test('keeps an AppException raised before the request left', () {
+      final DioException error = DioException(
+        requestOptions: RequestOptions(path: '/api/v1/customer/cart/list'),
+        error: const InternetConnectionException(message: 'offline'),
+      );
+
+      expect(
+        mapDioException(error),
+        const InternetConnectionException(message: 'offline'),
+      );
+    });
+  });
 }

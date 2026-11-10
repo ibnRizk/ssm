@@ -150,6 +150,19 @@ abstract class Strings {
   static const String _authTermsNotice = 'auth_terms_notice';
   static String get authTermsNotice => _authTermsNotice.tr;
 
+  // --- Guest mode ---
+  static const String _authContinueAsGuest = 'auth_continue_as_guest';
+  static String get authContinueAsGuest => _authContinueAsGuest.tr;
+
+  static const String _signInRequiredTitle = 'sign_in_required_title';
+  static String get signInRequiredTitle => _signInRequiredTitle.tr;
+
+  static const String _signInRequiredMessage = 'sign_in_required_message';
+  static String get signInRequiredMessage => _signInRequiredMessage.tr;
+
+  static const String _notNow = 'not_now';
+  static String get notNow => _notNow.tr;
+
   static const String _authRegisterTitle = 'auth_register_title';
   static String get authRegisterTitle => _authRegisterTitle.tr;
 

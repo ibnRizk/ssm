@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../config/routes/app_routes.dart';
+import '../../../../core/session/ensure_signed_in.dart';
+import '../../../../core/session/session_cubit.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/utils/failure_message.dart';
@@ -69,6 +71,18 @@ class _CartBody extends StatelessWidget {
 
   const _CartBody({required this.cart, required this.busyLineIds});
 
+  /// Ordering is account-based: a guest signs in first. Signing in merges
+  /// the guest cart into the account's, so the lines are reloaded (their
+  /// ids change) before checkout reads them through the same cubit.
+  static Future<void> _checkout(BuildContext context, CartCubit cubit) async {
+    final bool wasSignedIn = context.read<SessionCubit>().state.isSignedIn;
+    if (!await ensureSignedIn(context) || !context.mounted) return;
+    if (!wasSignedIn) await cubit.load();
+    if (context.mounted) {
+      context.push(AppRoutes.orderConfirmation, extra: cubit);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final CartCubit cubit = context.read<CartCubit>();
@@ -99,9 +113,8 @@ class _CartBody extends StatelessWidget {
           SizedBox(height: AppSpacing.lg.h),
           AppButton(
             btnText: Strings.cartContinueButton,
-            // Checkout reads the cart through the same cubit.
             onPressed: busyLineIds.isEmpty
-                ? () => context.push(AppRoutes.orderConfirmation, extra: cubit)
+                ? () => _checkout(context, cubit)
                 : null,
           ),
         ],

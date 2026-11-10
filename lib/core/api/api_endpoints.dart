@@ -26,6 +26,23 @@ abstract class ApiEndpoints {
   static const String verifyResetToken = '$_v1/auth/verify-token';
   static const String resetPassword = '$_v1/auth/reset-password';
 
+  // --- Guest mode ---
+  /// Starts a guest session: answers `guest_id`, a one-time `guest_token`
+  /// and `expires_at`. Browsing needs none of it — only guest cart and
+  /// order calls do (see [isGuestScoped]).
+  static const String guestSession = '$_v1/auth/guest/request';
+
+  /// The paths a guest reaches with `guest_id` + `X-Guest-Token` instead of
+  /// a bearer token: the cart, checkout, and the guest's own orders.
+  static const List<String> _guestScopedPrefixes = <String>[
+    '$_v1/customer/cart/',
+    '$_v1/customer/order/',
+    '$_v1/customer/orders/',
+  ];
+
+  static bool isGuestScoped(String path) =>
+      _guestScopedPrefixes.any(path.startsWith);
+
   // --- Customer ---
   static const String customerInfo = '$_v1/customer/info';
   static const String updateProfile = '$_v1/customer/update-profile';

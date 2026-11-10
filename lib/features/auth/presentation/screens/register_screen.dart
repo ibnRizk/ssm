@@ -172,8 +172,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 AuthToggleLink(
                   question: Strings.authHaveAccount,
                   action: Strings.authLoginLink,
-                  onTap: () =>
-                      context.goNamed(AppRoutes.loginName),
+                  // Pushed from a gate-pushed Login: back to that Login.
+                  onTap: () => context.canPop()
+                      ? context.pop()
+                      : context.goNamed(AppRoutes.loginName),
                 ),
               ],
             ),

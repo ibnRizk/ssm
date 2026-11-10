@@ -20,9 +20,32 @@ void main() {
         'password': 'secret123',
       });
     });
+
+    test('carries the guest id for the cart merge', () {
+      final LoginRequest request = LoginRequest.fromCredentials(
+        const LoginCredentials(phone: '+966512345678', password: 'secret123'),
+        guestId: 42,
+      );
+
+      expect(request.toJson()['guest_id'], 42);
+    });
   });
 
   group('RegisterRequest', () {
+    test('carries the guest id for the cart merge', () {
+      final RegisterRequest request = RegisterRequest.fromDetails(
+        const RegistrationDetails(
+          name: 'Sara Customer',
+          phone: '+966512345678',
+          email: 'sara@ssm.test',
+          password: 'secret123',
+        ),
+        guestId: 42,
+      );
+
+      expect(request.toJson()['guest_id'], 42);
+    });
+
     test('serialises to exactly name, phone, email, password', () {
       final RegisterRequest request = RegisterRequest.fromDetails(
         const RegistrationDetails(

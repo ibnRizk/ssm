@@ -12,6 +12,7 @@ abstract class _Keys {
   static const String userType = 'userType';
   static const String userCycle = 'userCycle';
   static const String zoneIds = 'zoneIds';
+  static const String guestMode = 'guestMode';
 }
 
 /// Non-sensitive key/value storage. Anything secret (tokens, refresh tokens)
@@ -72,6 +73,15 @@ abstract class AppSharedPreferences {
   Future<bool> saveZoneIds(List<int> ids);
 
   Future<bool> removeZoneIds();
+
+  // --- Guest mode ---
+  /// True once the customer chose "Continue as guest" and hasn't signed in
+  /// since — the app then opens on Home instead of Login.
+  bool getGuestMode();
+
+  Future<bool> saveGuestMode(bool value);
+
+  Future<bool> removeGuestMode();
 
   Future<bool> clearAll();
 }
@@ -169,6 +179,17 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
 
   @override
   Future<bool> removeZoneIds() => instance.remove(_Keys.zoneIds);
+
+  // --- Guest mode ---
+  @override
+  bool getGuestMode() => instance.getBool(_Keys.guestMode) ?? false;
+
+  @override
+  Future<bool> saveGuestMode(bool value) =>
+      instance.setBool(_Keys.guestMode, value);
+
+  @override
+  Future<bool> removeGuestMode() => instance.remove(_Keys.guestMode);
 
   @override
   Future<bool> clearAll() => instance.clear();

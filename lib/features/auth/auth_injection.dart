@@ -27,6 +27,7 @@ Future<void> initAuthFeatureInjection() async {
       remote: ServiceLocator.instance(),
       secureStorage: ServiceLocator.instance(),
       sharedPreferences: ServiceLocator.instance(),
+      guestSessions: ServiceLocator.instance(),
     ),
   );
 

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:ssm/core/error/exceptions.dart';
 import 'package:ssm/core/error/failures.dart';
+import 'package:ssm/core/guest/guest_session.dart';
 import 'package:ssm/core/services/local_storage/app_secure_storage.dart';
 import 'package:ssm/core/services/local_storage/app_shared_preferences.dart';
 import 'package:ssm/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -14,6 +15,8 @@ import 'package:ssm/features/auth/domain/entities/registration_details.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../helpers/fake_guest_session_manager.dart';
 
 class _FakeRemote implements AuthRemoteDataSource {
   Object? error;
@@ -108,6 +111,7 @@ void main() {
   late _FakeSecureStorage storage;
   late AppSharedPreferences preferences;
   late AuthRepositoryImpl repository;
+  late FakeGuestSessionManager guestSessions;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
@@ -116,11 +120,59 @@ void main() {
     preferences = AppSharedPreferencesImpl(
       instance: await SharedPreferences.getInstance(),
     );
+    guestSessions = FakeGuestSessionManager();
     repository = AuthRepositoryImpl(
       remote: remote,
       secureStorage: storage,
       sharedPreferences: preferences,
+      guestSessions: guestSessions,
     );
+  });
+
+  group('guest hand-off', () {
+    const GuestSession guest = GuestSession(guestId: 42, token: 'guest-tok');
+
+    test('login sends the stored guest id so the cart is merged', () async {
+      guestSessions.session = guest;
+
+      await repository.login(_credentials);
+
+      expect(remote.lastLogin?.toJson()['guest_id'], 42);
+    });
+
+    test('register sends the stored guest id so the cart is merged', () async {
+      guestSessions.session = guest;
+
+      await repository.register(_details);
+
+      expect(remote.lastRegister?.toJson()['guest_id'], 42);
+    });
+
+    test('login sends no guest id when the device never was a guest', () async {
+      await repository.login(_credentials);
+
+      expect(remote.lastLogin?.toJson().containsKey('guest_id'), isFalse);
+    });
+
+    test('a successful sign-in discards the guest session', () async {
+      guestSessions.session = guest;
+      await preferences.saveGuestMode(true);
+
+      await repository.login(_credentials);
+
+      expect(guestSessions.clearCalls, 1);
+      expect(preferences.getGuestMode(), isFalse);
+    });
+
+    test('a failed sign-in keeps the guest session and its cart', () async {
+      guestSessions.session = guest;
+      remote.error = const UnauthorizedException();
+
+      await repository.login(_credentials);
+
+      expect(guestSessions.clearCalls, 0);
+      expect(guestSessions.session, guest);
+    });
   });
 
   group('logout', () {

@@ -7,8 +7,10 @@ import '../../../../config/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/session/session_cubit.dart';
 import '../../../../core/utils/validator.dart';
 import '../../../../core/utils/values/strings.dart';
+import '../../../../core/widgets/app_outlined_button.dart';
 import '../cubit/auth_cubit.dart';
 import '../../../../core/widgets/labeled_field.dart';
 import '../widgets/auth_password_field.dart';
@@ -51,6 +53,31 @@ class _LoginScreenState extends State<LoginScreen> {
       phone: _phoneController.text,
       password: _passwordController.text,
     );
+  }
+
+  /// Pushed by a sign-in gate, Register is pushed too, and its success pops
+  /// back through here to the gate. As the app's entry screen, it replaces.
+  Future<void> _openRegister() async {
+    if (!context.canPop()) {
+      context.goNamed(AppRoutes.registerName);
+      return;
+    }
+    final bool? registered = await context.pushNamed<bool>(
+      AppRoutes.registerName,
+    );
+    if (registered == true && mounted) context.pop(true);
+  }
+
+  /// Browsing needs no account (App Store guideline 5.1.1(v)). Pushed by a
+  /// sign-in gate, this just closes Login and leaves the guest where they
+  /// were.
+  Future<void> _continueAsGuest() async {
+    if (context.canPop()) {
+      context.pop(false);
+      return;
+    }
+    await context.read<SessionCubit>().continueAsGuest();
+    if (mounted) context.goNamed(AppRoutes.homeName);
   }
 
   @override
@@ -116,7 +143,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 AuthToggleLink(
                   question: Strings.authNoAccount,
                   action: Strings.authCreateAccountLink,
-                  onTap: () => context.goNamed(AppRoutes.registerName),
+                  onTap: _openRegister,
+                ),
+                SizedBox(height: AppSpacing.lg.h),
+                AppOutlinedButton(
+                  text: Strings.authContinueAsGuest,
+                  onPressed: _continueAsGuest,
                 ),
                 SizedBox(height: AppSpacing.xl.h),
                 Text(

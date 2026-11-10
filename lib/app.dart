@@ -8,6 +8,7 @@ import 'config/env/app_env.dart';
 import 'config/locale/app_localizations_setup.dart';
 import 'config/locale/locale_cubit.dart';
 import 'config/routes/app_routes.dart';
+import 'core/session/session_cubit.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
 import 'injection_container.dart';
@@ -32,6 +33,7 @@ class _AppState extends State<App> {
     // the app entry point — swap for your login route once auth exists.
     _unauthorizedSub = eventBus.unauthorizedStream.listen((_) async {
       await secureStorage.clearAll();
+      await sessionCubit.refresh();
       AppRoutes.router.go(AppRoutes.login);
     });
   }
@@ -53,6 +55,9 @@ class _AppState extends State<App> {
           providers: [
             BlocProvider<LocaleCubit>.value(value: localeCubit),
             BlocProvider<ThemeCubit>.value(value: themeCubit),
+            // Above the router so every route — and every sheet — can gate
+            // on it (see `ensureSignedIn`).
+            BlocProvider<SessionCubit>.value(value: sessionCubit),
           ],
           child: BlocBuilder<LocaleCubit, Locale?>(
             builder: (BuildContext context, Locale? locale) {

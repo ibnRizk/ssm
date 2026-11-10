@@ -10,6 +10,7 @@ import '../utils/extension.dart';
 import '../utils/log_utils.dart';
 import '../utils/values/strings.dart';
 import 'api_error_mapper.dart';
+import 'guest_session_interceptor.dart';
 
 /// Thin, typed wrapper over Dio. Data sources depend on this abstraction, not
 /// on Dio itself, which keeps them unit-testable with a fake consumer.
@@ -78,7 +79,16 @@ class DioConsumerImpl implements DioConsumer {
         'device-type': _devicePlatform,
       };
 
-    client.interceptors.add(appInterceptors);
+    client.interceptors
+      ..add(appInterceptors)
+      // After the bearer token is decided (`_attachAccessToken`): it only
+      // acts on requests that go out without one.
+      ..add(
+        GuestSessionInterceptor(
+          sessions: () => guestSessionManager,
+          retry: client.fetch,
+        ),
+      );
     // Bodies carry passwords and responses carry bearer tokens — never print
     // them from a release build, whatever `.env` says.
     if (AppEnv.enableNetworkLogs && kDebugMode) {

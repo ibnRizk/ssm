@@ -17,6 +17,9 @@ import 'core/app_config/app_version.dart';
 import 'core/app_config/installed_app.dart';
 import 'core/api/auth_event_bus.dart';
 import 'core/api/dio_consumer.dart';
+import 'core/guest/guest_session_local_data_source.dart';
+import 'core/guest/guest_session_manager.dart';
+import 'core/guest/guest_session_remote_data_source.dart';
 import 'core/location/device_location_data_source.dart';
 import 'core/location/location_repository.dart';
 import 'core/location/location_repository_impl.dart';
@@ -30,6 +33,9 @@ import 'core/realtime/realtime_repository_impl.dart';
 import 'core/realtime/realtime_socket_data_source.dart';
 import 'core/services/local_storage/app_secure_storage.dart';
 import 'core/services/local_storage/app_shared_preferences.dart';
+import 'core/session/session_cubit.dart';
+import 'core/session/session_repository.dart';
+import 'core/session/session_repository_impl.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/theme_cubit.dart';
 import 'core/zone/zone_remote_data_source.dart';
@@ -77,6 +83,8 @@ abstract class ServiceLocator {
     _injectLocation();
     _injectZone();
     _injectPush();
+    _injectGuestSession();
+    _injectSession();
     _injectRealtime();
     await _injectAppConfig();
     injectAppColors(AppColors.light);
@@ -181,6 +189,40 @@ abstract class ServiceLocator {
         remote: instance(),
         preferences: instance(),
       ),
+    );
+  }
+
+  /// Guest cart/order credentials — used by the networking layer (via
+  /// `GuestSessionInterceptor`) and by auth (the cart merge on sign-in).
+  static void _injectGuestSession() {
+    instance.registerLazySingleton<GuestSessionRemoteDataSource>(
+      () => GuestSessionRemoteDataSourceImpl(consumer: instance()),
+    );
+    instance.registerLazySingleton<GuestSessionLocalDataSource>(
+      () => GuestSessionLocalDataSourceImpl(
+        storage: instance<AppSecureStorage>().instance,
+      ),
+    );
+    instance.registerLazySingleton<GuestSessionManager>(
+      () => GuestSessionManagerImpl(
+        remote: instance(),
+        local: instance(),
+        fcmToken: () => instance<PushMessagingDataSource>().getToken(),
+      ),
+    );
+  }
+
+  /// Signed in / guest / signed out — read by splash, the shell and every
+  /// sign-in gate, so one app-wide cubit.
+  static void _injectSession() {
+    instance.registerLazySingleton<SessionRepository>(
+      () => SessionRepositoryImpl(
+        secureStorage: instance(),
+        sharedPreferences: instance(),
+      ),
+    );
+    instance.registerLazySingleton<SessionCubit>(
+      () => SessionCubit(repository: instance()),
     );
   }
 
@@ -292,6 +334,11 @@ AppLocalizations get appLocalizations =>
 LocaleCubit get localeCubit => ServiceLocator.instance<LocaleCubit>();
 
 ThemeCubit get themeCubit => ServiceLocator.instance<ThemeCubit>();
+
+SessionCubit get sessionCubit => ServiceLocator.instance<SessionCubit>();
+
+GuestSessionManager get guestSessionManager =>
+    ServiceLocator.instance<GuestSessionManager>();
 
 List<String> get routesStack =>
     ServiceLocator.instance<List<String>>(instanceName: 'routesStack');

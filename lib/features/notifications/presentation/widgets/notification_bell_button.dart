@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../config/routes/app_routes.dart';
+import '../../../../core/session/ensure_signed_in.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -32,7 +33,11 @@ class NotificationBellButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.md.r),
           child: InkWell(
             borderRadius: BorderRadius.circular(AppRadius.md.r),
-            onTap: () => context.push(AppRoutes.notifications),
+            onTap: () async {
+              if (await ensureSignedIn(context) && context.mounted) {
+                context.push(AppRoutes.notifications);
+              }
+            },
             child: Container(
               width: 44.r,
               height: 44.r,

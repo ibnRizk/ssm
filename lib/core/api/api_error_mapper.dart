@@ -20,6 +20,12 @@ const String payloadTooLargeCode = 'payload_too_large';
 /// picks a localized fallback, instead of a raw HTML page or JSON dump
 /// reaching the user.
 AppException mapDioException(DioException error) {
+  // An interceptor failed before the request left (e.g. starting a guest
+  // session while offline) — keep the typed cause rather than a generic one.
+  if (error.response == null && error.error is AppException) {
+    return error.error! as AppException;
+  }
+
   final dynamic data = error.response?.data;
 
   switch (error.response?.statusCode) {

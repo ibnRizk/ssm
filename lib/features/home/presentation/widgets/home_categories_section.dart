@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../config/routes/app_routes.dart';
+import '../../../../core/session/ensure_signed_in.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_decorations.dart';
 import '../../../../core/theme/app_dimens.dart';
@@ -71,7 +72,13 @@ class HomeCategoriesSection extends StatelessWidget {
               _CategoryCard(
                 label: Strings.homePharmacyCategory,
                 featured: true,
-                onTap: () => context.push(AppRoutes.pharmacyOrder),
+                // A prescription request goes to a saved address — account
+                // based, unlike browsing the pharmacies' stores.
+                onTap: () async {
+                  if (await ensureSignedIn(context) && context.mounted) {
+                    context.push(AppRoutes.pharmacyOrder);
+                  }
+                },
               ),
             ];
             // `Wrap` with an explicit item width, so a short last row is

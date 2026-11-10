@@ -4,6 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../config/routes/app_routes.dart';
+import '../../../../core/session/ensure_signed_in.dart';
+import '../../../../core/session/session_cubit.dart';
+import '../../../../core/session/session_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -34,24 +37,43 @@ class _HomeParcelsViewState extends State<HomeParcelsView> {
   @override
   void initState() {
     super.initState();
-    context.read<C2cParcelsListCubit>().load();
+    // A guest has no parcels — and the list needs a bearer token.
+    if (context.read<SessionCubit>().state.isSignedIn) {
+      context.read<C2cParcelsListCubit>().load();
+    }
   }
 
+  /// Sending a parcel is account-based; a guest signs in first.
   Future<void> _send() async {
     final C2cParcelsListCubit cubit = context.read<C2cParcelsListCubit>();
+    if (!await ensureSignedIn(context) || !mounted) return;
     await context.push(AppRoutes.sendParcel);
     if (!cubit.isClosed) await cubit.load();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        C2cSendParcelCard(onSend: _send),
-        SizedBox(height: AppSpacing.xxl.h),
-        const _ActiveParcelsSection(),
-      ],
+    return BlocListener<SessionCubit, SessionState>(
+      // A guest who signs in from a gate stays on Home — load their parcels.
+      listenWhen: (SessionState previous, SessionState current) =>
+          !previous.isSignedIn && current.isSignedIn,
+      listener: (BuildContext context, _) =>
+          context.read<C2cParcelsListCubit>().load(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          C2cSendParcelCard(onSend: _send),
+          BlocSelector<SessionCubit, SessionState, bool>(
+            selector: (SessionState state) => state.isSignedIn,
+            builder: (_, bool signedIn) => signedIn
+                ? Padding(
+                    padding: EdgeInsets.only(top: AppSpacing.xxl.h),
+                    child: const _ActiveParcelsSection(),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -105,12 +127,11 @@ class _ActiveParcelsSection extends StatelessWidget {
                   message: failure.c2cMessage,
                   onRetry: () => context.read<C2cParcelsListCubit>().load(),
                 ),
-                C2cParcelsListLoaded(:final active) when active.isEmpty =>
-                  Text(
-                    Strings.homeActiveParcelsEmpty,
-                    style: AppTextStyles.body(color: c.textSecondary),
-                    textAlign: TextAlign.center,
-                  ),
+                C2cParcelsListLoaded(:final active) when active.isEmpty => Text(
+                  Strings.homeActiveParcelsEmpty,
+                  style: AppTextStyles.body(color: c.textSecondary),
+                  textAlign: TextAlign.center,
+                ),
                 C2cParcelsListLoaded(:final active) => Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[

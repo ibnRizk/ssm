@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/session/session_cubit.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../c2c_parcels/presentation/cubit/c2c_parcels_list_cubit.dart';
 import '../../../promotions/presentation/cubit/promotions_cubit.dart';
@@ -44,7 +45,11 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<HomeCubit>().load(),
       context.read<PromotionsCubit>().load(),
     ]),
-    HomeService.parcels => context.read<C2cParcelsListCubit>().load(),
+    // A guest's parcels side shows only the "send" card — nothing to fetch.
+    HomeService.parcels =>
+      context.read<SessionCubit>().state.isSignedIn
+          ? context.read<C2cParcelsListCubit>().load()
+          : Future<void>.value(),
   };
 
   @override
